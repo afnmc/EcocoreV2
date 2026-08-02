@@ -2,7 +2,6 @@ package io.azthera.ecocore.commands;
 
 import io.azthera.ecocore.config.ConfigManager;
 import io.azthera.ecocore.gui.GuiManager;
-import io.azthera.ecocore.gui.sell.SellChestGui;
 import io.azthera.ecocore.gui.sell.SellMainGui;
 import io.azthera.ecocore.sell.AutoSellManager;
 import io.azthera.ecocore.sell.SellManager;
@@ -10,11 +9,10 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.InventoryHolder;
 
 /**
- * {@code /sell} - opens the sell GUI, or {@code /sell chest} to
- * immediately sell the contents of a currently-open container.
+ * {@code /sell} - opens the sell GUI, where players deposit items
+ * into a dedicated area and sell them with a button.
  */
 public final class SellCommand implements CommandExecutor {
 
@@ -48,19 +46,6 @@ public final class SellCommand implements CommandExecutor {
 
         if (!configManager.isModuleEnabled("sell-enabled")) {
             player.sendMessage("§cFitur sell sedang dinonaktifkan.");
-            return true;
-        }
-
-        if (args.length > 0 && args[0].equalsIgnoreCase("chest")) {
-            if (!(player.getOpenInventory().getTopInventory().getHolder() instanceof InventoryHolder)
-                    || player.getOpenInventory().getTopInventory().getType() == org.bukkit.event.inventory.InventoryType.CRAFTING) {
-                player.sendMessage("§cBuka chest yang mau dijual dulu, baru ketik command ini.");
-                return true;
-            }
-
-            SellChestGui chestGui = new SellChestGui(player, sellManager, guiManager,
-                    configManager.getMessagesConfig(), player.getOpenInventory().getTopInventory());
-            chestGui.open();
             return true;
         }
 
