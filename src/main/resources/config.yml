@@ -22,6 +22,7 @@ modules:
   discord-enabled: true
   placeholderapi-enabled: true
   vault-hook-enabled: true
+  night-market-enabled: true
 
 intervals:
   ai-calculation-seconds: 300
