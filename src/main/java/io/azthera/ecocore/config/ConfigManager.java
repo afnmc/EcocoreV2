@@ -21,6 +21,7 @@ public final class ConfigManager {
 
     private FileConfiguration mainConfig;
     private ShopConfig shopConfig;
+    private ShopItemsConfig shopItemsConfig;
     private PricesConfig pricesConfig;
     private InflationConfig inflationConfig;
     private JobsConfig jobsConfig;
@@ -50,6 +51,7 @@ public final class ConfigManager {
     public void loadAll() {
         mainConfig = loadYaml("config.yml");
         shopConfig = new ShopConfig(loadYaml("shop.yml"));
+        shopItemsConfig = new ShopItemsConfig(loadYaml("shop-items.yml"));
         pricesConfig = new PricesConfig(loadYaml("prices.yml"));
         inflationConfig = new InflationConfig(loadYaml("inflation.yml"));
         jobsConfig = new JobsConfig(loadYaml("jobs.yml"));
@@ -80,8 +82,6 @@ public final class ConfigManager {
 
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 
-        // Layer in any new defaults added in a plugin update without
-        // overwriting the admin's existing customized values.
         try (var stream = plugin.getResource(fileName)) {
             if (stream != null) {
                 YamlConfiguration defaults = YamlConfiguration.loadConfiguration(
@@ -205,6 +205,10 @@ public final class ConfigManager {
         return shopConfig;
     }
 
+    public ShopItemsConfig getShopItemsConfig() {
+        return shopItemsConfig;
+    }
+
     public PricesConfig getPricesConfig() {
         return pricesConfig;
     }
@@ -244,4 +248,4 @@ public final class ConfigManager {
     public AiConfig getAiConfig() {
         return aiConfig;
     }
-}
+        }
