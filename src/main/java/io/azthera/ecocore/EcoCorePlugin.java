@@ -6,10 +6,11 @@ import io.azthera.ecocore.ai.RestockDecisionEngine;
 import io.azthera.ecocore.ai.TrendAnalyzer;
 import io.azthera.ecocore.api.EcoCoreAPI;
 import io.azthera.ecocore.api.EcoCoreAPIImpl;
+import io.azthera.ecocore.commands.BalanceCommand;
 import io.azthera.ecocore.commands.EcoCoreCommand;
 import io.azthera.ecocore.commands.HistoryCommand;
 import io.azthera.ecocore.commands.InflationCommand;
-import io.azthera.ecocore.commands.ItemViewCommand; // <-- IMPORT BARU
+import io.azthera.ecocore.commands.ItemViewCommand;
 import io.azthera.ecocore.commands.JobCommand;
 import io.azthera.ecocore.commands.JobsCommand;
 import io.azthera.ecocore.commands.MarketCommand;
@@ -29,6 +30,7 @@ import io.azthera.ecocore.database.dao.JobsDao;
 import io.azthera.ecocore.database.dao.MarketHistoryDao;
 import io.azthera.ecocore.database.dao.MinionsDao;
 import io.azthera.ecocore.database.dao.MoneyDao;
+import io.azthera.ecocore.database.dao.NightMarketDao;
 import io.azthera.ecocore.database.dao.PlayerDao;
 import io.azthera.ecocore.database.dao.SellHistoryDao;
 import io.azthera.ecocore.database.dao.ShopItemDao;
@@ -67,11 +69,13 @@ import io.azthera.ecocore.listener.CraftListener;
 import io.azthera.ecocore.listener.EntityDeathListener;
 import io.azthera.ecocore.listener.FishListener;
 import io.azthera.ecocore.listener.InventoryClickListener;
-import io.azthera.ecocore.listener.MinionInteractListener; // <-- IMPORT BARU
+import io.azthera.ecocore.listener.MinionEggListener;
+import io.azthera.ecocore.listener.MinionInteractListener;
 import io.azthera.ecocore.listener.PlayerJoinListener;
 import io.azthera.ecocore.listener.PlayerQuitListener;
 import io.azthera.ecocore.manager.NotificationManager;
 import io.azthera.ecocore.manager.PlayerDataManager;
+import io.azthera.ecocore.market.NightMarketManager;
 import io.azthera.ecocore.minions.MinionAiController;
 import io.azthera.ecocore.minions.MinionAnimationHandler;
 import io.azthera.ecocore.minions.MinionFactory;
@@ -85,6 +89,7 @@ import io.azthera.ecocore.scheduler.AiCalculationScheduler;
 import io.azthera.ecocore.scheduler.AutoSaveScheduler;
 import io.azthera.ecocore.scheduler.InflationTaskScheduler;
 import io.azthera.ecocore.scheduler.MinionTickScheduler;
+import io.azthera.ecocore.scheduler.NightMarketRotationScheduler;
 import io.azthera.ecocore.scheduler.RestockTaskScheduler;
 import io.azthera.ecocore.sell.AutoSellManager;
 import io.azthera.ecocore.sell.SellBlacklistManager;
@@ -124,6 +129,7 @@ public final class EcoCorePlugin extends JavaPlugin {
     private MinionsDao minionsDao;
     private AiLearningDao aiLearningDao;
     private DiscordLogDao discordLogDao;
+    private NightMarketDao nightMarketDao;
 
     private EconomyEngine economyEngine;
     private AiLearningModel aiLearningModel;
@@ -135,12 +141,14 @@ public final class EcoCorePlugin extends JavaPlugin {
     private SellManager sellManager;
     private AutoSellManager autoSellManager;
 
+    private NightMarketManager nightMarketManager;
+
     private GuiManager guiManager;
 
     private JobsManager jobsManager;
     private MinionManager minionManager;
     private MinionUpgradeManager minionUpgradeManager;
-    private MinionFuelManager minionFuelManager; // <-- FIELD BARU DITAMBAHKAN DI SINI
+    private MinionFuelManager minionFuelManager;
 
     private ItemIdentityResolver itemIdentityResolver;
 
@@ -157,13 +165,12 @@ public final class EcoCorePlugin extends JavaPlugin {
     private RestockTaskScheduler restockTaskScheduler;
     private MinionTickScheduler minionTickScheduler;
     private AutoSaveScheduler autoSaveScheduler;
+    private NightMarketRotationScheduler nightMarketRotationScheduler;
 
     private EcoCoreAPI api;
 
     /**
-     * Returns the running plugin instance. Used by GUI classes that
-     * need access to shared managers without threading them through
-     * every constructor (e.g. {@code MinionUpgradeGui}).
+     * Returns the running plugin instance.
      *
      * @return the active plugin instance
      */
@@ -181,6 +188,7 @@ public final class EcoCorePlugin extends JavaPlugin {
         setupEconomy();
         setupAiAndInflation();
         setupShopAndSell();
+        setupNightMarket();
         setupGui();
         setupJobs();
         setupMinions();
@@ -203,6 +211,7 @@ public final class EcoCorePlugin extends JavaPlugin {
         if (restockTaskScheduler != null) restockTaskScheduler.stop();
         if (minionTickScheduler != null) minionTickScheduler.stop();
         if (autoSaveScheduler != null) autoSaveScheduler.stop();
+        if (nightMarketRotationScheduler != null) nightMarketRotationScheduler.stop();
 
         if (discordBotManager != null) {
             discordBotManager.shutdown();
@@ -254,6 +263,7 @@ public final class EcoCorePlugin extends JavaPlugin {
         minionsDao = new MinionsDao(databaseManager);
         aiLearningDao = new AiLearningDao(databaseManager);
         discordLogDao = new DiscordLogDao(databaseManager);
+        nightMarketDao = new NightMarketDao(databaseManager);
     }
 
     private void setupEconomy() {
@@ -304,6 +314,12 @@ public final class EcoCorePlugin extends JavaPlugin {
         autoSellManager = new AutoSellManager(getLogger(), sellManager, economyEngine);
     }
 
+    private void setupNightMarket() {
+        nightMarketManager = new NightMarketManager(getLogger(), nightMarketDao,
+                configManager.getNightMarketConfig(), economyEngine);
+        nightMarketManager.loadOrRotate();
+    }
+
     private void setupGui() {
         guiManager = new GuiManager(configManager.getGuiConfig());
     }
@@ -311,16 +327,17 @@ public final class EcoCorePlugin extends JavaPlugin {
     private void setupJobs() {
         JobProgressTracker progressTracker = new JobProgressTracker(jobsDao, configManager.getJobsConfig(), economyEngine);
         JobSkillTreeManager skillTreeManager = new JobSkillTreeManager(configManager.getJobsConfig());
-        JobMissionManager missionManager = new JobMissionManager(jobMissionDao, configManager.getJobsConfig(), economyEngine);
+        JobMissionManager missionManager = new JobMissionManager(jobMissionDao, configManager.getJobsConfig(),
+                economyEngine, configManager.getMessagesConfig());
         JobPrestigeManager prestigeManager = new JobPrestigeManager(jobsDao, configManager.getJobsConfig());
         JobLeaderboardManager leaderboardManager = new JobLeaderboardManager(jobsDao, configManager.getJobsConfig());
 
         jobsManager = new JobsManager(getLogger(), jobsDao, configManager.getJobsConfig(),
-                progressTracker, skillTreeManager, missionManager, prestigeManager, leaderboardManager);
+                progressTracker, skillTreeManager, missionManager, prestigeManager, leaderboardManager,
+                configManager.getMessagesConfig());
     }
 
     private void setupMinions() {
-        // <-- DIUBAH: Menggunakan field class minionFuelManager, bukan variabel lokal
         minionFuelManager = new MinionFuelManager(configManager.getMinionsConfig());
         MinionTargetSelector targetSelector = new MinionTargetSelector(configManager.getMinionsConfig());
         MinionPathfinder pathfinder = new MinionPathfinder(configManager.getMinionsConfig());
@@ -339,8 +356,7 @@ public final class EcoCorePlugin extends JavaPlugin {
     }
 
     private void setupHooks() {
-        // Item-identity hooks (ItemsAdder/Oraxen/MMOItems/Slimefun) are
-        // already constructed in setupShopAndSell() via ItemIdentityResolver.
+        // Item-identity hooks are already constructed in setupShopAndSell() via ItemIdentityResolver.
     }
 
     private void setupDiscord() {
@@ -375,7 +391,21 @@ public final class EcoCorePlugin extends JavaPlugin {
         notificationManager = new NotificationManager(getLogger(), configManager, configManager.getMessagesConfig(),
                 discordBotManager, discordWebhookSender, discordEmbedBuilder);
 
-        inflationEngine.addListener(notificationManager::onInflationEvent);
+        // Both InflationEngine.runCycle() and AiEconomyEngine.runCycle() run on
+        // ASYNC scheduler threads. NotificationManager touches Bukkit API
+        // (broadcastMessage, sendActionBar, createBossBar) which is NOT
+        // thread-safe off the main thread - every listener here hops back
+        // to the main thread via runTask before doing any of that.
+        inflationEngine.addListener(event ->
+                Bukkit.getScheduler().runTask(this, () -> notificationManager.onInflationEvent(event)));
+
+        aiEconomyEngine.addPriceChangeListener(notice ->
+                Bukkit.getScheduler().runTask(this, () ->
+                        notificationManager.announcePriceChange(notice.item(), notice.previousPrice())));
+
+        nightMarketManager.addRotationListener(newOffers ->
+                Bukkit.getScheduler().runTask(this, () ->
+                        Bukkit.broadcastMessage(configManager.getMessagesConfig().getWithPrefix("market.rotated"))));
     }
 
     private void setupPlaceholderApi() {
@@ -396,36 +426,33 @@ public final class EcoCorePlugin extends JavaPlugin {
         pluginManager.registerEvents(new PlayerJoinListener(playerDataManager), this);
         pluginManager.registerEvents(new PlayerQuitListener(playerDataManager), this);
         pluginManager.registerEvents(new InventoryClickListener(guiManager), this);
-        
-        // <-- LISTENER BARU DITAMBAHKAN DI SINI
-        pluginManager.registerEvents(new MinionInteractListener(
-                minionManager, minionFuelManager, configManager.getMinionsConfig(), guiManager, configManager.getGuiConfig()), this);
 
         var inflationConfig = configManager.getInflationConfig();
         pluginManager.registerEvents(new BlockBreakListener(jobsManager, inflationEngine, inflationConfig, autoSellManager), this);
         pluginManager.registerEvents(new EntityDeathListener(jobsManager, inflationEngine, inflationConfig, autoSellManager), this);
         pluginManager.registerEvents(new FishListener(jobsManager, inflationEngine, inflationConfig, autoSellManager), this);
         pluginManager.registerEvents(new CraftListener(jobsManager, inflationEngine, inflationConfig), this);
+
+        pluginManager.registerEvents(new MinionInteractListener(
+                minionManager, minionFuelManager, configManager.getMinionsConfig(), guiManager, configManager.getGuiConfig()), this);
+        pluginManager.registerEvents(new MinionEggListener(minionManager), this);
     }
 
     private void registerCommands() {
         var guiConfig = configManager.getGuiConfig();
 
         setExecutor("shop", new ShopCommand(shopManager, configManager, guiManager, guiConfig));
-        setExecutor("balance", new io.azthera.ecocore.commands.BalanceCommand(economyEngine));
         setExecutor("sell", new SellCommand(sellManager, autoSellManager, configManager, guiManager));
         setExecutor("jobs", new JobsCommand(jobsManager, configManager, guiManager, guiConfig));
         setExecutor("job", new JobCommand(jobsManager, configManager, guiManager, guiConfig));
         setExecutor("minions", new MinionsCommand(minionManager, configManager, guiManager, guiConfig));
         setExecutor("minion", new MinionCommand(minionManager, configManager, guiManager, guiConfig));
-        setExecutor("market", new MarketCommand(shopManager, economyEngine.getFormatter()));
+        setExecutor("market", new MarketCommand(nightMarketManager, guiManager, configManager));
         setExecutor("prices", new PricesCommand(shopManager, economyEngine.getFormatter()));
         setExecutor("inflation", new InflationCommand(inflationEngine));
         setExecutor("history", new HistoryCommand(shopManager, guiManager));
-        
-        // <-- COMMAND BARU DITAMBAHKAN DI SINI
+        setExecutor("balance", new BalanceCommand(economyEngine));
         setExecutor("ecoitem", new ItemViewCommand(shopManager, configManager, guiManager, guiConfig));
-        
         setExecutor("ecocore", new EcoCoreCommand(configManager, databaseManager, shopManager, restockScheduler,
                 inflationEngine, aiEconomyEngine, aiLearningModel, economyEngine, minionManager, getDataFolder()));
     }
@@ -450,6 +477,7 @@ public final class EcoCorePlugin extends JavaPlugin {
                 configManager.getMinionTickIntervalSeconds());
         autoSaveScheduler = new AutoSaveScheduler(this, getLogger(), economyEngine, minionManager,
                 configManager.getAutosaveIntervalMinutes());
+        nightMarketRotationScheduler = new NightMarketRotationScheduler(this, nightMarketManager);
 
         if (configManager.isModuleEnabled("ai-economy-enabled")) {
             aiCalculationScheduler.start();
@@ -462,6 +490,9 @@ public final class EcoCorePlugin extends JavaPlugin {
         }
         if (configManager.isModuleEnabled("minions-enabled")) {
             minionTickScheduler.start();
+        }
+        if (configManager.isModuleEnabled("night-market-enabled")) {
+            nightMarketRotationScheduler.start();
         }
         autoSaveScheduler.start();
     }
@@ -490,6 +521,10 @@ public final class EcoCorePlugin extends JavaPlugin {
         return autoSellManager;
     }
 
+    public NightMarketManager getNightMarketManager() {
+        return nightMarketManager;
+    }
+
     public InflationEngine getInflationEngine() {
         return inflationEngine;
     }
@@ -508,11 +543,6 @@ public final class EcoCorePlugin extends JavaPlugin {
 
     public MinionUpgradeManager getMinionUpgradeManager() {
         return minionUpgradeManager;
-    }
-    
-    // <-- GETTER BARU (Opsional, tapi bagus untuk konsistensi)
-    public MinionFuelManager getMinionFuelManager() {
-        return minionFuelManager;
     }
 
     public GuiManager getGuiManager() {
