@@ -22,7 +22,8 @@ import java.util.List;
 
 /**
  * Detail screen for a single joined job: level/xp/prestige summary,
- * active missions, and navigation into the skill tree and leaderboard.
+ * active missions (with clear descriptions and a visual progress
+ * bar), and navigation into the skill tree and leaderboard.
  */
 public final class JobDetailGui extends AbstractGui {
 
@@ -70,6 +71,10 @@ public final class JobDetailGui extends AbstractGui {
     }
 
     private void render() {
+        for (int i = 0; i < inventory.getSize(); i++) {
+            inventory.setItem(i, null);
+        }
+
         try {
             JobData data = jobsManager.getProgress(viewer.getUniqueId(), jobType);
             if (data == null) {
@@ -78,11 +83,22 @@ public final class JobDetailGui extends AbstractGui {
             }
 
             inventory.setItem(SUMMARY_SLOT, buildSummaryIcon(data));
-            inventory.setItem(SKILL_TREE_SLOT, buildNavIcon(Material.BOOKSHELF, "§dSkill Tree", "§7Lihat perk yang terbuka."));
-            inventory.setItem(LEADERBOARD_SLOT, buildNavIcon(Material.GOLD_INGOT, "§6Leaderboard", "§7Lihat peringkat teratas."));
+            inventory.setItem(SKILL_TREE_SLOT, buildNavIcon(Material.BOOKSHELF, "§dSkill Tree",
+                    "§7Lihat perk yang terbuka di level lu."));
+            inventory.setItem(LEADERBOARD_SLOT, buildNavIcon(Material.GOLD_INGOT, "§6Leaderboard",
+                    "§7Lihat peringkat top player job ini."));
 
             boolean canPrestige = jobsManager.getPrestigeManager().canPrestige(data);
             inventory.setItem(PRESTIGE_SLOT, buildPrestigeIcon(data, canPrestige));
+
+            ItemStack missionHeader = new ItemStack(Material.WRITTEN_BOOK);
+            ItemMeta headerMeta = missionHeader.getItemMeta();
+            if (headerMeta != null) {
+                headerMeta.setDisplayName("§bMisi Aktif");
+                headerMeta.setLore(List.of("§7Selesaikan misi buat dapet bonus reward."));
+                missionHeader.setItemMeta(headerMeta);
+            }
+            inventory.setItem(MISSIONS_START_SLOT - 9, missionHeader);
 
             List<JobMissionRecord> missions = jobsManager.getMissionManager()
                     .getActiveMissions(viewer.getUniqueId()).stream()
@@ -91,6 +107,17 @@ public final class JobDetailGui extends AbstractGui {
 
             for (int i = 0; i < missions.size() && i < 9; i++) {
                 inventory.setItem(MISSIONS_START_SLOT + i, buildMissionIcon(missions.get(i)));
+            }
+
+            if (missions.isEmpty()) {
+                ItemStack noneIcon = new ItemStack(Material.BARRIER);
+                ItemMeta noneMeta = noneIcon.getItemMeta();
+                if (noneMeta != null) {
+                    noneMeta.setDisplayName("§7Belum ada misi aktif");
+                    noneMeta.setLore(List.of("§7Misi baru muncul otomatis setiap hari/minggu."));
+                    noneIcon.setItemMeta(noneMeta);
+                }
+                inventory.setItem(MISSIONS_START_SLOT, noneIcon);
             }
         } catch (SQLException exception) {
             viewer.sendMessage("§cGagal memuat data job.");
@@ -141,18 +168,48 @@ public final class JobDetailGui extends AbstractGui {
         return icon;
     }
 
+    /**
+     * Builds a mission icon with a plain-language description, a
+     * bracket progress bar, and the numeric progress, instead of just
+     * a bare number.
+     *
+     * @param mission the mission to render
+     * @return the built icon
+     */
     private ItemStack buildMissionIcon(JobMissionRecord mission) {
         ItemStack icon = new ItemStack(mission.isComplete() ? Material.LIME_DYE : Material.PAPER);
         ItemMeta meta = icon.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName((mission.period().equals("DAILY") ? "§bMisi Harian" : "§5Misi Mingguan"));
-            meta.setLore(List.of(
-                    "§7Progress: §f" + mission.progress() + "/" + mission.target(),
-                    mission.isComplete() ? "§a§lSelesai" : "§7Sedang berjalan"
-            ));
+            String periodLabel = mission.period().equals("DAILY") ? "§bMisi Harian" : "§5Misi Mingguan";
+            meta.setDisplayName(periodLabel);
+
+            List<String> lore = new ArrayList<>();
+            lore.add("§7Tugas: §fLakukan aksi kerja sebagai " + jobType.configKey() + " sebanyak " + mission.target() + "x");
+            lore.add("§7(misal: mining/nebang/farming/dll sesuai job ini)");
+            lore.add("");
+            lore.add(buildProgressBar(mission.progress(), mission.target()));
+            lore.add("§7Progress: §f" + mission.progress() + " / " + mission.target());
+            lore.add(mission.isComplete() ? "§a§lSelesai - reward udah masuk!" : "§e§lSedang berjalan");
+            meta.setLore(lore);
             icon.setItemMeta(meta);
         }
         return icon;
+    }
+
+    private String buildProgressBar(int progress, int target) {
+        int totalBars = 20;
+        int filled = target > 0 ? (int) Math.round((progress / (double) target) * totalBars) : 0;
+        filled = Math.max(0, Math.min(totalBars, filled));
+
+        StringBuilder bar = new StringBuilder("§a");
+        for (int i = 0; i < totalBars; i++) {
+            if (i == filled) {
+                bar.append("§7");
+            }
+            bar.append("■");
+        }
+        int percent = target > 0 ? (int) Math.round((progress / (double) target) * 100) : 0;
+        return bar + " §f" + percent + "%";
     }
 
     private Material safeMaterial(String name) {
@@ -209,4 +266,4 @@ public final class JobDetailGui extends AbstractGui {
             }
         }
     }
-}
+                                   }
