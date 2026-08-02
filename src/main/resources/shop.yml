@@ -39,10 +39,18 @@ categories:
     display-name: "&4Redstone"
     icon: "REDSTONE"
     slot: 19
-  - id: "misc"
-    display-name: "&fMisc"
-    icon: "CHEST"
+  - id: "building"
+    display-name: "&fBuilding"
+    icon: "BRICKS"
     slot: 20
+  - id: "brewing"
+    display-name: "&5Brewing"
+    icon: "BREWING_STAND"
+    slot: 21
+  - id: "misc"
+    display-name: "&7Misc"
+    icon: "CHEST"
+    slot: 22
 
 features:
   search-enabled: true
@@ -60,10 +68,13 @@ features:
 buying:
   require-confirmation-above: 1000.0
   buy-max-enabled: true
-  buy-max-cap: 6400
+  buy-max-cap: 640
   sell-out-block-purchase: true
 
 stock:
-  default-max-stock: 6400
+  # Diturunin dari 6400 -> 640 biar perubahan stock jelas keliatan
+  # tiap kali ada yang beli/jual. Barang langka override ini lewat
+  # max-stock per item di shop-items.yml.
+  default-max-stock: 640
   low-stock-threshold-percent: 20
   critical-stock-threshold-percent: 5
