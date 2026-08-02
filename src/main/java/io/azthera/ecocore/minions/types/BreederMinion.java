@@ -19,7 +19,7 @@ public final class BreederMinion extends AbstractMinionHandler {
                 noMaterials(),
                 Map.ofEntries(
                         Map.entry(EntityType.COW, Material.LEATHER),
-                        Map.entry(EntityType.PIG, Material.RAW_PORKCHOP),
+                        Map.entry(EntityType.PIG, Material.PORKCHOP),
                         Map.entry(EntityType.SHEEP, Material.WHITE_WOOL),
                         Map.entry(EntityType.CHICKEN, Material.EGG),
                         Map.entry(EntityType.HORSE, Material.LEATHER)
