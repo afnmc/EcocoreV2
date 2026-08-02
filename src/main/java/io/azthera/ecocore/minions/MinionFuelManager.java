@@ -2,7 +2,6 @@ package io.azthera.ecocore.minions;
 
 import io.azthera.ecocore.config.MinionsConfig;
 import io.azthera.ecocore.model.MinionData;
-import io.azthera.ecocore.utils.ItemUtils;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
@@ -10,7 +9,8 @@ import java.util.Map;
 
 /**
  * Manages minion fuel: consuming configured fuel items from a
- * minion's own storage to keep {@link MinionData#getFuelTicksRemaining()}
+ * minion's own storage OR directly from a player's hand (via
+ * right-click interaction) to keep {@link MinionData#getFuelTicksRemaining()}
  * topped up. Fuel gates whether a minion is powered on at all;
  * energy (managed separately by {@code MinionAiController}) gates
  * how many actions it can perform while powered.
@@ -59,7 +59,9 @@ public final class MinionFuelManager {
 
     /**
      * Attempts to refuel a minion by consuming one configured fuel
-     * item from its storage, if it isn't already fueled.
+     * item from its storage, if it isn't already fueled. Called
+     * automatically by {@code MinionAiController} every tick a
+     * minion runs out of fuel.
      *
      * @param data    the minion's persistent data
      * @param storage the minion's storage contents, modified in place if refueling occurs
@@ -91,5 +93,42 @@ public final class MinionFuelManager {
         }
 
         return false;
+    }
+
+    /**
+     * Refuels a minion directly from a fuel item, used when a player
+     * right-clicks the minion's entity in the world while holding
+     * coal/coal block/lava bucket. Consumes one unit from the given
+     * stack. Unlike {@link #tryRefuel}, this works even if the
+     * minion already has fuel remaining (tops it up further), since
+     * it's an intentional player action rather than an automatic check.
+     *
+     * @param data     the minion's persistent data
+     * @param handItem the item currently in the player's hand, may be {@code null}
+     * @return {@code true} if one fuel item was consumed and fuel was added
+     */
+    public boolean refuelFromHand(MinionData data, ItemStack handItem) {
+        if (handItem == null || handItem.getType().isAir()) {
+            return false;
+        }
+
+        Integer fuelValue = FUEL_VALUES.get(handItem.getType());
+        if (fuelValue == null || !minionsConfig.getFuelTypes().contains(handItem.getType().name())) {
+            return false;
+        }
+
+        handItem.setAmount(handItem.getAmount() - 1);
+        data.setFuelTicksRemaining(data.getFuelTicksRemaining() + fuelValue);
+        return true;
+    }
+
+    /**
+     * Whether the given material is configured as valid minion fuel.
+     *
+     * @param material the material to check
+     * @return {@code true} if it's a recognized, enabled fuel type
+     */
+    public boolean isFuelItem(Material material) {
+        return FUEL_VALUES.containsKey(material) && minionsConfig.getFuelTypes().contains(material.name());
     }
 }
