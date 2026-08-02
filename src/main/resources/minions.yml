@@ -1,0 +1,73 @@
+# ==========================================================
+# EcoCore - Minions Configuration
+# ==========================================================
+global:
+  max-level: 50
+  base-storage-slots: 9
+  storage-slots-per-upgrade: 9
+  max-storage-upgrades: 6
+  base-radius: 6
+  radius-per-upgrade: 2
+  max-radius-upgrades: 5
+  base-speed-ticks: 20
+  speed-reduction-per-upgrade-ticks: 2
+  min-speed-ticks: 4
+  base-energy: 1000
+  energy-drain-per-action: 1
+  fuel-types: [ "COAL", "COAL_BLOCK", "LAVA_BUCKET" ]
+  auto-repair-enabled: true
+  auto-sell-enabled: true
+  auto-smelt-enabled: true
+
+minions:
+  miner:
+    display-name: "&7Miner Minion"
+    base-efficiency: 1.0
+  lumberjack:
+    display-name: "&6Lumberjack Minion"
+    base-efficiency: 1.0
+  farmer:
+    display-name: "&2Farmer Minion"
+    base-efficiency: 1.0
+  fishing:
+    display-name: "&bFishing Minion"
+    base-efficiency: 0.8
+  collector:
+    display-name: "&fCollector Minion"
+    base-efficiency: 1.2
+  mob_killer:
+    display-name: "&cMob Killer Minion"
+    base-efficiency: 0.9
+  animal_farmer:
+    display-name: "&eAnimal Farmer Minion"
+    base-efficiency: 1.0
+  smelter:
+    display-name: "&7Smelter Minion"
+    base-efficiency: 1.0
+  crafter:
+    display-name: "&dCrafter Minion"
+    base-efficiency: 1.0
+  storage:
+    display-name: "&8Storage Minion"
+    base-efficiency: 1.0
+  seller:
+    display-name: "&aSeller Minion"
+    base-efficiency: 1.0
+  harvester:
+    display-name: "&2Harvester Minion"
+    base-efficiency: 1.1
+  planter:
+    display-name: "&2Planter Minion"
+    base-efficiency: 1.0
+  breeder:
+    display-name: "&6Breeder Minion"
+    base-efficiency: 0.7
+  quarry:
+    display-name: "&7Quarry Minion"
+    base-efficiency: 1.3
+
+ai:
+  obstacle-avoidance-enabled: true
+  target-selection-strategy: "NEAREST_HIGHEST_VALUE"
+  pathfinding-max-nodes: 200
+  pathfinding-recalculate-ticks: 40

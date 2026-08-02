@@ -1,0 +1,69 @@
+# ==========================================================
+# EcoCore - Shop Configuration
+# ==========================================================
+gui:
+  rows: 6
+  title: "&8&lEcoCore &7» &fShop"
+  items-per-page: 45
+
+categories:
+  - id: "blocks"
+    display-name: "&aBlocks"
+    icon: "GRASS_BLOCK"
+    slot: 10
+  - id: "ores"
+    display-name: "&7Ores & Minerals"
+    icon: "IRON_ORE"
+    slot: 11
+  - id: "food"
+    display-name: "&6Food"
+    icon: "COOKED_BEEF"
+    slot: 12
+  - id: "farming"
+    display-name: "&2Farming"
+    icon: "WHEAT"
+    slot: 13
+  - id: "mob-drops"
+    display-name: "&cMob Drops"
+    icon: "ROTTEN_FLESH"
+    slot: 14
+  - id: "fishing"
+    display-name: "&bFishing"
+    icon: "FISHING_ROD"
+    slot: 15
+  - id: "wood"
+    display-name: "&6Wood"
+    icon: "OAK_LOG"
+    slot: 16
+  - id: "redstone"
+    display-name: "&4Redstone"
+    icon: "REDSTONE"
+    slot: 19
+  - id: "misc"
+    display-name: "&fMisc"
+    icon: "CHEST"
+    slot: 20
+
+features:
+  search-enabled: true
+  pagination-enabled: true
+  sorting-enabled: true
+  favorite-enabled: true
+  history-enabled: true
+  history-max-entries: 50
+  item-preview-enabled: true
+  stock-indicator-enabled: true
+  inflation-indicator-enabled: true
+  price-graph-enabled: true
+  price-graph-periods: [ "24h", "7d", "30d", "90d" ]
+
+buying:
+  require-confirmation-above: 1000.0
+  buy-max-enabled: true
+  buy-max-cap: 6400
+  sell-out-block-purchase: true
+
+stock:
+  default-max-stock: 6400
+  low-stock-threshold-percent: 20
+  critical-stock-threshold-percent: 5

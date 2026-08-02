@@ -1,0 +1,46 @@
+# ==========================================================
+# EcoCore - Main Configuration
+# ==========================================================
+debug: false
+locale: id_ID
+
+general:
+  autosave-interval-minutes: 5
+  currency-symbol: "$"
+  currency-name-singular: "Dollar"
+  currency-name-plural: "Dollars"
+  starting-balance: 500.0
+  decimal-format: "#,##0.00"
+
+modules:
+  ai-economy-enabled: true
+  inflation-enabled: true
+  shop-enabled: true
+  sell-enabled: true
+  jobs-enabled: true
+  minions-enabled: true
+  discord-enabled: true
+  placeholderapi-enabled: true
+  vault-hook-enabled: true
+
+intervals:
+  ai-calculation-seconds: 300
+  restock-check-seconds: 60
+  inflation-calculation-seconds: 900
+  minion-tick-seconds: 5
+  market-snapshot-seconds: 3600
+
+notifications:
+  broadcast-price-changes: true
+  broadcast-inflation-changes: true
+  broadcast-restock: false
+  use-actionbar: true
+  use-bossbar: false
+  use-title: false
+  use-chat: true
+  use-discord: true
+  use-console: true
+
+storage:
+  data-folder: "data"
+  backup-folder: "backups"

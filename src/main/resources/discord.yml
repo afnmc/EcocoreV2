@@ -1,0 +1,34 @@
+# ==========================================================
+# EcoCore - Discord Bot Configuration
+# ==========================================================
+bot:
+  enabled: true
+  token: "REPLACE_WITH_BOT_TOKEN"
+  guild-id: "REPLACE_WITH_GUILD_ID"
+  activity-status: "Managing the Azthera Economy"
+
+channels:
+  market-channel-id: "REPLACE_ME"
+  inflation-channel-id: "REPLACE_ME"
+  trade-log-channel-id: "REPLACE_ME"
+  sell-log-channel-id: "REPLACE_ME"
+  buy-log-channel-id: "REPLACE_ME"
+  admin-log-channel-id: "REPLACE_ME"
+  crash-log-channel-id: "REPLACE_ME"
+
+webhooks:
+  enabled: false
+  market-webhook-url: ""
+  trade-webhook-url: ""
+
+slash-commands:
+  enabled: true
+  register-guild-only: true
+  commands: [ "market", "inflation", "topmarket", "history", "restock", "item", "player", "jobs", "minions" ]
+
+embeds:
+  color-price-up: "#43B581"
+  color-price-down: "#F04747"
+  color-neutral: "#7289DA"
+  color-crash: "#992D22"
+  footer-text: "EcoCore • Azthera Network"

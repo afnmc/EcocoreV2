@@ -1,0 +1,44 @@
+# ==========================================================
+# EcoCore - Messages Configuration
+# ==========================================================
+prefix: "&8[&aEcoCore&8] &r"
+
+general:
+  no-permission: "&cLu gak punya izin buat ini."
+  player-only: "&cCommand ini cuma bisa dipakai player."
+  reload-success: "&aConfig berhasil di-reload."
+  unknown-error: "&cTerjadi error, cek console."
+
+economy:
+  balance: "&7Saldo lu: &a{amount}"
+  not-enough-money: "&cSaldo lu gak cukup."
+
+shop:
+  bought: "&aBerhasil beli &f{amount}x {item} &aseharga &f{price}."
+  sold-out: "&cBarang ini lagi sell out."
+  buy-confirm-title: "&eKonfirmasi pembelian &f{amount}x {item} &eseharga &f{price}?"
+
+sell:
+  sold: "&aBerhasil jual &f{amount}x {item} &aseharga &f{price}."
+  blacklisted: "&cBarang ini gak bisa dijual."
+  nothing-to-sell: "&cGak ada barang yang bisa dijual."
+
+jobs:
+  joined: "&aLu join job &f{job}."
+  level-up: "&6Job &f{job} &6naik ke level &f{level}!"
+  already-joined: "&cLu udah join job ini."
+
+minions:
+  placed: "&aMinion &f{type} &aberhasil dipasang."
+  out-of-fuel: "&eMinion &f{type} &ekehabisan fuel."
+  level-up: "&6Minion &f{type} &6naik ke level &f{level}!"
+
+market:
+  price-up: "&aHarga &f{item} &anaik jadi &f{price}."
+  price-down: "&cHarga &f{item} &cturun jadi &f{price}."
+
+inflation:
+  boom: "&6Ekonomi server lagi &lBOOM&r&6!"
+  recession: "&eEkonomi server masuk fase &lRESESI&r&e."
+  crisis: "&cEkonomi server lagi &lKRISIS&r&c!"
+  growth: "&aEkonomi server tumbuh stabil."
