@@ -57,6 +57,10 @@ commands:
     description: Check your (or another player's) EcoCore balance directly
     usage: /balance [player]
     permission: ecocore.balance
+  ecoitem:
+    description: Directly open a shop item's buy screen
+    usage: /ecoitem <id>
+    permission: ecocore.shop
 
 permissions:
   ecocore.admin:
