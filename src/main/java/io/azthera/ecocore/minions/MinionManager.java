@@ -1,8 +1,8 @@
 package io.azthera.ecocore.minions;
 
+import io.azthera.ecocore.EcoCorePlugin;
 import io.azthera.ecocore.config.MinionsConfig;
 import io.azthera.ecocore.database.dao.MinionsDao;
-import io.azthera.ecocore.economy.EconomyEngine;
 import io.azthera.ecocore.minions.types.AnimalFarmerMinion;
 import io.azthera.ecocore.minions.types.BreederMinion;
 import io.azthera.ecocore.minions.types.CollectorMinion;
@@ -21,16 +21,15 @@ import io.azthera.ecocore.minions.types.SmelterMinion;
 import io.azthera.ecocore.minions.types.StorageMinion;
 import io.azthera.ecocore.model.MinionData;
 import io.azthera.ecocore.model.MinionType;
-import io.azthera.ecocore.sell.SellManager;
 import io.azthera.ecocore.utils.ItemUtils;
 import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -45,11 +44,18 @@ import java.util.stream.Collectors;
  * live storage array), every {@link MinionHandler}, and the
  * placement/removal lifecycle. {@code MinionTickScheduler} calls
  * {@link #tickAll()} once per configured tick interval.
+ *
+ * <p>Every placed minion is spawned as a real, visible, interactable
+ * entity in the world (see {@link #spawnVisualEntity}), tagged with
+ * its database id via persistent data so {@code MinionInteractListener}
+ * can resolve which minion was right-clicked.
  */
 public final class MinionManager {
 
     /** Default cap on how many minions a single player may place; server owners can raise this via a future permission-based override. */
     public static final int DEFAULT_MAX_MINIONS_PER_PLAYER = 20;
+
+    private static final String MINION_ID_KEY = "minion_id";
 
     private final Logger logger;
     private final MinionsDao minionsDao;
@@ -114,6 +120,10 @@ public final class MinionManager {
         return handlers.get(type);
     }
 
+    public Map<MinionType, MinionHandler> getAllHandlers() {
+        return handlers;
+    }
+
     /**
      * Loads every persisted minion from the database and spawns their
      * visual entities, called once during plugin enable.
@@ -149,6 +159,16 @@ public final class MinionManager {
         activeMinions.put(data.getId(), new ActiveMinion(data, storage, entity));
     }
 
+    /**
+     * Spawns a minion's visual entity in the world (an invisible-name-tag-showing
+     * ArmorStand) at the given location, and tags it with the minion's
+     * database id via persistent data so it can be resolved back from
+     * a right-click interaction by {@code MinionInteractListener}.
+     *
+     * @param location the location to spawn at
+     * @param data     the minion's data (must already have a real database id)
+     * @return the spawned entity
+     */
     private Entity spawnVisualEntity(Location location, MinionData data) {
         org.bukkit.entity.ArmorStand standEntity = location.getWorld().spawn(location, org.bukkit.entity.ArmorStand.class);
         standEntity.setInvisible(false);
@@ -158,7 +178,27 @@ public final class MinionManager {
         standEntity.setCustomName(data.getType().configKey() + " Lv." + data.getLevel());
         standEntity.setBasePlate(false);
         standEntity.setMarker(false);
+
+        NamespacedKey key = new NamespacedKey(EcoCorePlugin.getInstance(), MINION_ID_KEY);
+        standEntity.getPersistentDataContainer().set(key, PersistentDataType.LONG, data.getId());
+
         return standEntity;
+    }
+
+    /**
+     * Resolves the minion database id tagged on an entity, used by
+     * {@code MinionInteractListener} when a player right-clicks
+     * something in the world.
+     *
+     * @param entity the entity that was interacted with
+     * @return the minion's database id, or {@code null} if this entity isn't a minion
+     */
+    public Long resolveMinionId(Entity entity) {
+        if (entity == null) {
+            return null;
+        }
+        NamespacedKey key = new NamespacedKey(EcoCorePlugin.getInstance(), MINION_ID_KEY);
+        return entity.getPersistentDataContainer().get(key, PersistentDataType.LONG);
     }
 
     /**
@@ -209,9 +249,8 @@ public final class MinionManager {
     }
 
     /**
-     * Removes a minion permanently: despawns its visual entity, drops
-     * or returns its remaining storage contents is left to the
-     * caller (the returned array), and deletes it from the database.
+     * Removes a minion permanently: despawns its visual entity and
+     * deletes it from the database.
      *
      * @param minionId the minion's database id
      * @return the minion's remaining storage contents at time of removal, or {@code null} if it wasn't active
@@ -231,12 +270,6 @@ public final class MinionManager {
         return active.storage();
     }
 
-    /**
-     * Returns every active minion owned by a player.
-     *
-     * @param ownerUuid the player's uuid
-     * @return that player's active minion data
-     */
     public List<MinionData> getMinionsOwnedBy(UUID ownerUuid) {
         return activeMinions.values().stream()
                 .filter(active -> active.data().getOwnerUuid().equals(ownerUuid))
@@ -244,23 +277,11 @@ public final class MinionManager {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Returns a single active minion's data by id.
-     *
-     * @param minionId the minion's database id
-     * @return the minion's data, or {@code null} if not active
-     */
     public MinionData getMinion(long minionId) {
         ActiveMinion active = activeMinions.get(minionId);
         return active != null ? active.data() : null;
     }
 
-    /**
-     * Returns a single active minion's live storage array by id.
-     *
-     * @param minionId the minion's database id
-     * @return the storage array, or {@code null} if not active
-     */
     public ItemStack[] getMinionStorage(long minionId) {
         ActiveMinion active = activeMinions.get(minionId);
         return active != null ? active.storage() : null;
@@ -277,6 +298,10 @@ public final class MinionManager {
             }
             boolean ownerOnline = org.bukkit.Bukkit.getPlayer(active.data().getOwnerUuid()) != null;
             aiController.tick(active.data(), handler, active.entity(), active.storage(), ownerOnline);
+
+            if (active.entity() instanceof org.bukkit.entity.ArmorStand standEntity) {
+                standEntity.setCustomName(active.data().getType().configKey() + " Lv." + active.data().getLevel());
+            }
         }
     }
 
@@ -299,4 +324,4 @@ public final class MinionManager {
     public MinionsConfig getMinionsConfig() {
         return minionsConfig;
     }
-}
+                     }
