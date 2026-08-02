@@ -17,7 +17,7 @@
         <maven.compiler.source>25</maven.compiler.source>
         <maven.compiler.target>25</maven.compiler.target>
         <maven.compiler.release>25</maven.compiler.release>
-        <paper.version>26.1.2-R0.1-SNAPSHOT</paper.version>
+        <paper.version>[26.1.2.build,)</paper.version>
     </properties>
 
     <repositories>
