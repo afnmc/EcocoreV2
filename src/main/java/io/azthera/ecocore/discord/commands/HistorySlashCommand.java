@@ -3,7 +3,6 @@ package io.azthera.ecocore.discord.commands;
 import io.azthera.ecocore.discord.DiscordEmbedBuilder;
 import io.azthera.ecocore.model.TransactionRecord;
 import io.azthera.ecocore.shop.ShopManager;
-import net.dv8tion.jda.api.entities.OfflineUser;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
