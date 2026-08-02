@@ -27,6 +27,7 @@ jobs:
   joined: "&aLu join job &f{job}."
   level-up: "&6Job &f{job} &6naik ke level &f{level}!"
   already-joined: "&cLu udah join job ini."
+  mission-complete: "&a&lMisi {period} Selesai! &7Dapat reward &f{reward}"
 
 minions:
   placed: "&aMinion &f{type} &aberhasil dipasang."
@@ -36,6 +37,7 @@ minions:
 market:
   price-up: "&aHarga &f{item} &anaik jadi &f{price}."
   price-down: "&cHarga &f{item} &cturun jadi &f{price}."
+  rotated: "&d&l[Night Market] &rBarang baru udah tersedia! Cek &f/market &rsekarang."
 
 inflation:
   boom: "&6Ekonomi server lagi &lBOOM&r&6!"
