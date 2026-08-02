@@ -22,49 +22,82 @@ global:
 minions:
   miner:
     display-name: "&7Miner Minion"
+    icon: "IRON_PICKAXE"
     base-efficiency: 1.0
   lumberjack:
     display-name: "&6Lumberjack Minion"
+    icon: "IRON_AXE"
     base-efficiency: 1.0
   farmer:
     display-name: "&2Farmer Minion"
+    icon: "IRON_HOE"
     base-efficiency: 1.0
   fishing:
     display-name: "&bFishing Minion"
+    icon: "FISHING_ROD"
     base-efficiency: 0.8
   collector:
     display-name: "&fCollector Minion"
+    icon: "HOPPER"
     base-efficiency: 1.2
   mob_killer:
     display-name: "&cMob Killer Minion"
+    icon: "IRON_SWORD"
     base-efficiency: 0.9
   animal_farmer:
     display-name: "&eAnimal Farmer Minion"
+    icon: "WHEAT"
     base-efficiency: 1.0
   smelter:
     display-name: "&7Smelter Minion"
+    icon: "FURNACE"
     base-efficiency: 1.0
   crafter:
     display-name: "&dCrafter Minion"
+    icon: "CRAFTING_TABLE"
     base-efficiency: 1.0
   storage:
     display-name: "&8Storage Minion"
+    icon: "CHEST"
     base-efficiency: 1.0
   seller:
     display-name: "&aSeller Minion"
+    icon: "EMERALD"
     base-efficiency: 1.0
   harvester:
     display-name: "&2Harvester Minion"
+    icon: "DIAMOND_HOE"
     base-efficiency: 1.1
   planter:
     display-name: "&2Planter Minion"
+    icon: "WHEAT_SEEDS"
     base-efficiency: 1.0
   breeder:
     display-name: "&6Breeder Minion"
+    icon: "EGG"
     base-efficiency: 0.7
   quarry:
     display-name: "&7Quarry Minion"
+    icon: "DIAMOND_PICKAXE"
     base-efficiency: 1.3
+
+purchase:
+  prices:
+    miner: 500.0
+    lumberjack: 450.0
+    farmer: 400.0
+    fishing: 400.0
+    collector: 350.0
+    mob_killer: 600.0
+    animal_farmer: 450.0
+    smelter: 500.0
+    crafter: 500.0
+    storage: 300.0
+    seller: 550.0
+    harvester: 500.0
+    planter: 450.0
+    breeder: 550.0
+    quarry: 700.0
 
 ai:
   obstacle-avoidance-enabled: true
