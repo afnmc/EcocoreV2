@@ -9,6 +9,7 @@ import io.azthera.ecocore.api.EcoCoreAPIImpl;
 import io.azthera.ecocore.commands.EcoCoreCommand;
 import io.azthera.ecocore.commands.HistoryCommand;
 import io.azthera.ecocore.commands.InflationCommand;
+import io.azthera.ecocore.commands.ItemViewCommand; // <-- IMPORT BARU
 import io.azthera.ecocore.commands.JobCommand;
 import io.azthera.ecocore.commands.JobsCommand;
 import io.azthera.ecocore.commands.MarketCommand;
@@ -66,6 +67,7 @@ import io.azthera.ecocore.listener.CraftListener;
 import io.azthera.ecocore.listener.EntityDeathListener;
 import io.azthera.ecocore.listener.FishListener;
 import io.azthera.ecocore.listener.InventoryClickListener;
+import io.azthera.ecocore.listener.MinionInteractListener; // <-- IMPORT BARU
 import io.azthera.ecocore.listener.PlayerJoinListener;
 import io.azthera.ecocore.listener.PlayerQuitListener;
 import io.azthera.ecocore.manager.NotificationManager;
@@ -138,6 +140,7 @@ public final class EcoCorePlugin extends JavaPlugin {
     private JobsManager jobsManager;
     private MinionManager minionManager;
     private MinionUpgradeManager minionUpgradeManager;
+    private MinionFuelManager minionFuelManager; // <-- FIELD BARU DITAMBAHKAN DI SINI
 
     private ItemIdentityResolver itemIdentityResolver;
 
@@ -317,13 +320,14 @@ public final class EcoCorePlugin extends JavaPlugin {
     }
 
     private void setupMinions() {
-        MinionFuelManager fuelManager = new MinionFuelManager(configManager.getMinionsConfig());
+        // <-- DIUBAH: Menggunakan field class minionFuelManager, bukan variabel lokal
+        minionFuelManager = new MinionFuelManager(configManager.getMinionsConfig());
         MinionTargetSelector targetSelector = new MinionTargetSelector(configManager.getMinionsConfig());
         MinionPathfinder pathfinder = new MinionPathfinder(configManager.getMinionsConfig());
         MinionAnimationHandler animationHandler = new MinionAnimationHandler(configManager.getGuiConfig());
 
         MinionAiController aiController = new MinionAiController(getLogger(), configManager.getMinionsConfig(),
-                fuelManager, targetSelector, pathfinder, animationHandler, sellManager, economyEngine);
+                minionFuelManager, targetSelector, pathfinder, animationHandler, sellManager, economyEngine);
 
         MinionFactory minionFactory = new MinionFactory(configManager.getMinionsConfig());
 
@@ -392,6 +396,10 @@ public final class EcoCorePlugin extends JavaPlugin {
         pluginManager.registerEvents(new PlayerJoinListener(playerDataManager), this);
         pluginManager.registerEvents(new PlayerQuitListener(playerDataManager), this);
         pluginManager.registerEvents(new InventoryClickListener(guiManager), this);
+        
+        // <-- LISTENER BARU DITAMBAHKAN DI SINI
+        pluginManager.registerEvents(new MinionInteractListener(
+                minionManager, minionFuelManager, configManager.getMinionsConfig(), guiManager, configManager.getGuiConfig()), this);
 
         var inflationConfig = configManager.getInflationConfig();
         pluginManager.registerEvents(new BlockBreakListener(jobsManager, inflationEngine, inflationConfig, autoSellManager), this);
@@ -414,6 +422,10 @@ public final class EcoCorePlugin extends JavaPlugin {
         setExecutor("prices", new PricesCommand(shopManager, economyEngine.getFormatter()));
         setExecutor("inflation", new InflationCommand(inflationEngine));
         setExecutor("history", new HistoryCommand(shopManager, guiManager));
+        
+        // <-- COMMAND BARU DITAMBAHKAN DI SINI
+        setExecutor("ecoitem", new ItemViewCommand(shopManager, configManager, guiManager, guiConfig));
+        
         setExecutor("ecocore", new EcoCoreCommand(configManager, databaseManager, shopManager, restockScheduler,
                 inflationEngine, aiEconomyEngine, aiLearningModel, economyEngine, minionManager, getDataFolder()));
     }
@@ -497,6 +509,11 @@ public final class EcoCorePlugin extends JavaPlugin {
     public MinionUpgradeManager getMinionUpgradeManager() {
         return minionUpgradeManager;
     }
+    
+    // <-- GETTER BARU (Opsional, tapi bagus untuk konsistensi)
+    public MinionFuelManager getMinionFuelManager() {
+        return minionFuelManager;
+    }
 
     public GuiManager getGuiManager() {
         return guiManager;
@@ -509,4 +526,4 @@ public final class EcoCorePlugin extends JavaPlugin {
     public EcoCoreAPI getApi() {
         return api;
     }
-}
+    }
