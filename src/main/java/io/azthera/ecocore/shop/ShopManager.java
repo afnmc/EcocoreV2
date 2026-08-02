@@ -8,6 +8,11 @@ import io.azthera.ecocore.database.dao.StockEventDao;
 import io.azthera.ecocore.economy.EconomyEngine;
 import io.azthera.ecocore.economy.TransactionLogger;
 import io.azthera.ecocore.model.ShopItemRecord;
+import io.azthera.ecocore.utils.ItemUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
@@ -53,7 +58,9 @@ public final class ShopManager {
     }
 
     /**
-     * Creates the shop manager and its sub-components.
+     * Creates the shop manager and its sub-components. The catalog
+     * loader is built here using {@code configManager.getShopItemsConfig()}
+     * so {@code shop-items.yml} drives the catalog on every reload.
      *
      * @param logger              plugin logger
      * @param shopItemDao         DAO for the item catalog
@@ -76,7 +83,8 @@ public final class ShopManager {
         this.configManager = configManager;
         this.economyEngine = economyEngine;
 
-        this.catalogLoader = new ShopCatalogLoader(logger, shopItemDao, shopConfig, pricesConfig);
+        this.catalogLoader = new ShopCatalogLoader(logger, shopItemDao, shopConfig, pricesConfig,
+                configManager.getShopItemsConfig());
         this.historyManager = new ShopHistoryManager(buyHistoryDao, sellHistoryDaoParam);
         this.stockManager = new StockManager(logger, shopItemDao, stockEventDao, catalog);
 
@@ -86,9 +94,13 @@ public final class ShopManager {
     }
 
     /**
-     * Loads (or reloads) the entire item catalog from the database and
-     * rebuilds each category's item list. Call once on plugin enable
-     * and again whenever {@code /ecocore reload} runs.
+     * Loads (or reloads) the entire item catalog: first syncs
+     * definitions from {@code shop-items.yml} into the database
+     * (adding new items, updating static fields on existing ones
+     * without resetting their live AI-driven price/stock), then loads
+     * everything from the database and rebuilds each category's item
+     * list. Call once on plugin enable and again whenever
+     * {@code /ecocore reload} runs.
      */
     public void loadCatalog() {
         try {
@@ -101,39 +113,23 @@ public final class ShopManager {
     }
 
     private void rebuildCategoryIndex() {
-        Map<String, java.util.List<ShopItemRecord>> byCategory = new LinkedHashMap<>();
+        Map<String, List<ShopItemRecord>> byCategory = new LinkedHashMap<>();
         for (ShopItemRecord item : catalog.values()) {
             byCategory.computeIfAbsent(item.getCategory(), key -> new java.util.ArrayList<>()).add(item);
         }
         for (ShopCategory category : categories.values()) {
-            category.setItems(byCategory.getOrDefault(category.getId(), java.util.List.of()));
+            category.setItems(byCategory.getOrDefault(category.getId(), List.of()));
         }
     }
 
-    /**
-     * Returns a single item by id.
-     *
-     * @param itemId the item id
-     * @return the item, or {@code null} if not in the catalog
-     */
     public ShopItemRecord getItem(String itemId) {
         return catalog.get(itemId);
     }
 
-    /**
-     * Returns every category, in the order defined in shop.yml.
-     *
-     * @return the category list
-     */
     public Map<String, ShopCategory> getCategories() {
         return categories;
     }
 
-    /**
-     * Returns every item currently in the catalog.
-     *
-     * @return all catalog items
-     */
     public List<ShopItemRecord> getAllItems() {
         return List.copyOf(catalog.values());
     }
@@ -151,67 +147,26 @@ public final class ShopManager {
         return catalog;
     }
 
-    /**
-     * Searches the full catalog by free-text query.
-     *
-     * @param query the search text
-     * @return matching items
-     */
     public List<ShopItemRecord> search(String query) {
         return searchEngine.search(catalog.values(), query);
     }
 
-    /**
-     * Sorts a list of items according to the given sort mode.
-     *
-     * @param items the items to sort (sorted in place)
-     * @param mode  the sort mode
-     * @return the sorted list
-     */
     public List<ShopItemRecord> sort(List<ShopItemRecord> items, ShopSortEngine.SortMode mode) {
         return sortEngine.sort(items, mode);
     }
 
-    /**
-     * Toggles a player's favorite status for an item.
-     *
-     * @param playerUuid the player's uuid
-     * @param itemId     the item id
-     * @return {@code true} if now favorited
-     */
     public boolean toggleFavorite(UUID playerUuid, String itemId) {
         return favoriteManager.toggle(playerUuid, itemId);
     }
 
-    /**
-     * Checks whether a player has favorited an item.
-     *
-     * @param playerUuid the player's uuid
-     * @param itemId     the item id
-     * @return {@code true} if favorited
-     */
     public boolean isFavorite(UUID playerUuid, String itemId) {
         return favoriteManager.isFavorite(playerUuid, itemId);
     }
 
-    /**
-     * Returns the shared favorite manager, used by
-     * {@code PlayerDataManager} to clear a player's favorites on quit.
-     *
-     * @return the favorite manager
-     */
     public ShopFavoriteManager getFavoriteManager() {
         return favoriteManager;
     }
 
-    /**
-     * Returns a player's recent combined buy/sell history.
-     *
-     * @param playerUuid the player's uuid
-     * @param limit      max entries to return
-     * @return the recent history, newest first
-     * @throws SQLException if the underlying query fails
-     */
     public List<io.azthera.ecocore.model.TransactionRecord> getHistory(UUID playerUuid, int limit) throws SQLException {
         return historyManager.getRecentHistory(playerUuid, limit);
     }
@@ -219,7 +174,9 @@ public final class ShopManager {
     /**
      * Attempts to purchase an item on behalf of a player: validates
      * tradeability/stock, charges the player's balance, consumes
-     * stock, and records the transaction.
+     * stock, GIVES the purchased items to the player's inventory
+     * (dropping any overflow on the ground if their inventory is
+     * full), and records the transaction.
      *
      * @param playerUuid the buying player's uuid
      * @param itemId     the item id to purchase
@@ -258,6 +215,8 @@ public final class ShopManager {
                 return new BuyResult(false, "insufficient-funds", 0, 0);
             }
 
+            giveItemToPlayer(playerUuid, item, actualAmount);
+
             try {
                 buyHistoryDao.insert(playerUuid, itemId, actualAmount, item.getCurrentPrice(), totalPrice);
             } catch (SQLException exception) {
@@ -269,6 +228,47 @@ public final class ShopManager {
         }
     }
 
+    /**
+     * Hands purchased items to the buying player's inventory,
+     * splitting into multiple stacks if the amount exceeds the
+     * material's max stack size, and dropping any overflow on the
+     * ground at their feet if their inventory doesn't have room.
+     *
+     * <p>If the player is currently offline (e.g. a future
+     * console/API-triggered purchase), the items are forfeited - this
+     * method is only ever called synchronously from an online
+     * player's own GUI click today, so this path is a defensive
+     * no-op rather than an active mailbox system.
+     *
+     * @param playerUuid the buying player's uuid
+     * @param item       the purchased item record
+     * @param amount     total quantity purchased
+     */
+    private void giveItemToPlayer(UUID playerUuid, ShopItemRecord item, int amount) {
+        Player player = Bukkit.getPlayer(playerUuid);
+        if (player == null) {
+            logger.warning("[EcoCore] Player " + playerUuid + " went offline mid-purchase; "
+                    + amount + "x " + item.getId() + " was paid for but not delivered.");
+            return;
+        }
+
+        Material material = ItemUtils.safeMaterial(item.getMaterial());
+        int remaining = amount;
+        int maxStackSize = new ItemStack(material).getMaxStackSize();
+
+        while (remaining > 0) {
+            int stackAmount = Math.min(maxStackSize, remaining);
+            ItemStack stack = new ItemStack(material, stackAmount);
+
+            Map<Integer, ItemStack> leftover = player.getInventory().addItem(stack);
+            for (ItemStack leftoverStack : leftover.values()) {
+                player.getWorld().dropItemNaturally(player.getLocation(), leftoverStack);
+            }
+
+            remaining -= stackAmount;
+        }
+    }
+
     public StockManager getStockManager() {
         return stockManager;
     }
@@ -276,4 +276,4 @@ public final class ShopManager {
     public ShopSortEngine getSortEngine() {
         return sortEngine;
     }
-}
+            }
