@@ -58,6 +58,16 @@ public final class JobsMainGui extends AbstractGui {
     @Override
     public void build() {
         inventory = Bukkit.createInventory(this, guiConfig.getJobsMainRows() * 9, "§8Jobs");
+        render();
+    }
+
+    /**
+     * Repopulates the already-created {@link #inventory} in place.
+     * Always call this (not {@link #build()}) after a state change
+     * like joining a job, so the window the player is actively
+     * looking at gets updated instead of an orphaned new inventory object.
+     */
+    private void render() {
         slotToJob.clear();
 
         JobType[] types = JobType.values();
@@ -86,7 +96,8 @@ public final class JobsMainGui extends AbstractGui {
                     meta.setLore(List.of(
                             "§7Level: §f" + progress.getLevel() + "/" + jobsConfig.getMaxLevel(),
                             "§7Prestige: §f" + progress.getPrestige(),
-                            "§7XP: §f" + progress.getXp()
+                            "§7XP: §f" + progress.getXp(),
+                            "§eKlik buat buka detail, skill tree & leaderboard"
                     ));
                 } else {
                     meta.setLore(List.of("§7Belum bergabung.", "§eKlik untuk join!"));
@@ -132,7 +143,7 @@ public final class JobsMainGui extends AbstractGui {
                 jobsManager.join(viewer.getUniqueId(), type);
                 viewer.sendMessage(messagesConfig.getWithPrefix("jobs.joined", "job", type.configKey()));
                 guiManager.playSound(viewer, "click");
-                build();
+                render();
                 return;
             }
         } catch (SQLException exception) {
@@ -145,4 +156,4 @@ public final class JobsMainGui extends AbstractGui {
         guiManager.register(viewer, detailGui);
         detailGui.open();
     }
-}
+                        }
