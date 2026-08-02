@@ -1,6 +1,7 @@
 package io.azthera.ecocore.jobs;
 
 import io.azthera.ecocore.config.JobsConfig;
+import io.azthera.ecocore.config.MessagesConfig;
 import io.azthera.ecocore.database.dao.JobsDao;
 import io.azthera.ecocore.jobs.types.AlchemyJob;
 import io.azthera.ecocore.jobs.types.BlacksmithJob;
@@ -21,6 +22,9 @@ import io.azthera.ecocore.jobs.types.QuestHunterJob;
 import io.azthera.ecocore.jobs.types.WoodcutterJob;
 import io.azthera.ecocore.model.JobData;
 import io.azthera.ecocore.model.JobType;
+import org.bukkit.Bukkit;
+import org.bukkit.Sound;
+import org.bukkit.entity.Player;
 
 import java.sql.SQLException;
 import java.util.EnumMap;
@@ -37,13 +41,15 @@ import java.util.logging.Logger;
  * {@link JobLeaderboardManager}. Listener classes call
  * {@link #processAction(UUID, String, double)} whenever a
  * job-relevant Bukkit event occurs; this class fans that action out
- * to every job the player has joined that recognizes it.
+ * to every job the player has joined that recognizes it, and sends a
+ * level-up notification when applicable.
  */
 public final class JobsManager {
 
     private final Logger logger;
     private final JobsDao jobsDao;
     private final JobsConfig jobsConfig;
+    private final MessagesConfig messagesConfig;
 
     private final Map<JobType, JobHandler> handlers = new EnumMap<>(JobType.class);
 
@@ -64,11 +70,12 @@ public final class JobsManager {
      * @param missionManager     mission assignment/tracking manager
      * @param prestigeManager    prestige eligibility/execution manager
      * @param leaderboardManager cached per-job leaderboard manager
+     * @param messagesConfig     resolved messages.yml configuration, used for level-up notifications
      */
     public JobsManager(Logger logger, JobsDao jobsDao, JobsConfig jobsConfig,
                         JobProgressTracker progressTracker, JobSkillTreeManager skillTreeManager,
                         JobMissionManager missionManager, JobPrestigeManager prestigeManager,
-                        JobLeaderboardManager leaderboardManager) {
+                        JobLeaderboardManager leaderboardManager, MessagesConfig messagesConfig) {
         this.logger = logger;
         this.jobsDao = jobsDao;
         this.jobsConfig = jobsConfig;
@@ -77,6 +84,7 @@ public final class JobsManager {
         this.missionManager = missionManager;
         this.prestigeManager = prestigeManager;
         this.leaderboardManager = leaderboardManager;
+        this.messagesConfig = messagesConfig;
 
         registerHandlers();
     }
@@ -108,27 +116,10 @@ public final class JobsManager {
         return handlers;
     }
 
-    /**
-     * Whether a player has joined a given job.
-     *
-     * @param playerUuid the player's uuid
-     * @param type       the job type
-     * @return {@code true} if joined
-     * @throws SQLException if the query fails
-     */
     public boolean hasJoined(UUID playerUuid, JobType type) throws SQLException {
         return jobsDao.find(playerUuid, type) != null;
     }
 
-    /**
-     * Joins a player to a job at level 1, if not already joined, and
-     * assigns their first batch of daily missions.
-     *
-     * @param playerUuid the player's uuid
-     * @param type       the job type to join
-     * @return {@code true} if newly joined, {@code false} if already joined
-     * @throws SQLException if the underlying persistence fails
-     */
     public boolean join(UUID playerUuid, JobType type) throws SQLException {
         if (hasJoined(playerUuid, type)) {
             return false;
@@ -139,34 +130,18 @@ public final class JobsManager {
         return true;
     }
 
-    /**
-     * Returns a player's progress in a single job.
-     *
-     * @param playerUuid the player's uuid
-     * @param type       the job type
-     * @return the job data, or {@code null} if not joined
-     * @throws SQLException if the query fails
-     */
     public JobData getProgress(UUID playerUuid, JobType type) throws SQLException {
         return jobsDao.find(playerUuid, type);
     }
 
-    /**
-     * Returns every job a player has joined.
-     *
-     * @param playerUuid the player's uuid
-     * @return the player's joined jobs
-     * @throws SQLException if the query fails
-     */
     public List<JobData> getAllProgress(UUID playerUuid) throws SQLException {
         return jobsDao.findAllForPlayer(playerUuid);
     }
 
     /**
      * Processes a single in-game action for a player across every job
-     * they've joined that recognizes it (an action key can only ever
-     * match one job in EcoCore's default handlers, but this stays
-     * generic in case a server owner adds overlapping custom handlers).
+     * they've joined that recognizes it, and sends a level-up chat
+     * message + sound when the action pushes them to a new level.
      *
      * @param playerUuid         the acting player's uuid
      * @param actionKey          the action that occurred (e.g. "BREAK_DIAMOND_ORE")
@@ -182,12 +157,26 @@ public final class JobsManager {
                         playerUuid, handler, actionKey, jobBonusMultiplier);
                 if (result != null) {
                     missionManager.recordActionForMissions(playerUuid, handler.getType(), 1, jobBonusMultiplier);
+
+                    if (result.leveledUp()) {
+                        notifyLevelUp(playerUuid, handler.getType(), result.newLevel());
+                    }
                 }
             } catch (SQLException exception) {
                 logger.severe("[EcoCore] Failed to process job action " + actionKey
                         + " for " + playerUuid + ": " + exception.getMessage());
             }
         }
+    }
+
+    private void notifyLevelUp(UUID playerUuid, JobType type, int newLevel) {
+        Player player = Bukkit.getPlayer(playerUuid);
+        if (player == null) {
+            return;
+        }
+        player.sendMessage(messagesConfig.getWithPrefix("jobs.level-up",
+                "job", type.configKey(), "level", String.valueOf(newLevel)));
+        player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
     }
 
     public JobSkillTreeManager getSkillTreeManager() {
@@ -209,4 +198,4 @@ public final class JobsManager {
     public JobsConfig getJobsConfig() {
         return jobsConfig;
     }
-}
+            }
