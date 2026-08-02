@@ -53,6 +53,10 @@ commands:
     description: View trade history
     usage: /history
     permission: ecocore.market
+  balance:
+    description: Check your (or another player's) EcoCore balance directly
+    usage: /balance [player]
+    permission: ecocore.balance
 
 permissions:
   ecocore.admin:
@@ -73,6 +77,9 @@ permissions:
   ecocore.market:
     description: Access to /market, /prices, /inflation, /history
     default: true
+  ecocore.balance:
+    description: Access to /balance
+    default: true
   ecocore.*:
     description: All EcoCore permissions
     default: op
@@ -83,3 +90,4 @@ permissions:
       ecocore.jobs: true
       ecocore.minions: true
       ecocore.market: true
+      ecocore.balance: true
