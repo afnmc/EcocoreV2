@@ -12,7 +12,6 @@ import io.azthera.ecocore.utils.ItemUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
@@ -25,8 +24,7 @@ import java.util.logging.Logger;
 /**
  * Top-level facade for EcoCore's shop system, tying together the
  * live item catalog, search/sort/favorite/history helpers, and buy
- * transactions. This is the class GUI screens and the {@code /shop}
- * command interact with directly.
+ * transactions.
  */
 public final class ShopManager {
 
@@ -46,32 +44,9 @@ public final class ShopManager {
     private final ShopHistoryManager historyManager;
     private final StockManager stockManager;
 
-    /**
-     * The outcome of an attempted purchase.
-     *
-     * @param success    whether the purchase went through
-     * @param message    a human-readable outcome reason (only meaningful when {@code success} is false)
-     * @param amount     the quantity actually purchased (0 if failed)
-     * @param totalPrice the total price charged (0 if failed)
-     */
     public record BuyResult(boolean success, String message, int amount, double totalPrice) {
     }
 
-    /**
-     * Creates the shop manager and its sub-components. The catalog
-     * loader is built here using {@code configManager.getShopItemsConfig()}
-     * so {@code shop-items.yml} drives the catalog on every reload.
-     *
-     * @param logger              plugin logger
-     * @param shopItemDao         DAO for the item catalog
-     * @param buyHistoryDao       DAO for buy transaction history
-     * @param sellHistoryDaoParam DAO for sell transaction history (used only by {@link ShopHistoryManager})
-     * @param stockEventDao       DAO for stock change audit events
-     * @param shopConfig          resolved shop.yml configuration
-     * @param pricesConfig        resolved prices.yml configuration
-     * @param configManager       resolved main config manager
-     * @param economyEngine       the economy engine used to charge players on purchase
-     */
     public ShopManager(Logger logger, ShopItemDao shopItemDao, BuyHistoryDao buyHistoryDao,
                         io.azthera.ecocore.database.dao.SellHistoryDao sellHistoryDaoParam,
                         StockEventDao stockEventDao, ShopConfig shopConfig,
@@ -93,15 +68,6 @@ public final class ShopManager {
         }
     }
 
-    /**
-     * Loads (or reloads) the entire item catalog: first syncs
-     * definitions from {@code shop-items.yml} into the database
-     * (adding new items, updating static fields on existing ones
-     * without resetting their live AI-driven price/stock), then loads
-     * everything from the database and rebuilds each category's item
-     * list. Call once on plugin enable and again whenever
-     * {@code /ecocore reload} runs.
-     */
     public void loadCatalog() {
         try {
             catalog.clear();
@@ -134,15 +100,6 @@ public final class ShopManager {
         return List.copyOf(catalog.values());
     }
 
-    /**
-     * Returns the live, mutable catalog map backing this manager,
-     * shared with {@link StockManager} and used by
-     * {@code RestockScheduler} to iterate items without allocating a
-     * defensive copy every restock pass. Callers should not put/remove
-     * entries directly - go through {@link #loadCatalog()} instead.
-     *
-     * @return the live catalog map
-     */
     public Map<String, ShopItemRecord> getLiveCatalog() {
         return catalog;
     }
@@ -174,9 +131,8 @@ public final class ShopManager {
     /**
      * Attempts to purchase an item on behalf of a player: validates
      * tradeability/stock, charges the player's balance, consumes
-     * stock, GIVES the purchased items to the player's inventory
-     * (dropping any overflow on the ground if their inventory is
-     * full), and records the transaction.
+     * stock, gives the purchased items to the player's inventory
+     * (dropping overflow if full), and records the transaction.
      *
      * @param playerUuid the buying player's uuid
      * @param itemId     the item id to purchase
@@ -215,7 +171,13 @@ public final class ShopManager {
                 return new BuyResult(false, "insufficient-funds", 0, 0);
             }
 
-            giveItemToPlayer(playerUuid, item, actualAmount);
+            Player player = Bukkit.getPlayer(playerUuid);
+            if (player != null) {
+                ItemUtils.giveOrDrop(player, ItemUtils.safeMaterial(item.getMaterial()), actualAmount);
+            } else {
+                logger.warning("[EcoCore] Player " + playerUuid + " went offline mid-purchase; "
+                        + actualAmount + "x " + item.getId() + " was paid for but not delivered.");
+            }
 
             try {
                 buyHistoryDao.insert(playerUuid, itemId, actualAmount, item.getCurrentPrice(), totalPrice);
@@ -228,47 +190,6 @@ public final class ShopManager {
         }
     }
 
-    /**
-     * Hands purchased items to the buying player's inventory,
-     * splitting into multiple stacks if the amount exceeds the
-     * material's max stack size, and dropping any overflow on the
-     * ground at their feet if their inventory doesn't have room.
-     *
-     * <p>If the player is currently offline (e.g. a future
-     * console/API-triggered purchase), the items are forfeited - this
-     * method is only ever called synchronously from an online
-     * player's own GUI click today, so this path is a defensive
-     * no-op rather than an active mailbox system.
-     *
-     * @param playerUuid the buying player's uuid
-     * @param item       the purchased item record
-     * @param amount     total quantity purchased
-     */
-    private void giveItemToPlayer(UUID playerUuid, ShopItemRecord item, int amount) {
-        Player player = Bukkit.getPlayer(playerUuid);
-        if (player == null) {
-            logger.warning("[EcoCore] Player " + playerUuid + " went offline mid-purchase; "
-                    + amount + "x " + item.getId() + " was paid for but not delivered.");
-            return;
-        }
-
-        Material material = ItemUtils.safeMaterial(item.getMaterial());
-        int remaining = amount;
-        int maxStackSize = new ItemStack(material).getMaxStackSize();
-
-        while (remaining > 0) {
-            int stackAmount = Math.min(maxStackSize, remaining);
-            ItemStack stack = new ItemStack(material, stackAmount);
-
-            Map<Integer, ItemStack> leftover = player.getInventory().addItem(stack);
-            for (ItemStack leftoverStack : leftover.values()) {
-                player.getWorld().dropItemNaturally(player.getLocation(), leftoverStack);
-            }
-
-            remaining -= stackAmount;
-        }
-    }
-
     public StockManager getStockManager() {
         return stockManager;
     }
@@ -276,4 +197,4 @@ public final class ShopManager {
     public ShopSortEngine getSortEngine() {
         return sortEngine;
     }
-            }
+    }
