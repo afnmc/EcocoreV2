@@ -1,0 +1,140 @@
+# ==========================================================
+# EcoCore - Shop Item Catalog
+# Ini sumber utama isi shop. Tambah/edit item di sini, lalu
+# jalankan /ecocore reload - item baru langsung masuk katalog.
+# Harga & stock yang udah berjalan (live) TIDAK direset saat
+# reload; cuma field statis (category/material/base-price/
+# bound) yang di-refresh.
+# ==========================================================
+items:
+
+  # ---------------- blocks ----------------
+  stone: { category: blocks, material: STONE, base-price: 1.0 }
+  cobblestone: { category: blocks, material: COBBLESTONE, base-price: 0.6 }
+  dirt: { category: blocks, material: DIRT, base-price: 0.2 }
+  sand: { category: blocks, material: SAND, base-price: 0.35 }
+  gravel: { category: blocks, material: GRAVEL, base-price: 0.4 }
+  andesite: { category: blocks, material: ANDESITE, base-price: 0.5 }
+  diorite: { category: blocks, material: DIORITE, base-price: 0.5 }
+  granite: { category: blocks, material: GRANITE, base-price: 0.5 }
+  clay_block: { category: blocks, material: CLAY, base-price: 1.5 }
+  obsidian: { category: blocks, material: OBSIDIAN, base-price: 12.0 }
+  glowstone: { category: blocks, material: GLOWSTONE, base-price: 6.0 }
+  netherrack: { category: blocks, material: NETHERRACK, base-price: 0.4 }
+  end_stone: { category: blocks, material: END_STONE, base-price: 2.5 }
+  deepslate: { category: blocks, material: DEEPSLATE, base-price: 1.2 }
+  blackstone: { category: blocks, material: BLACKSTONE, base-price: 1.0 }
+
+  # ---------------- ores & minerals ----------------
+  coal: { category: ores, material: COAL, base-price: 3.0 }
+  raw_iron: { category: ores, material: RAW_IRON, base-price: 6.0 }
+  iron_ingot: { category: ores, material: IRON_INGOT, base-price: 8.0 }
+  raw_gold: { category: ores, material: RAW_GOLD, base-price: 10.0 }
+  gold_ingot: { category: ores, material: GOLD_INGOT, base-price: 15.0 }
+  raw_copper: { category: ores, material: RAW_COPPER, base-price: 3.5 }
+  copper_ingot: { category: ores, material: COPPER_INGOT, base-price: 5.0 }
+  diamond: { category: ores, material: DIAMOND, base-price: 60.0, elasticity: 1.3 }
+  emerald: { category: ores, material: EMERALD, base-price: 50.0, elasticity: 1.3 }
+  lapis_lazuli: { category: ores, material: LAPIS_LAZULI, base-price: 4.0 }
+  redstone_dust: { category: ores, material: REDSTONE, base-price: 2.0 }
+  quartz: { category: ores, material: QUARTZ, base-price: 5.0 }
+  glowstone_dust: { category: ores, material: GLOWSTONE_DUST, base-price: 3.0 }
+  amethyst_shard: { category: ores, material: AMETHYST_SHARD, base-price: 7.0 }
+  netherite_scrap: { category: ores, material: NETHERITE_SCRAP, base-price: 250.0, elasticity: 1.5, max-price: 1500.0 }
+
+  # ---------------- food ----------------
+  bread: { category: food, material: BREAD, base-price: 2.0 }
+  cooked_beef: { category: food, material: COOKED_BEEF, base-price: 4.0 }
+  cooked_porkchop: { category: food, material: COOKED_PORKCHOP, base-price: 4.0 }
+  cooked_chicken: { category: food, material: COOKED_CHICKEN, base-price: 3.0 }
+  cooked_mutton: { category: food, material: COOKED_MUTTON, base-price: 3.5 }
+  cooked_rabbit: { category: food, material: COOKED_RABBIT, base-price: 3.0 }
+  cooked_cod: { category: food, material: COOKED_COD, base-price: 2.5 }
+  cooked_salmon: { category: food, material: COOKED_SALMON, base-price: 3.0 }
+  apple: { category: food, material: APPLE, base-price: 1.5 }
+  golden_apple: { category: food, material: GOLDEN_APPLE, base-price: 80.0, elasticity: 0.7 }
+  cake: { category: food, material: CAKE, base-price: 10.0 }
+  pumpkin_pie: { category: food, material: PUMPKIN_PIE, base-price: 5.0 }
+  honey_bottle: { category: food, material: HONEY_BOTTLE, base-price: 4.0 }
+  baked_potato: { category: food, material: BAKED_POTATO, base-price: 1.2 }
+
+  # ---------------- farming ----------------
+  wheat: { category: farming, material: WHEAT, base-price: 1.0 }
+  wheat_seeds: { category: farming, material: WHEAT_SEEDS, base-price: 0.3 }
+  carrot: { category: farming, material: CARROT, base-price: 0.8 }
+  potato: { category: farming, material: POTATO, base-price: 0.8 }
+  beetroot: { category: farming, material: BEETROOT, base-price: 1.0 }
+  beetroot_seeds: { category: farming, material: BEETROOT_SEEDS, base-price: 0.3 }
+  pumpkin: { category: farming, material: PUMPKIN, base-price: 2.0 }
+  melon: { category: farming, material: MELON, base-price: 1.8 }
+  sugar_cane: { category: farming, material: SUGAR_CANE, base-price: 0.7 }
+  nether_wart: { category: farming, material: NETHER_WART, base-price: 1.6 }
+  cocoa_beans: { category: farming, material: COCOA_BEANS, base-price: 1.4 }
+  sweet_berries: { category: farming, material: SWEET_BERRIES, base-price: 1.0 }
+
+  # ---------------- mob drops ----------------
+  rotten_flesh: { category: mob-drops, material: ROTTEN_FLESH, base-price: 0.1 }
+  bone: { category: mob-drops, material: BONE, base-price: 0.5 }
+  string: { category: mob-drops, material: STRING, base-price: 0.5 }
+  spider_eye: { category: mob-drops, material: SPIDER_EYE, base-price: 1.0 }
+  gunpowder: { category: mob-drops, material: GUNPOWDER, base-price: 2.0 }
+  ender_pearl: { category: mob-drops, material: ENDER_PEARL, base-price: 20.0 }
+  blaze_rod: { category: mob-drops, material: BLAZE_ROD, base-price: 15.0 }
+  ghast_tear: { category: mob-drops, material: GHAST_TEAR, base-price: 25.0 }
+  slime_ball: { category: mob-drops, material: SLIME_BALL, base-price: 2.0 }
+  magma_cream: { category: mob-drops, material: MAGMA_CREAM, base-price: 3.0 }
+  phantom_membrane: { category: mob-drops, material: PHANTOM_MEMBRANE, base-price: 8.0 }
+  rabbit_hide: { category: mob-drops, material: RABBIT_HIDE, base-price: 1.0 }
+  rabbit_foot: { category: mob-drops, material: RABBIT_FOOT, base-price: 6.0 }
+  leather: { category: mob-drops, material: LEATHER, base-price: 2.0 }
+  feather: { category: mob-drops, material: FEATHER, base-price: 0.5 }
+  ink_sac: { category: mob-drops, material: INK_SAC, base-price: 1.0 }
+  shulker_shell: { category: mob-drops, material: SHULKER_SHELL, base-price: 90.0, elasticity: 1.4, max-price: 500.0 }
+  wither_skeleton_skull: { category: mob-drops, material: WITHER_SKELETON_SKULL, base-price: 150.0, elasticity: 1.5, max-price: 800.0 }
+  nether_star: { category: mob-drops, material: NETHER_STAR, base-price: 400.0, elasticity: 1.6, max-price: 2500.0, tradeable: false }
+
+  # ---------------- fishing ----------------
+  cod: { category: fishing, material: COD, base-price: 2.0 }
+  salmon: { category: fishing, material: SALMON, base-price: 2.5 }
+  pufferfish: { category: fishing, material: PUFFERFISH, base-price: 3.0 }
+  tropical_fish: { category: fishing, material: TROPICAL_FISH, base-price: 3.5 }
+  nautilus_shell: { category: fishing, material: NAUTILUS_SHELL, base-price: 25.0 }
+  prismarine_shard: { category: fishing, material: PRISMARINE_SHARD, base-price: 2.0 }
+  prismarine_crystals: { category: fishing, material: PRISMARINE_CRYSTALS, base-price: 2.5 }
+
+  # ---------------- wood ----------------
+  oak_log: { category: wood, material: OAK_LOG, base-price: 1.5 }
+  birch_log: { category: wood, material: BIRCH_LOG, base-price: 1.5 }
+  spruce_log: { category: wood, material: SPRUCE_LOG, base-price: 1.5 }
+  jungle_log: { category: wood, material: JUNGLE_LOG, base-price: 1.8 }
+  acacia_log: { category: wood, material: ACACIA_LOG, base-price: 1.8 }
+  dark_oak_log: { category: wood, material: DARK_OAK_LOG, base-price: 2.0 }
+  mangrove_log: { category: wood, material: MANGROVE_LOG, base-price: 2.0 }
+  cherry_log: { category: wood, material: CHERRY_LOG, base-price: 2.2 }
+  oak_planks: { category: wood, material: OAK_PLANKS, base-price: 0.5 }
+  stick: { category: wood, material: STICK, base-price: 0.2 }
+
+  # ---------------- redstone ----------------
+  redstone_torch: { category: redstone, material: REDSTONE_TORCH, base-price: 1.5 }
+  repeater: { category: redstone, material: REPEATER, base-price: 5.0 }
+  comparator: { category: redstone, material: COMPARATOR, base-price: 6.0 }
+  piston: { category: redstone, material: PISTON, base-price: 4.0 }
+  sticky_piston: { category: redstone, material: STICKY_PISTON, base-price: 5.5 }
+  observer: { category: redstone, material: OBSERVER, base-price: 5.0 }
+  hopper: { category: redstone, material: HOPPER, base-price: 8.0 }
+  dispenser: { category: redstone, material: DISPENSER, base-price: 6.0 }
+  dropper: { category: redstone, material: DROPPER, base-price: 4.0 }
+  redstone_lamp: { category: redstone, material: REDSTONE_LAMP, base-price: 4.5 }
+  target: { category: redstone, material: TARGET, base-price: 3.0 }
+
+  # ---------------- misc ----------------
+  book: { category: misc, material: BOOK, base-price: 3.0 }
+  paper: { category: misc, material: PAPER, base-price: 0.5 }
+  glass: { category: misc, material: GLASS, base-price: 0.6 }
+  glass_bottle: { category: misc, material: GLASS_BOTTLE, base-price: 0.4 }
+  flint: { category: misc, material: FLINT, base-price: 0.5 }
+  clay_ball: { category: misc, material: CLAY_BALL, base-price: 0.4 }
+  brick: { category: misc, material: BRICK, base-price: 0.8 }
+  name_tag: { category: misc, material: NAME_TAG, base-price: 15.0 }
+  saddle: { category: misc, material: SADDLE, base-price: 20.0 }
+  arrow: { category: misc, material: ARROW, base-price: 0.5 }
