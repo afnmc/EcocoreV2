@@ -9,7 +9,7 @@ import java.util.Map;
 /**
  * Parsed view of {@code ai.yml}: tuning parameters for the local
  * AI economy engine's pricing cycle, restock decisions, trend
- * analysis windows, and learning model.
+ * analysis windows, learning model, and price-change notifications.
  */
 public final class AiConfig {
 
@@ -35,6 +35,8 @@ public final class AiConfig {
     private final boolean learningModelEnabled;
     private final int historySamplesUsed;
     private final int retrainIntervalSeconds;
+
+    private final double notifyPriceChangeThresholdPercent;
 
     /**
      * Parses AI engine configuration from the loaded {@code ai.yml}.
@@ -69,6 +71,8 @@ public final class AiConfig {
         this.learningModelEnabled = config.getBoolean("learning-model.enabled", true);
         this.historySamplesUsed = config.getInt("learning-model.history-samples-used", 200);
         this.retrainIntervalSeconds = config.getInt("learning-model.retrain-interval-seconds", 3600);
+
+        this.notifyPriceChangeThresholdPercent = config.getDouble("notifications.price-change-threshold-percent", 5.0);
     }
 
     public int getCalculationIntervalSeconds() {
@@ -91,13 +95,6 @@ public final class AiConfig {
         return maxPriceChangeDownPercent;
     }
 
-    /**
-     * Returns the configured weight for a given AI feature key
-     * (e.g. "supply", "demand", "market-saturation").
-     *
-     * @param key the feature key
-     * @return the configured weight, or 0.0 if not configured
-     */
     public double getWeight(String key) {
         return weights.getOrDefault(key, 0.0);
     }
@@ -153,4 +150,16 @@ public final class AiConfig {
     public int getRetrainIntervalSeconds() {
         return retrainIntervalSeconds;
     }
-}
+
+    /**
+     * The minimum absolute percent price change (compared to the
+     * previous cycle) required before {@code AiEconomyEngine} notifies
+     * listeners about it. Keeps small, routine fluctuations from
+     * spamming chat/Discord every calculation cycle.
+     *
+     * @return the notification threshold, as a percentage
+     */
+    public double getNotifyPriceChangeThresholdPercent() {
+        return notifyPriceChangeThresholdPercent;
+    }
+    }
