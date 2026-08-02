@@ -7,20 +7,31 @@ import io.azthera.ecocore.database.dao.ShopItemDao;
 import io.azthera.ecocore.model.ShopItemRecord;
 
 import java.sql.SQLException;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**
  * Loads the shop's item catalog from the database into memory, and
- * synchronizes it against {@code shop-items.yml} on every load: new
- * item ids in the YAML are inserted, existing ones have their static
- * fields (category, material, base price, and any configured bound
- * overrides) refreshed WITHOUT resetting the item's live AI-driven
- * current price or current stock. This lets server owners manage the
- * catalog entirely through {@code shop-items.yml} plus
- * {@code /ecocore reload}.
+ * fully mirrors it against {@code shop-items.yml} on every load:
+ * <ul>
+ *   <li>new item ids in the YAML are inserted</li>
+ *   <li>existing ones have their static fields (category, material,
+ *       base price, bound overrides) refreshed WITHOUT resetting the
+ *       item's live AI-driven current price or current stock</li>
+ *   <li>any database row whose id is NOT present in
+ *       {@code shop-items.yml} is deleted</li>
+ * </ul>
+ * That last point matters: earlier plugin versions bootstrapped a
+ * default catalog directly into the database using a different id
+ * scheme (e.g. {@code blocks_stone}). Without the delete step here,
+ * those old rows would sit alongside the new {@code shop-items.yml}
+ * ids (e.g. {@code stone}) forever, showing up as duplicate-looking
+ * entries for the same material. Treating {@code shop-items.yml} as
+ * the single full source of truth keeps the catalog clean.
  */
 public final class ShopCatalogLoader {
 
@@ -71,8 +82,10 @@ public final class ShopCatalogLoader {
     private void syncFromConfig() throws SQLException {
         int created = 0;
         int updated = 0;
+        Set<String> configuredIds = new HashSet<>();
 
         for (ShopItemsConfig.ItemDefinition def : shopItemsConfig.getItems()) {
+            configuredIds.add(def.id());
             ShopItemRecord existing = shopItemDao.findById(def.id());
 
             double minPrice = def.minPrice() > 0
@@ -92,7 +105,6 @@ public final class ShopCatalogLoader {
                 shopItemDao.upsert(record);
                 created++;
             } else {
-                // Preserve live current price/stock; only refresh static/config-driven fields.
                 existing.setCategory(def.category());
                 existing.setMaterial(def.material());
                 existing.setBasePrice(def.basePrice());
@@ -106,8 +118,17 @@ public final class ShopCatalogLoader {
             }
         }
 
-        if (created > 0 || updated > 0) {
-            logger.info("[EcoCore] shop-items.yml sync: " + created + " item(s) created, " + updated + " item(s) updated");
+        int removed = 0;
+        for (String existingId : shopItemDao.findAllIds()) {
+            if (!configuredIds.contains(existingId)) {
+                shopItemDao.deleteById(existingId);
+                removed++;
+            }
+        }
+
+        if (created > 0 || updated > 0 || removed > 0) {
+            logger.info("[EcoCore] shop-items.yml sync: " + created + " created, " + updated
+                    + " updated, " + removed + " removed (not in shop-items.yml)");
         }
     }
                     }
