@@ -41,6 +41,7 @@ public final class ShopCategoryGui extends AbstractGui {
     private final MessagesConfig messagesConfig;
     private final String categoryId;
 
+    private List<ShopItemRecord> categoryItems = new ArrayList<>();
     private GuiPage<ShopItemRecord> page;
     private ShopSortEngine.SortMode sortMode = ShopSortEngine.SortMode.NAME_ASC;
 
@@ -72,12 +73,17 @@ public final class ShopCategoryGui extends AbstractGui {
         String title = category != null ? stripColor(category.getDisplayName()) : "Shop";
         inventory = Bukkit.createInventory(this, shopConfig.getGuiRows() * 9, "§8" + title);
 
-        List<ShopItemRecord> items = new ArrayList<>(category != null ? category.getItems() : List.of());
-        shopManager.sort(items, sortMode);
-        page = new GuiPage<>(items, shopConfig.getItemsPerPage());
+        categoryItems = new ArrayList<>(category != null ? category.getItems() : List.of());
+        shopManager.sort(categoryItems, sortMode);
+        page = new GuiPage<>(categoryItems, shopConfig.getItemsPerPage());
         render();
     }
 
+    /**
+     * Repopulates the already-created {@link #inventory} in place -
+     * used for pagination AND sort changes, so the window on the
+     * player's screen always stays the actively-tracked one.
+     */
     private void render() {
         for (int slot = 0; slot < shopConfig.getItemsPerPage(); slot++) {
             inventory.setItem(slot, null);
@@ -164,7 +170,9 @@ public final class ShopCategoryGui extends AbstractGui {
 
         if (slot == SORT_SLOT && shopConfig.isSortingEnabled()) {
             sortMode = shopManager.getSortEngine().next(sortMode);
-            build();
+            categoryItems = shopManager.sort(categoryItems, sortMode);
+            page = new GuiPage<>(categoryItems, shopConfig.getItemsPerPage());
+            render();
             return;
         }
 
@@ -192,4 +200,4 @@ public final class ShopCategoryGui extends AbstractGui {
             previewGui.open();
         }
     }
-}
+    }
