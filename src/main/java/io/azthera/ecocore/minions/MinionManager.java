@@ -25,7 +25,9 @@ import io.azthera.ecocore.utils.ItemUtils;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 
@@ -46,13 +48,16 @@ import java.util.stream.Collectors;
  * {@link #tickAll()} once per configured tick interval.
  *
  * <p>Every placed minion is spawned as a real, visible, interactable
- * entity in the world (see {@link #spawnVisualEntity}), tagged with
- * its database id via persistent data so {@code MinionInteractListener}
- * can resolve which minion was right-clicked.
+ * baby {@link Villager} entity in the world (see
+ * {@link #spawnVisualEntity}), with AI disabled and age locked so it
+ * stays a permanent baby standing where it was placed rather than
+ * wandering or growing up. It's tagged with its database id via
+ * persistent data so {@code MinionInteractListener} can resolve which
+ * minion was right-clicked.
  */
 public final class MinionManager {
 
-    /** Default cap on how many minions a single player may place; server owners can raise this via a future permission-based override. */
+    /** Default cap on how many minions a single player may place. */
     public static final int DEFAULT_MAX_MINIONS_PER_PLAYER = 20;
 
     private static final String MINION_ID_KEY = "minion_id";
@@ -160,29 +165,39 @@ public final class MinionManager {
     }
 
     /**
-     * Spawns a minion's visual entity in the world (an invisible-name-tag-showing
-     * ArmorStand) at the given location, and tags it with the minion's
-     * database id via persistent data so it can be resolved back from
-     * a right-click interaction by {@code MinionInteractListener}.
+     * Spawns a minion's visual entity: a permanent baby villager,
+     * with AI disabled (movement is driven manually by
+     * {@code MinionPathfinder}) and age-locked so it never grows up.
+     * Tagged with the minion's database id via persistent data so it
+     * can be resolved back from a right-click interaction by
+     * {@code MinionInteractListener}.
      *
      * @param location the location to spawn at
      * @param data     the minion's data (must already have a real database id)
      * @return the spawned entity
      */
     private Entity spawnVisualEntity(Location location, MinionData data) {
-        org.bukkit.entity.ArmorStand standEntity = location.getWorld().spawn(location, org.bukkit.entity.ArmorStand.class);
-        standEntity.setInvisible(false);
-        standEntity.setGravity(false);
-        standEntity.setSmall(true);
-        standEntity.setCustomNameVisible(true);
-        standEntity.setCustomName(data.getType().configKey() + " Lv." + data.getLevel());
-        standEntity.setBasePlate(false);
-        standEntity.setMarker(false);
+        Villager villager = location.getWorld().spawn(location, Villager.class);
+        villager.setBaby();
+        villager.setAgeLock(true);
+        villager.setAI(false);
+        villager.setInvulnerable(true);
+        villager.setSilent(true);
+        villager.setCanPickupItems(false);
+        villager.setCustomNameVisible(true);
+        villager.setCustomName(data.getType().configKey() + " Lv." + data.getLevel());
+        villager.setPersistent(true);
+        villager.setRemoveWhenFarAway(false);
+        try {
+            villager.setProfession(Villager.Profession.NONE);
+        } catch (Throwable ignored) {
+            // Some server builds restrict profession changes on freshly spawned babies; safe to ignore.
+        }
 
         NamespacedKey key = new NamespacedKey(EcoCorePlugin.getInstance(), MINION_ID_KEY);
-        standEntity.getPersistentDataContainer().set(key, PersistentDataType.LONG, data.getId());
+        villager.getPersistentDataContainer().set(key, PersistentDataType.LONG, data.getId());
 
-        return standEntity;
+        return villager;
     }
 
     /**
@@ -299,8 +314,8 @@ public final class MinionManager {
             boolean ownerOnline = org.bukkit.Bukkit.getPlayer(active.data().getOwnerUuid()) != null;
             aiController.tick(active.data(), handler, active.entity(), active.storage(), ownerOnline);
 
-            if (active.entity() instanceof org.bukkit.entity.ArmorStand standEntity) {
-                standEntity.setCustomName(active.data().getType().configKey() + " Lv." + active.data().getLevel());
+            if (active.entity() instanceof LivingEntity livingEntity) {
+                livingEntity.setCustomName(active.data().getType().configKey() + " Lv." + active.data().getLevel());
             }
         }
     }
