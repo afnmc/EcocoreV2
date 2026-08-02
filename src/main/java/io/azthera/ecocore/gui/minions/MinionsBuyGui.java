@@ -7,8 +7,8 @@ import io.azthera.ecocore.economy.TransactionLogger;
 import io.azthera.ecocore.gui.AbstractGui;
 import io.azthera.ecocore.gui.GuiManager;
 import io.azthera.ecocore.minions.MinionManager;
-import io.azthera.ecocore.model.MinionData;
 import io.azthera.ecocore.model.MinionType;
+import io.azthera.ecocore.utils.ItemUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -21,19 +21,20 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Lets a player purchase and place a new minion at their current
- * location. Charges the configured price from {@code minions.yml
- * purchase.prices} and enforces {@link MinionManager}'s per-player
- * minion cap.
+ * Lets a player purchase a "minion egg" item for any minion type.
+ * Purchasing does NOT place the minion immediately - it charges the
+ * configured price and gives an egg item (see {@code ItemUtils.buildMinionEgg}),
+ * which the player then right-clicks onto the ground to actually
+ * place it (see {@code listener.MinionEggListener}).
  *
- * <p>After a purchase, this screen re-renders IN PLACE (mutates the
- * already-open {@link org.bukkit.inventory.Inventory} instance)
- * rather than building a brand-new one, so the player's client stays
- * on this same screen instead of the window silently going stale.
+ * <p>This is why {@code MinionsMainGui} only ever shows minions that
+ * have actually been placed: buying alone never adds an entry to
+ * {@code MinionManager}'s active minion map.
  */
 public final class MinionsBuyGui extends AbstractGui {
 
     private static final int BACK_SLOT = 49;
+    private static final int INFO_SLOT = 40;
 
     private final MinionManager minionManager;
     private final MinionsConfig minionsConfig;
@@ -67,10 +68,8 @@ public final class MinionsBuyGui extends AbstractGui {
     }
 
     /**
-     * Repopulates the already-created {@link #inventory} in place.
-     * Always call this (not {@link #build()}) to refresh after a
-     * purchase, so the window the player is actively looking at gets
-     * updated instead of an orphaned new inventory object.
+     * Repopulates the already-created {@link #inventory} in place so
+     * a purchase updates the window the player is actually looking at.
      */
     private void render() {
         slotToType.clear();
@@ -86,15 +85,17 @@ public final class MinionsBuyGui extends AbstractGui {
         if (infoMeta != null) {
             infoMeta.setDisplayName("§eCara pakai minion");
             infoMeta.setLore(List.of(
-                    "§7Minion muncul di lokasi lu saat dibeli.",
+                    "§7Beli minion -> lu dapet item §fMinion Egg§7.",
+                    "§7Klik kanan tanah pakai Minion Egg buat naruh minion-nya.",
+                    "§7Minion muncul sebagai villager bayi.",
                     "§7Klik kanan minion buat buka menu upgrade.",
-                    "§7Shift + klik kanan buat buka storage-nya.",
+                    "§7Shift + klik kanan minion buat buka storage-nya.",
                     "§7Pegang §fCoal/Coal Block/Lava Bucket §7lalu",
                     "§7klik kanan minion buat isi ulang fuel."
             ));
             info.setItemMeta(infoMeta);
         }
-        inventory.setItem(40, info);
+        inventory.setItem(INFO_SLOT, info);
 
         inventory.setItem(BACK_SLOT, guiManager.buildButtonIcon("back", "§eKembali"));
     }
@@ -111,7 +112,7 @@ public final class MinionsBuyGui extends AbstractGui {
             meta.setDisplayName(org.bukkit.ChatColor.translateAlternateColorCodes('&', displayName));
             meta.setLore(List.of(
                     "§7Harga: §a" + String.format("%.2f", price),
-                    "§7Minion muncul persis di lokasi lu.",
+                    "§7Lu bakal dapet item Minion Egg.",
                     "§eKlik buat beli"
             ));
             icon.setItemMeta(meta);
@@ -169,16 +170,15 @@ public final class MinionsBuyGui extends AbstractGui {
             return;
         }
 
-        MinionData placed = minionManager.placeMinion(viewer, type, viewer.getLocation());
-        if (placed == null) {
-            economyEngine.deposit(viewer.getUniqueId(), price, TransactionLogger.REASON_ADMIN_ADJUST);
-            viewer.sendMessage("§cGagal menempatkan minion, saldo lu dikembalikan.");
-            return;
+        ItemStack egg = ItemUtils.buildMinionEgg(type, minionsConfig);
+        Map<Integer, ItemStack> leftover = viewer.getInventory().addItem(egg);
+        for (ItemStack over : leftover.values()) {
+            viewer.getWorld().dropItemNaturally(viewer.getLocation(), over);
         }
 
-        viewer.sendMessage("§aBerhasil beli minion §f" + type.configKey()
-                + "§a! Dia muncul di deket lu - klik kanan buat lihat menunya.");
+        viewer.sendMessage("§aBerhasil beli Minion Egg §f" + type.configKey()
+                + "§a! Klik kanan ke tanah buat naruh minion-nya.");
         guiManager.playSound(viewer, "buy");
         render();
     }
-                }
+                                }
