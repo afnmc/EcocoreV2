@@ -18,22 +18,10 @@ public final class ShopItemDao {
 
     private final DatabaseManager databaseManager;
 
-    /**
-     * Creates a shop item DAO.
-     *
-     * @param databaseManager the initialized database manager to pull connections from
-     */
     public ShopItemDao(DatabaseManager databaseManager) {
         this.databaseManager = databaseManager;
     }
 
-    /**
-     * Finds a single shop item by its id.
-     *
-     * @param id the item id
-     * @return the item, or {@code null} if it does not exist
-     * @throws SQLException if the query fails
-     */
     public ShopItemRecord findById(String id) throws SQLException {
         String sql = "SELECT * FROM shop_items WHERE id = ?";
         try (Connection connection = databaseManager.getConnection();
@@ -45,13 +33,6 @@ public final class ShopItemDao {
         }
     }
 
-    /**
-     * Loads every shop item in the catalog. Used at startup to warm the
-     * in-memory cache used by {@code ShopManager}.
-     *
-     * @return all shop items
-     * @throws SQLException if the query fails
-     */
     public List<ShopItemRecord> findAll() throws SQLException {
         String sql = "SELECT * FROM shop_items";
         List<ShopItemRecord> results = new ArrayList<>();
@@ -66,12 +47,28 @@ public final class ShopItemDao {
     }
 
     /**
-     * Finds all items belonging to a given shop category.
+     * Returns every item id currently in the catalog, used by
+     * {@code ShopCatalogLoader} to figure out which rows are no
+     * longer present in {@code shop-items.yml} and should be removed
+     * (keeping the database from accumulating stale/duplicate entries
+     * across catalog format changes).
      *
-     * @param category the category id from shop.yml
-     * @return the matching items
+     * @return every item id in the catalog
      * @throws SQLException if the query fails
      */
+    public List<String> findAllIds() throws SQLException {
+        String sql = "SELECT id FROM shop_items";
+        List<String> results = new ArrayList<>();
+        try (Connection connection = databaseManager.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet resultSet = statement.executeQuery()) {
+            while (resultSet.next()) {
+                results.add(resultSet.getString("id"));
+            }
+        }
+        return results;
+    }
+
     public List<ShopItemRecord> findByCategory(String category) throws SQLException {
         String sql = "SELECT * FROM shop_items WHERE category = ?";
         List<ShopItemRecord> results = new ArrayList<>();
@@ -87,13 +84,6 @@ public final class ShopItemDao {
         return results;
     }
 
-    /**
-     * Inserts a new item if it does not exist, or updates the full row
-     * if it already exists. Used when reloading the catalog from config.
-     *
-     * @param item the item to persist
-     * @throws SQLException if the operation fails
-     */
     public void upsert(ShopItemRecord item) throws SQLException {
         String sql = """
                 INSERT INTO shop_items
@@ -133,15 +123,6 @@ public final class ShopItemDao {
         }
     }
 
-    /**
-     * Updates only the price columns for an item, called frequently by
-     * the AI engine's pricing cycle to avoid rewriting the whole row.
-     *
-     * @param id           the item id
-     * @param currentPrice the new live price
-     * @param updatedAt    epoch millis of this update
-     * @throws SQLException if the update fails
-     */
     public void updatePrice(String id, double currentPrice, long updatedAt) throws SQLException {
         String sql = "UPDATE shop_items SET current_price = ?, updated_at = ? WHERE id = ?";
         try (Connection connection = databaseManager.getConnection();
@@ -153,15 +134,6 @@ public final class ShopItemDao {
         }
     }
 
-    /**
-     * Updates only the stock column for an item, called by
-     * {@code StockManager} on every buy/sell/restock.
-     *
-     * @param id        the item id
-     * @param stock     the new stock value
-     * @param updatedAt epoch millis of this update
-     * @throws SQLException if the update fails
-     */
     public void updateStock(String id, int stock, long updatedAt) throws SQLException {
         String sql = "UPDATE shop_items SET stock = ?, updated_at = ? WHERE id = ?";
         try (Connection connection = databaseManager.getConnection();
@@ -169,6 +141,23 @@ public final class ShopItemDao {
             statement.setInt(1, stock);
             statement.setLong(2, updatedAt);
             statement.setString(3, id);
+            statement.executeUpdate();
+        }
+    }
+
+    /**
+     * Permanently deletes an item from the catalog, used by
+     * {@code ShopCatalogLoader} to remove entries that no longer
+     * exist in {@code shop-items.yml}.
+     *
+     * @param id the item id to delete
+     * @throws SQLException if the delete fails
+     */
+    public void deleteById(String id) throws SQLException {
+        String sql = "DELETE FROM shop_items WHERE id = ?";
+        try (Connection connection = databaseManager.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, id);
             statement.executeUpdate();
         }
     }
@@ -190,4 +179,4 @@ public final class ShopItemDao {
                 resultSet.getLong("updated_at")
         );
     }
-}
+                }
