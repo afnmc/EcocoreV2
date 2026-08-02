@@ -10,7 +10,8 @@ import java.util.Map;
 
 /**
  * Parsed view of {@code minions.yml}: global minion progression/upgrade
- * rules, per-type efficiency definitions, and AI pathfinding tuning.
+ * rules, per-type icon/efficiency/purchase-price definitions, and AI
+ * pathfinding tuning.
  */
 public final class MinionsConfig {
 
@@ -18,9 +19,10 @@ public final class MinionsConfig {
      * Static definition of a single minion type.
      *
      * @param displayName    colorized display name
+     * @param icon           Bukkit Material name used as this minion's GUI icon
      * @param baseEfficiency baseline efficiency multiplier for this minion type
      */
-    public record MinionDefinition(String displayName, double baseEfficiency) {
+    public record MinionDefinition(String displayName, String icon, double baseEfficiency) {
     }
 
     private final int maxLevel;
@@ -41,6 +43,7 @@ public final class MinionsConfig {
     private final boolean autoSmeltEnabled;
 
     private final Map<MinionType, MinionDefinition> minionDefinitions = new EnumMap<>(MinionType.class);
+    private final Map<MinionType, Double> purchasePrices = new EnumMap<>(MinionType.class);
 
     private final boolean obstacleAvoidanceEnabled;
     private final String targetSelectionStrategy;
@@ -83,8 +86,19 @@ public final class MinionsConfig {
                 }
                 minionDefinitions.put(type, new MinionDefinition(
                         section.getString("display-name", type.name()),
+                        section.getString("icon", "VILLAGER_SPAWN_EGG"),
                         section.getDouble("base-efficiency", 1.0)
                 ));
+            }
+        }
+
+        ConfigurationSection purchaseSection = config.getConfigurationSection("purchase.prices");
+        if (purchaseSection != null) {
+            for (String key : purchaseSection.getKeys(false)) {
+                MinionType type = MinionType.fromConfigKey(key);
+                if (type != null) {
+                    purchasePrices.put(type, purchaseSection.getDouble(key, 500.0));
+                }
             }
         }
 
@@ -159,13 +173,24 @@ public final class MinionsConfig {
     }
 
     /**
-     * Returns the static display/efficiency definition for a minion type.
+     * Returns the static display/icon/efficiency definition for a minion type.
      *
      * @param type the minion type
      * @return the definition, or {@code null} if not configured
      */
     public MinionDefinition getDefinition(MinionType type) {
         return minionDefinitions.get(type);
+    }
+
+    /**
+     * Returns the configured purchase price for a minion type, used by
+     * the minion shop GUI.
+     *
+     * @param type the minion type
+     * @return the purchase price, defaulting to 500.0 if unconfigured
+     */
+    public double getPurchasePrice(MinionType type) {
+        return purchasePrices.getOrDefault(type, 500.0);
     }
 
     public boolean isObstacleAvoidanceEnabled() {
@@ -183,4 +208,4 @@ public final class MinionsConfig {
     public int getPathfindingRecalculateTicks() {
         return pathfindingRecalculateTicks;
     }
-}
+                    }
