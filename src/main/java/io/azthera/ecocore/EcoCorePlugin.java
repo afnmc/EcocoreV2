@@ -404,6 +404,7 @@ public final class EcoCorePlugin extends JavaPlugin {
         var guiConfig = configManager.getGuiConfig();
 
         setExecutor("shop", new ShopCommand(shopManager, configManager, guiManager, guiConfig));
+        setExecutor("balance", new io.azthera.ecocore.commands.BalanceCommand(economyEngine));
         setExecutor("sell", new SellCommand(sellManager, autoSellManager, configManager, guiManager));
         setExecutor("jobs", new JobsCommand(jobsManager, configManager, guiManager, guiConfig));
         setExecutor("job", new JobCommand(jobsManager, configManager, guiManager, guiConfig));
