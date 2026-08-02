@@ -1,6 +1,7 @@
 package io.azthera.ecocore.gui;
 
 import io.azthera.ecocore.config.GuiConfig;
+
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -44,7 +45,7 @@ public final class GuiManager {
      * {@link AbstractGui#open()}.
      *
      * @param player the viewing player
-     * @param gui    the screen now open for them
+     * @param gui the screen now open for them
      */
     public void register(Player player, AbstractGui gui) {
         openGuis.put(player.getUniqueId(), gui);
@@ -85,7 +86,9 @@ public final class GuiManager {
         if (!(event.getWhoClicked() instanceof Player player)) {
             return;
         }
+
         AbstractGui gui = openGuis.get(player.getUniqueId());
+
         if (gui != null) {
             gui.handleClick(event);
         }
@@ -95,16 +98,36 @@ public final class GuiManager {
      * Routes a Bukkit inventory close to the closing player's
      * currently registered screen, then clears the registration.
      *
+     * <p>Only acts if the inventory that is actually closing still
+     * matches the screen currently tracked for this player. During
+     * screen-to-screen navigation (e.g. a "Back" button), the new
+     * screen is registered and opened <em>while the old screen's
+     * inventory is still on-screen</em>; opening the new inventory
+     * makes Bukkit implicitly fire a close event for the old one.
+     * Without this check, that implicit close would blindly remove
+     * whatever is currently mapped — which by then is already the
+     * new screen — leaving the player's active screen unregistered
+     * and its clicks no longer cancelled by {@code
+     * InventoryClickListener}.
+     *
      * @param event the inventory close event to route
      */
     public void routeClose(InventoryCloseEvent event) {
         if (!(event.getPlayer() instanceof Player player)) {
             return;
         }
-        AbstractGui gui = openGuis.remove(player.getUniqueId());
-        if (gui != null) {
-            gui.handleClose(event);
+
+        AbstractGui gui = openGuis.get(player.getUniqueId());
+
+        if (gui == null || gui.getInventory() != event.getInventory()) {
+            // Not a real close of the tracked screen — most likely an
+            // implicit close fired because a new screen just replaced
+            // it. Leave the (already-updated) registration alone.
+            return;
         }
+
+        openGuis.remove(player.getUniqueId());
+        gui.handleClose(event);
     }
 
     /**
@@ -112,13 +135,15 @@ public final class GuiManager {
      * and the given key resolves to a valid sound in {@code gui.yml}.
      *
      * @param player the player to play the sound to
-     * @param key    the sound key (e.g. "click", "buy", "sell", "error")
+     * @param key the sound key (e.g. "click", "buy", "sell", "error")
      */
     public void playSound(Player player, String key) {
         if (!guiConfig.isSoundsEnabled()) {
             return;
         }
+
         Sound sound = guiConfig.getSound(key);
+
         if (sound != null) {
             player.playSound(player.getLocation(), sound, 1.0f, 1.0f);
         }
@@ -128,23 +153,27 @@ public final class GuiManager {
      * Builds a shared control icon (next-page, close, back, etc.) from
      * its {@code gui.yml} definition.
      *
-     * @param key         the button key from gui.yml
+     * @param key the button key from gui.yml
      * @param displayName colorized display name to apply to the built icon
-     * @return the built item stack, falling back to plain stone if unconfigured/invalid
+     * @return the built item stack, falling back to plain stone if
+     *         unconfigured/invalid
      */
     public ItemStack buildButtonIcon(String key, String displayName) {
         GuiConfig.ButtonIcon iconDef = guiConfig.getButtonIcon(key);
         Material material = iconDef != null ? safeMaterial(iconDef.material()) : Material.STONE;
-
         ItemStack stack = new ItemStack(material);
         ItemMeta meta = stack.getItemMeta();
+
         if (meta != null) {
             meta.setDisplayName(displayName);
+
             if (iconDef != null && iconDef.customModelData() != 0) {
                 meta.setCustomModelData(iconDef.customModelData());
             }
+
             stack.setItemMeta(meta);
         }
+
         return stack;
     }
 
@@ -155,4 +184,4 @@ public final class GuiManager {
             return Material.STONE;
         }
     }
-}
+    }
