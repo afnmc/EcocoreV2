@@ -19,11 +19,12 @@ import java.util.Map;
 
 /**
  * The root {@code /minions} screen: lists every minion the player
- * currently owns. Left-click opens the upgrade screen for that
- * minion; shift-click opens its storage directly.
+ * currently owns, plus a button to buy a new one. Left-click a minion
+ * opens the upgrade screen for it; shift-click opens its storage directly.
  */
 public final class MinionsMainGui extends AbstractGui {
 
+    private static final int BUY_SLOT = 4;
     private static final int CLOSE_SLOT = 31;
 
     private final MinionManager minionManager;
@@ -56,8 +57,17 @@ public final class MinionsMainGui extends AbstractGui {
         inventory = Bukkit.createInventory(this, guiConfig.getMinionsMainRows() * 9, "§8Minions");
         slotToMinionId.clear();
 
+        ItemStack buyIcon = new ItemStack(Material.EMERALD);
+        ItemMeta buyMeta = buyIcon.getItemMeta();
+        if (buyMeta != null) {
+            buyMeta.setDisplayName("§a§lBeli Minion Baru");
+            buyMeta.setLore(List.of("§7Klik buat lihat semua tipe minion", "§7dan harganya."));
+            buyIcon.setItemMeta(buyMeta);
+        }
+        inventory.setItem(BUY_SLOT, buyIcon);
+
         List<MinionData> owned = minionManager.getMinionsOwnedBy(viewer.getUniqueId());
-        int slot = 0;
+        int slot = 9;
         int maxSlots = (guiConfig.getMinionsMainRows() * 9) - 9;
 
         for (MinionData data : owned) {
@@ -74,7 +84,10 @@ public final class MinionsMainGui extends AbstractGui {
 
     private ItemStack buildMinionIcon(MinionData data) {
         boolean fueled = data.getFuelTicksRemaining() > 0;
-        ItemStack icon = new ItemStack(Material.VILLAGER_SPAWN_EGG);
+        MinionsConfig.MinionDefinition definition = minionsConfig.getDefinition(data.getType());
+        Material material = definition != null ? safeMaterial(definition.icon()) : Material.VILLAGER_SPAWN_EGG;
+
+        ItemStack icon = new ItemStack(material);
         ItemMeta meta = icon.getItemMeta();
         if (meta != null) {
             meta.setDisplayName("§f" + data.getType().configKey() + " §7Lv." + data.getLevel());
@@ -90,10 +103,25 @@ public final class MinionsMainGui extends AbstractGui {
         return icon;
     }
 
+    private Material safeMaterial(String name) {
+        try {
+            return Material.valueOf(name);
+        } catch (IllegalArgumentException exception) {
+            return Material.VILLAGER_SPAWN_EGG;
+        }
+    }
+
     @Override
     public void handleClick(InventoryClickEvent event) {
         event.setCancelled(true);
         int slot = event.getRawSlot();
+
+        if (slot == BUY_SLOT) {
+            MinionsBuyGui buyGui = new MinionsBuyGui(viewer, minionManager, minionsConfig, guiManager, this);
+            guiManager.register(viewer, buyGui);
+            buyGui.open();
+            return;
+        }
 
         if (slot == CLOSE_SLOT) {
             viewer.closeInventory();
@@ -117,4 +145,4 @@ public final class MinionsMainGui extends AbstractGui {
         guiManager.register(viewer, upgradeGui);
         upgradeGui.open();
     }
-}
+                }
