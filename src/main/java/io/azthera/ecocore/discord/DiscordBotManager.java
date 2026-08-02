@@ -15,7 +15,6 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.FileUpload;
 
-import javax.security.auth.login.LoginException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
@@ -95,7 +94,7 @@ public final class DiscordBotManager extends ListenerAdapter {
             }
 
             logger.info("[EcoCore] Discord bot connected as " + jda.getSelfUser().getAsTag());
-        } catch (LoginException | InterruptedException exception) {
+        } catch (InterruptedException exception) {
             logger.severe("[EcoCore] Failed to start Discord bot: " + exception.getMessage());
             jda = null;
         }
