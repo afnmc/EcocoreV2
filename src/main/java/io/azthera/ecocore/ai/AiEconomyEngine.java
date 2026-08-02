@@ -16,6 +16,8 @@ import io.azthera.ecocore.model.ShopItemRecord;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 
@@ -25,14 +27,26 @@ import java.util.logging.Logger;
  * {@link #runCycle()}, which for every tradeable item: gathers this
  * cycle's feature signals, consults the item's learned weight
  * profile, computes a new price, persists it, records a market
- * snapshot, and feeds the outcome back into the learning model.
+ * snapshot, feeds the outcome back into the learning model, and
+ * notifies any registered {@link PriceChangeNotice} listeners when
+ * the move exceeds {@code ai.yml}'s configured threshold.
  *
- * <p>This engine runs entirely on local data (supply, demand, stock,
- * transaction volume, player count, money velocity, and the current
- * macro-economic state from the InflationEngine). It never contacts
- * any external AI service and requires no internet connection.
+ * <p>This engine runs entirely on local data and requires no
+ * internet connection. It also runs on an ASYNC scheduler thread
+ * (see {@code AiCalculationScheduler}), so any listener registered
+ * via {@link #addPriceChangeListener} that touches Bukkit API must
+ * hop back to the main thread itself before doing so.
  */
 public final class AiEconomyEngine {
+
+    /**
+     * Notification payload for a single item's price move.
+     *
+     * @param item          the item whose price changed (already carries the new price)
+     * @param previousPrice the price before this cycle's change
+     */
+    public record PriceChangeNotice(ShopItemRecord item, double previousPrice) {
+    }
 
     private final Logger logger;
     private final ShopItemDao shopItemDao;
@@ -49,26 +63,11 @@ public final class AiEconomyEngine {
     private final AiLearningModel learningModel;
 
     private final Supplier<InflationRecord> latestInflationSupplier;
+    private final List<Consumer<PriceChangeNotice>> priceChangeListeners = new CopyOnWriteArrayList<>();
 
     private long lastCycleTime;
     private long lastRetrainTime;
 
-    /**
-     * Creates the AI economy engine.
-     *
-     * @param logger                  plugin logger for cycle summaries
-     * @param shopItemDao             DAO for reading/writing item prices and stock
-     * @param marketHistoryDao        DAO for persisting per-cycle market snapshots
-     * @param buyHistoryDao           DAO for buy transaction counts
-     * @param sellHistoryDao          DAO for sell transaction counts
-     * @param playerDao               DAO for total money supply and player counts
-     * @param moneyDao                DAO for net money flow, used by velocity tracking
-     * @param aiConfig                resolved ai.yml configuration
-     * @param pricesConfig            resolved prices.yml configuration
-     * @param inflationConfig         resolved inflation.yml configuration
-     * @param learningModel           the shared AI learning model
-     * @param latestInflationSupplier supplies the most recently computed {@link InflationRecord}, backed by the InflationEngine
-     */
     public AiEconomyEngine(Logger logger, ShopItemDao shopItemDao, MarketHistoryDao marketHistoryDao,
                             BuyHistoryDao buyHistoryDao, SellHistoryDao sellHistoryDao, PlayerDao playerDao,
                             MoneyDao moneyDao, AiConfig aiConfig, PricesConfig pricesConfig,
@@ -96,9 +95,21 @@ public final class AiEconomyEngine {
     }
 
     /**
+     * Registers a listener notified whenever a single item's price
+     * moves by at least {@code ai.yml notifications.price-change-threshold-percent}
+     * in one cycle. Runs on whatever thread {@link #runCycle()} was
+     * called from (an async scheduler thread) - listeners touching
+     * Bukkit API must schedule back to the main thread themselves.
+     *
+     * @param listener the callback to register
+     */
+    public void addPriceChangeListener(Consumer<PriceChangeNotice> listener) {
+        priceChangeListeners.add(listener);
+    }
+
+    /**
      * Runs one full AI pricing cycle across every tradeable item in the
-     * catalog. Safe to call from an async scheduler task; all database
-     * access here is expected to already be off the main server thread.
+     * catalog. Safe to call from an async scheduler task.
      */
     public void runCycle() {
         long now = System.currentTimeMillis();
@@ -176,10 +187,13 @@ public final class AiEconomyEngine {
         );
 
         AiWeightProfile profile = learningModel.loadProfile(item.getId());
+        double previousPrice = item.getCurrentPrice();
         double newPrice = priceCalculator.computeNewPrice(item, features, profile, economicMultiplier);
 
         item.setCurrentPrice(newPrice);
         shopItemDao.updatePrice(item.getId(), newPrice, now);
+
+        notifyIfSignificantChange(item, previousPrice);
 
         marketHistoryDao.insert(new MarketSnapshot(
                 item.getId(), newPrice, item.getStock(),
@@ -189,6 +203,22 @@ public final class AiEconomyEngine {
         learningModel.recordSample(features, newPrice);
     }
 
+    private void notifyIfSignificantChange(ShopItemRecord item, double previousPrice) {
+        if (previousPrice <= 0 || priceChangeListeners.isEmpty()) {
+            return;
+        }
+
+        double percentChange = Math.abs((item.getCurrentPrice() - previousPrice) / previousPrice) * 100.0;
+        if (percentChange < aiConfig.getNotifyPriceChangeThresholdPercent()) {
+            return;
+        }
+
+        PriceChangeNotice notice = new PriceChangeNotice(item, previousPrice);
+        for (Consumer<PriceChangeNotice> listener : priceChangeListeners) {
+            listener.accept(notice);
+        }
+    }
+
     private double normalizeCount(int count) {
         return count / (double) (count + 10.0);
     }
@@ -196,4 +226,4 @@ public final class AiEconomyEngine {
     private double clamp(double value) {
         return Math.max(0.0, Math.min(1.0, value));
     }
-}
+                }
