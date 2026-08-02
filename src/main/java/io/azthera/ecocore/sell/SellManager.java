@@ -7,6 +7,7 @@ import io.azthera.ecocore.economy.TransactionLogger;
 import io.azthera.ecocore.hook.ItemIdentityResolver;
 import io.azthera.ecocore.model.ShopItemRecord;
 import io.azthera.ecocore.shop.ShopManager;
+import io.azthera.ecocore.shop.StockManager;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -21,14 +22,14 @@ import java.util.logging.Logger;
 /**
  * Top-level facade for EcoCore's sell system: matches raw inventory
  * item stacks to catalog items, prices them via {@link ProfitCalculator},
- * enforces blacklist/whitelist rules, and executes the sale (charging
- * the shop's stock inflow and paying the player).
+ * enforces blacklist/whitelist rules, and executes the sale (paying
+ * the player and restocking the shop with what was sold).
  *
- * <p>Selling does not consume shop stock directly - it instead feeds
- * the AI engine's supply signal (see {@code SupplyDemandAnalyzer}),
- * modeling "players selling to the shop" as increasing available
- * supply for future AI pricing cycles, without artificially inflating
- * the shop's purchasable stock count.
+ * <p>Selling an item now DOES add units back to that item's live shop
+ * stock (capped at its max stock, same as any other restock) - a
+ * player selling diamonds increases how many diamonds the shop has
+ * available to sell back out. This also naturally feeds the AI
+ * engine's supply signal via the resulting higher stock level.
  */
 public final class SellManager {
 
@@ -52,18 +53,6 @@ public final class SellManager {
     public record SellResult(boolean success, int totalAmount, double totalPayout, int itemsSkipped) {
     }
 
-    /**
-     * Creates the sell manager.
-     *
-     * @param logger            plugin logger
-     * @param shopManager       shared shop manager, used to resolve catalog items and material->id lookups
-     * @param economyEngine     economy engine used to pay players
-     * @param sellHistoryDao    DAO for recording sell transactions
-     * @param pricesConfig      resolved prices.yml configuration
-     * @param blacklistManager  blacklist enforcement for sellable items
-     * @param whitelistManager  optional whitelist enforcement for sellable items
-     * @param identityResolver  resolves an ItemStack's identity across vanilla and custom-item plugins
-     */
     public SellManager(Logger logger, ShopManager shopManager, EconomyEngine economyEngine,
                         SellHistoryDao sellHistoryDao, PricesConfig pricesConfig,
                         SellBlacklistManager blacklistManager, SellWhitelistManager whitelistManager,
@@ -78,13 +67,6 @@ public final class SellManager {
         this.identityResolver = identityResolver;
     }
 
-    /**
-     * Attempts to resolve a catalog {@link ShopItemRecord} matching the
-     * given item stack's material, ignoring blacklist/whitelist checks.
-     *
-     * @param stack the item stack to resolve
-     * @return the matching catalog item, or {@code null} if none is sellable for this material
-     */
     public ShopItemRecord resolveCatalogItem(ItemStack stack) {
         if (stack == null) {
             return null;
@@ -98,14 +80,6 @@ public final class SellManager {
         return null;
     }
 
-    /**
-     * Checks whether a single item stack is currently sellable
-     * (not blacklisted, whitelist-permitted if enabled, and has a
-     * matching tradeable catalog entry).
-     *
-     * @param stack the item stack to check
-     * @return {@code true} if it can be sold right now
-     */
     public boolean isSellable(ItemStack stack) {
         if (blacklistManager.isBlacklisted(stack)) {
             return false;
@@ -117,13 +91,6 @@ public final class SellManager {
         return whitelistManager.isAllowed(catalogItem.getId());
     }
 
-    /**
-     * Sells a single item stack in full on behalf of a player.
-     *
-     * @param playerUuid the selling player's uuid
-     * @param stack      the item stack to sell (its amount is fully sold)
-     * @return the sell result
-     */
     public SellResult sellSingle(UUID playerUuid, ItemStack stack) {
         if (!isSellable(stack)) {
             return new SellResult(false, 0, 0.0, 1);
@@ -134,31 +101,16 @@ public final class SellManager {
         double payout = profitCalculator.computeTotalSellPrice(catalogItem, amount);
 
         economyEngine.deposit(playerUuid, payout, TransactionLogger.REASON_SHOP_SELL);
+        restockFromSale(catalogItem.getId(), amount);
         recordSale(playerUuid, catalogItem, amount, payout);
 
         return new SellResult(true, amount, payout, 0);
     }
 
-    /**
-     * Sells every sellable item in a player's inventory, replacing sold
-     * stacks with air.
-     *
-     * @param playerUuid the selling player's uuid
-     * @param inventory  the inventory to sweep (usually the player's own)
-     * @return the aggregated sell result across all sold stacks
-     */
     public SellResult sellAll(UUID playerUuid, Inventory inventory) {
         return sellMatching(playerUuid, inventory, stack -> true);
     }
 
-    /**
-     * Sells every sellable item currently in a container inventory
-     * (used for the "Sell Chest" feature), replacing sold stacks with air.
-     *
-     * @param playerUuid the selling player's uuid
-     * @param container  the container inventory to sweep
-     * @return the aggregated sell result across all sold stacks
-     */
     public SellResult sellChest(UUID playerUuid, Inventory container) {
         return sellMatching(playerUuid, container, stack -> true);
     }
@@ -208,10 +160,24 @@ public final class SellManager {
             String itemId = entry.getKey();
             int amount = entry.getValue();
             double unitPrice = unitPriceByItemId.get(itemId);
+            restockFromSale(itemId, amount);
             recordSale(playerUuid, itemById.get(itemId), amount, unitPrice * amount);
         }
 
         return new SellResult(true, totalAmount, totalPayout, skipped);
+    }
+
+    /**
+     * Adds the sold quantity back to the item's live shop stock,
+     * capped at its max stock like any other restock. This is what
+     * makes selling to the shop actually replenish what's available
+     * to buy.
+     *
+     * @param itemId the item id that was sold
+     * @param amount the quantity sold
+     */
+    private void restockFromSale(String itemId, int amount) {
+        shopManager.getStockManager().restock(itemId, amount, "PLAYER_SELL");
     }
 
     private void recordSale(UUID playerUuid, ShopItemRecord item, int amount, double totalPrice) {
@@ -235,4 +201,4 @@ public final class SellManager {
     public SellWhitelistManager getWhitelistManager() {
         return whitelistManager;
     }
-}
+    }
