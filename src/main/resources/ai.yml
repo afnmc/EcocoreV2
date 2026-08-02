@@ -39,3 +39,8 @@ learning-model:
   enabled: true
   history-samples-used: 200
   retrain-interval-seconds: 3600
+
+notifications:
+  # Persentase perubahan harga minimum sebelum diumumkan ke
+  # chat/Discord. Naikin nilainya kalau berasa spam.
+  price-change-threshold-percent: 5.0
