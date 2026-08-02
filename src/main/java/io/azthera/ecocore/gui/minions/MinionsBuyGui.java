@@ -25,6 +25,11 @@ import java.util.Map;
  * location. Charges the configured price from {@code minions.yml
  * purchase.prices} and enforces {@link MinionManager}'s per-player
  * minion cap.
+ *
+ * <p>After a purchase, this screen re-renders IN PLACE (mutates the
+ * already-open {@link org.bukkit.inventory.Inventory} instance)
+ * rather than building a brand-new one, so the player's client stays
+ * on this same screen instead of the window silently going stale.
  */
 public final class MinionsBuyGui extends AbstractGui {
 
@@ -58,6 +63,16 @@ public final class MinionsBuyGui extends AbstractGui {
     @Override
     public void build() {
         inventory = Bukkit.createInventory(this, 45, "§8Beli Minion");
+        render();
+    }
+
+    /**
+     * Repopulates the already-created {@link #inventory} in place.
+     * Always call this (not {@link #build()}) to refresh after a
+     * purchase, so the window the player is actively looking at gets
+     * updated instead of an orphaned new inventory object.
+     */
+    private void render() {
         slotToType.clear();
 
         MinionType[] types = MinionType.values();
@@ -65,6 +80,21 @@ public final class MinionsBuyGui extends AbstractGui {
             inventory.setItem(i, buildIcon(types[i]));
             slotToType.put(i, types[i]);
         }
+
+        ItemStack info = new ItemStack(Material.PAPER);
+        ItemMeta infoMeta = info.getItemMeta();
+        if (infoMeta != null) {
+            infoMeta.setDisplayName("§eCara pakai minion");
+            infoMeta.setLore(List.of(
+                    "§7Minion muncul di lokasi lu saat dibeli.",
+                    "§7Klik kanan minion buat buka menu upgrade.",
+                    "§7Shift + klik kanan buat buka storage-nya.",
+                    "§7Pegang §fCoal/Coal Block/Lava Bucket §7lalu",
+                    "§7klik kanan minion buat isi ulang fuel."
+            ));
+            info.setItemMeta(infoMeta);
+        }
+        inventory.setItem(40, info);
 
         inventory.setItem(BACK_SLOT, guiManager.buildButtonIcon("back", "§eKembali"));
     }
@@ -141,14 +171,14 @@ public final class MinionsBuyGui extends AbstractGui {
 
         MinionData placed = minionManager.placeMinion(viewer, type, viewer.getLocation());
         if (placed == null) {
-            // Refund - placement failed after payment (e.g. hit the cap in a race, or persistence failed).
             economyEngine.deposit(viewer.getUniqueId(), price, TransactionLogger.REASON_ADMIN_ADJUST);
             viewer.sendMessage("§cGagal menempatkan minion, saldo lu dikembalikan.");
             return;
         }
 
-        viewer.sendMessage("§aBerhasil beli minion §f" + type.configKey() + "§a! Cek lewat §f/minions§a.");
+        viewer.sendMessage("§aBerhasil beli minion §f" + type.configKey()
+                + "§a! Dia muncul di deket lu - klik kanan buat lihat menunya.");
         guiManager.playSound(viewer, "buy");
-        build();
+        render();
     }
-          }
+                }
