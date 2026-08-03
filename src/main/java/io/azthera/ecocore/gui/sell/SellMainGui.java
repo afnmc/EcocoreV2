@@ -9,24 +9,35 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.List;
+import java.util.Map;
 
 /**
- * The root {@code /sell} screen: quick actions for Sell Inventory,
- * Sell Chest, and toggling auto-sell, plus a drag-and-drop slot for
- * selling a single item stack.
+ * The {@code /sell} screen: a drag-and-drop deposit area (18 slots)
+ * plus quick actions. Players place items into the deposit area
+ * freely - clicks there are NOT cancelled, so items can be taken back
+ * out normally like any chest. Clicking "Sell Deposited Items"
+ * liquidates whatever's currently sitting in the deposit area.
+ *
+ * <p>If the player closes the screen with items still sitting in the
+ * deposit area (accidentally or on purpose), those items are returned
+ * to their inventory in {@link #handleClose}, dropping any overflow
+ * on the ground if their inventory is full - nothing is ever lost
+ * silently.
  */
 public final class SellMainGui extends AbstractGui {
 
-    private static final int DROP_SLOT = 13;
-    private static final int SELL_DROPPED_SLOT = 22;
-    private static final int SELL_INVENTORY_SLOT = 29;
-    private static final int SELL_CHEST_SLOT = 31;
-    private static final int AUTO_SELL_TOGGLE_SLOT = 33;
-    private static final int CLOSE_SLOT = 40;
+    private static final int INFO_SLOT = 4;
+    private static final int DEPOSIT_START_SLOT = 9;
+    private static final int DEPOSIT_END_SLOT = 26;
+    private static final int SELL_INVENTORY_SLOT = 38;
+    private static final int SELL_DEPOSITED_SLOT = 40;
+    private static final int AUTO_SELL_TOGGLE_SLOT = 42;
+    private static final int CLOSE_SLOT = 49;
 
     private final SellManager sellManager;
     private final AutoSellManager autoSellManager;
@@ -53,69 +64,76 @@ public final class SellMainGui extends AbstractGui {
 
     @Override
     public void build() {
-        inventory = Bukkit.createInventory(this, 45, "§8Sell");
+        inventory = Bukkit.createInventory(this, 54, "§8Sell");
         render();
     }
 
+    /**
+     * Repopulates the control slots in place. Deliberately never
+     * touches slots {@link #DEPOSIT_START_SLOT}-{@link #DEPOSIT_END_SLOT}
+     * so items the player has placed there survive every re-render
+     * (auto-sell toggle, selling, etc).
+     */
     private void render() {
-        inventory.setItem(SELL_DROPPED_SLOT, buildActionIcon(Material.HOPPER, "§aJual Barang Ini",
-                "§7Taruh barang di slot tengah,", "§7lalu klik ikon ini."));
-        inventory.setItem(SELL_INVENTORY_SLOT, buildActionIcon(Material.CHEST, "§6Sell All (Inventory)",
-                "§7Jual semua barang yang bisa", "§7dijual di inventory kamu."));
-        inventory.setItem(SELL_CHEST_SLOT, buildActionIcon(Material.ENDER_CHEST, "§dSell Chest",
-                "§7Buka chest, lalu gunakan", "§7/sell chest saat chest terbuka."));
+        ItemStack info = new ItemStack(Material.HOPPER);
+        ItemMeta infoMeta = info.getItemMeta();
+        if (infoMeta != null) {
+            infoMeta.setDisplayName("§eCara Jual");
+            infoMeta.setLore(List.of(
+                    "§7Taruh barang di kotak besar di bawah ini.",
+                    "§7Klik §a§lJUAL BARANG DI SINI §7buat jual semuanya.",
+                    "§7Kalau nutup menu ini, barang yang belum",
+                    "§7dijual otomatis balik ke inventory lu."
+            ));
+            info.setItemMeta(infoMeta);
+        }
+        inventory.setItem(INFO_SLOT, info);
+
+        ItemStack sellInventory = new ItemStack(Material.CHEST);
+        ItemMeta sellInvMeta = sellInventory.getItemMeta();
+        if (sellInvMeta != null) {
+            sellInvMeta.setDisplayName("§6Sell All (Seluruh Inventory)");
+            sellInvMeta.setLore(List.of("§7Jual semua barang yang bisa", "§7dijual di inventory lu."));
+            sellInventory.setItemMeta(sellInvMeta);
+        }
+        inventory.setItem(SELL_INVENTORY_SLOT, sellInventory);
+
+        ItemStack sellDeposited = new ItemStack(Material.EMERALD_BLOCK);
+        ItemMeta sellDepMeta = sellDeposited.getItemMeta();
+        if (sellDepMeta != null) {
+            sellDepMeta.setDisplayName("§a§lJUAL BARANG DI SINI");
+            sellDepMeta.setLore(List.of("§7Jual semua barang di kotak deposit."));
+            sellDeposited.setItemMeta(sellDepMeta);
+        }
+        inventory.setItem(SELL_DEPOSITED_SLOT, sellDeposited);
 
         boolean autoSellOn = autoSellManager.isEnabled(viewer.getUniqueId());
-        inventory.setItem(AUTO_SELL_TOGGLE_SLOT, buildActionIcon(
-                autoSellOn ? Material.LIME_DYE : Material.GRAY_DYE,
-                autoSellOn ? "§a§lAuto Sell: ON" : "§7§lAuto Sell: OFF",
-                "§7Klik untuk toggle auto-sell."));
+        ItemStack autoSell = new ItemStack(autoSellOn ? Material.LIME_DYE : Material.GRAY_DYE);
+        ItemMeta autoSellMeta = autoSell.getItemMeta();
+        if (autoSellMeta != null) {
+            autoSellMeta.setDisplayName(autoSellOn ? "§a§lAuto Sell: ON" : "§7§lAuto Sell: OFF");
+            autoSellMeta.setLore(List.of("§7Klik untuk toggle auto-sell."));
+            autoSell.setItemMeta(autoSellMeta);
+        }
+        inventory.setItem(AUTO_SELL_TOGGLE_SLOT, autoSell);
 
         inventory.setItem(CLOSE_SLOT, guiManager.buildButtonIcon("close", "§cTutup"));
-    }
-
-    private ItemStack buildActionIcon(Material material, String name, String... lore) {
-        ItemStack icon = new ItemStack(material);
-        ItemMeta meta = icon.getItemMeta();
-        if (meta != null) {
-            meta.setDisplayName(name);
-            meta.setLore(List.of(lore));
-            icon.setItemMeta(meta);
-        }
-        return icon;
     }
 
     @Override
     public void handleClick(InventoryClickEvent event) {
         int slot = event.getRawSlot();
 
-        if (slot == DROP_SLOT) {
-            // Allow the player to freely place/remove an item stack here.
-            event.setCancelled(false);
+        if (slot >= DEPOSIT_START_SLOT && slot <= DEPOSIT_END_SLOT) {
+            // Allow completely free vanilla interaction (place, take back,
+            // shift-click in) within the deposit area.
             return;
         }
 
         event.setCancelled(true);
 
-        if (slot == SELL_DROPPED_SLOT) {
-            ItemStack toSell = inventory.getItem(DROP_SLOT);
-            if (toSell == null || toSell.getType().isAir()) {
-                viewer.sendMessage(messagesConfig.getWithPrefix("sell.nothing-to-sell"));
-                return;
-            }
-
-            SellManager.SellResult result = sellManager.sellSingle(viewer.getUniqueId(), toSell);
-            if (result.success()) {
-                inventory.setItem(DROP_SLOT, null);
-                viewer.sendMessage(messagesConfig.getWithPrefix("sell.sold",
-                        "amount", String.valueOf(result.totalAmount()),
-                        "item", toSell.getType().name(),
-                        "price", String.format("%.2f", result.totalPayout())));
-                guiManager.playSound(viewer, "sell");
-            } else {
-                viewer.sendMessage(messagesConfig.getWithPrefix("sell.blacklisted"));
-                guiManager.playSound(viewer, "error");
-            }
+        if (slot == SELL_DEPOSITED_SLOT) {
+            sellDepositedItems();
             return;
         }
 
@@ -124,12 +142,6 @@ public final class SellMainGui extends AbstractGui {
                     viewer, sellManager, guiManager, messagesConfig, SellConfirmGui.Mode.INVENTORY, null, this);
             guiManager.register(viewer, confirmGui);
             confirmGui.open();
-            return;
-        }
-
-        if (slot == SELL_CHEST_SLOT) {
-            viewer.sendMessage("§7Buka chest yang mau dijual, lalu ketik §f/sell chest§7.");
-            viewer.closeInventory();
             return;
         }
 
@@ -144,4 +156,67 @@ public final class SellMainGui extends AbstractGui {
             viewer.closeInventory();
         }
     }
-}
+
+    private void sellDepositedItems() {
+        int totalAmount = 0;
+        double totalPayout = 0;
+        int skipped = 0;
+
+        for (int slot = DEPOSIT_START_SLOT; slot <= DEPOSIT_END_SLOT; slot++) {
+            ItemStack stack = inventory.getItem(slot);
+            if (stack == null || stack.getType().isAir()) {
+                continue;
+            }
+
+            SellManager.SellResult result = sellManager.sellSingle(viewer.getUniqueId(), stack);
+            if (result.success()) {
+                totalAmount += result.totalAmount();
+                totalPayout += result.totalPayout();
+                inventory.setItem(slot, null);
+            } else {
+                skipped++;
+            }
+        }
+
+        if (totalAmount > 0) {
+            viewer.sendMessage(messagesConfig.getWithPrefix("sell.sold",
+                    "amount", String.valueOf(totalAmount),
+                    "item", "barang",
+                    "price", String.format("%.2f", totalPayout)));
+            guiManager.playSound(viewer, "sell");
+        } else {
+            viewer.sendMessage(messagesConfig.getWithPrefix("sell.nothing-to-sell"));
+            guiManager.playSound(viewer, "error");
+        }
+
+        if (skipped > 0) {
+            viewer.sendMessage("§7(" + skipped + " item dilewati karena gak bisa dijual.)");
+        }
+    }
+
+    /**
+     * Returns whatever items are still sitting in the deposit area
+     * back to the player's inventory when this screen closes, so
+     * nothing is ever silently lost by walking away or pressing
+     * escape mid-deposit. Drops overflow on the ground if their
+     * inventory is full.
+     *
+     * @param event the triggering inventory close event
+     */
+    @Override
+    public void handleClose(InventoryCloseEvent event) {
+        for (int slot = DEPOSIT_START_SLOT; slot <= DEPOSIT_END_SLOT; slot++) {
+            ItemStack stack = inventory.getItem(slot);
+            if (stack == null || stack.getType().isAir()) {
+                continue;
+            }
+
+            Map<Integer, ItemStack> leftover = viewer.getInventory().addItem(stack);
+            for (ItemStack over : leftover.values()) {
+                viewer.getWorld().dropItemNaturally(viewer.getLocation(), over);
+            }
+
+            inventory.setItem(slot, null);
+        }
+    }
+            }
