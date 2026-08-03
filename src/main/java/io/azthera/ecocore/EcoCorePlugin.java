@@ -69,6 +69,7 @@ import io.azthera.ecocore.listener.CraftListener;
 import io.azthera.ecocore.listener.EntityDeathListener;
 import io.azthera.ecocore.listener.FishListener;
 import io.azthera.ecocore.listener.InventoryClickListener;
+import io.azthera.ecocore.listener.MinionChunkListener;
 import io.azthera.ecocore.listener.MinionEggListener;
 import io.azthera.ecocore.listener.MinionInteractListener;
 import io.azthera.ecocore.listener.PlayerJoinListener;
@@ -81,7 +82,6 @@ import io.azthera.ecocore.minions.MinionAnimationHandler;
 import io.azthera.ecocore.minions.MinionFactory;
 import io.azthera.ecocore.minions.MinionFuelManager;
 import io.azthera.ecocore.minions.MinionManager;
-import io.azthera.ecocore.minions.MinionPathfinder;
 import io.azthera.ecocore.minions.MinionTargetSelector;
 import io.azthera.ecocore.minions.MinionUpgradeManager;
 import io.azthera.ecocore.placeholder.EcoCorePlaceholderExpansion;
@@ -169,11 +169,6 @@ public final class EcoCorePlugin extends JavaPlugin {
 
     private EcoCoreAPI api;
 
-    /**
-     * Returns the running plugin instance.
-     *
-     * @return the active plugin instance
-     */
     public static EcoCorePlugin getInstance() {
         return instance;
     }
@@ -339,17 +334,23 @@ public final class EcoCorePlugin extends JavaPlugin {
 
     private void setupMinions() {
         minionFuelManager = new MinionFuelManager(configManager.getMinionsConfig());
-        MinionTargetSelector targetSelector = new MinionTargetSelector(configManager.getMinionsConfig());
-        MinionPathfinder pathfinder = new MinionPathfinder(configManager.getMinionsConfig());
+        MinionTargetSelector targetSelector = new MinionTargetSelector();
         MinionAnimationHandler animationHandler = new MinionAnimationHandler(configManager.getGuiConfig());
 
         MinionAiController aiController = new MinionAiController(getLogger(), configManager.getMinionsConfig(),
-                minionFuelManager, targetSelector, pathfinder, animationHandler, sellManager, economyEngine);
+                minionFuelManager, targetSelector, animationHandler, sellManager, economyEngine);
 
         MinionFactory minionFactory = new MinionFactory(configManager.getMinionsConfig());
 
         minionManager = new MinionManager(getLogger(), minionsDao, configManager.getMinionsConfig(),
                 minionFactory, aiController);
+
+        // Late-bind: MinionAiController needs to enumerate other active
+        // minions (for the Collector's cross-minion pulling) but MinionManager
+        // is the one that owns/constructs the controller, so this can't be
+        // done via constructor injection without a cycle.
+        aiController.setMinionManager(minionManager);
+
         minionManager.loadAll();
 
         minionUpgradeManager = new MinionUpgradeManager(configManager.getMinionsConfig(), economyEngine);
@@ -391,11 +392,6 @@ public final class EcoCorePlugin extends JavaPlugin {
         notificationManager = new NotificationManager(getLogger(), configManager, configManager.getMessagesConfig(),
                 discordBotManager, discordWebhookSender, discordEmbedBuilder);
 
-        // Both InflationEngine.runCycle() and AiEconomyEngine.runCycle() run on
-        // ASYNC scheduler threads. NotificationManager touches Bukkit API
-        // (broadcastMessage, sendActionBar, createBossBar) which is NOT
-        // thread-safe off the main thread - every listener here hops back
-        // to the main thread via runTask before doing any of that.
         inflationEngine.addListener(event ->
                 Bukkit.getScheduler().runTask(this, () -> notificationManager.onInflationEvent(event)));
 
@@ -436,6 +432,7 @@ public final class EcoCorePlugin extends JavaPlugin {
         pluginManager.registerEvents(new MinionInteractListener(
                 minionManager, minionFuelManager, configManager.getMinionsConfig(), guiManager, configManager.getGuiConfig()), this);
         pluginManager.registerEvents(new MinionEggListener(minionManager), this);
+        pluginManager.registerEvents(new MinionChunkListener(minionManager), this);
     }
 
     private void registerCommands() {
