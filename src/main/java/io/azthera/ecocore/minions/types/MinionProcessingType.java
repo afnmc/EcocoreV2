@@ -16,17 +16,14 @@ public enum MinionProcessingType {
     /** Interacts with a nearby matching entity and stores a resulting item (Mob Killer, Animal Farmer, Breeder). */
     ENTITY_INTERACT,
 
-    /** Picks up nearby dropped item entities into storage (Collector). */
+    /** Picks up nearby dropped item entities AND pulls from nearby owned minions' storage into its own (Collector). */
     ITEM_PICKUP,
 
     /** Produces a random catch from a configured table on a fixed cycle (Fishing). */
     FISHING,
 
-    /** Converts a raw input item already in storage into a smelted output item (Smelter). */
+    /** Converts a raw input item already in storage into a smelted/crafted output item (Smelter - also absorbs what used to be the separate Crafter minion). */
     INTERNAL_SMELT,
-
-    /** Converts a raw input item already in storage into a crafted output item (Crafter). */
-    INTERNAL_CRAFT,
 
     /** Sells sellable items already in storage directly to the owner's balance (Seller). */
     INTERNAL_SELL,
