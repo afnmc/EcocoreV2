@@ -52,10 +52,6 @@ minions:
     display-name: "&7Smelter Minion"
     icon: "FURNACE"
     base-efficiency: 1.0
-  crafter:
-    display-name: "&dCrafter Minion"
-    icon: "CRAFTING_TABLE"
-    base-efficiency: 1.0
   storage:
     display-name: "&8Storage Minion"
     icon: "CHEST"
@@ -91,7 +87,6 @@ purchase:
     mob_killer: 600.0
     animal_farmer: 450.0
     smelter: 500.0
-    crafter: 500.0
     storage: 300.0
     seller: 550.0
     harvester: 500.0
@@ -100,6 +95,9 @@ purchase:
     quarry: 700.0
 
 ai:
+  # Sudah gak dipakai lagi - minion sekarang selalu diam di tempat dan
+  # kerja instan dalam radius-nya, gak ada lagi jalan/garis pandang.
+  # Dibiarin di sini biar gak error kalau ada tooling lama yang baca ini.
   obstacle-avoidance-enabled: true
   target-selection-strategy: "NEAREST_HIGHEST_VALUE"
   pathfinding-max-nodes: 200
