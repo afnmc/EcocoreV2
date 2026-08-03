@@ -3,7 +3,6 @@ package io.azthera.ecocore.utils;
 import io.azthera.ecocore.EcoCorePlugin;
 import io.azthera.ecocore.config.MinionsConfig;
 import io.azthera.ecocore.model.MinionType;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -22,13 +21,11 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 /**
- * Shared helpers for working with {@link ItemStack}s across EcoCore:
- * safe material lookup, quick named-item construction, Base64
- * serialization of item arrays, inventory insertion, and the minion
- * spawn-egg item used by the minion purchase flow.
+ * Shared helpers for working with {@link ItemStack}s across EcoCore.
  */
 public final class ItemUtils {
 
+    private static final Logger LOGGER = Logger.getLogger("EcoCore");
     private static final String MINION_EGG_TYPE_KEY = "minion_egg_type";
 
     private ItemUtils() {
@@ -37,7 +34,7 @@ public final class ItemUtils {
 
     /**
      * Resolves a {@link Material} by name, falling back to STONE if the
-     * name is invalid or unknown.
+     * name is invalid or unknown, so a bad config value never crashes a build.
      *
      * @param name the material name
      * @return the resolved material, or {@link Material#STONE} as a fallback
@@ -49,6 +46,7 @@ public final class ItemUtils {
         try {
             return Material.valueOf(name.toUpperCase());
         } catch (IllegalArgumentException exception) {
+            LOGGER.warning("[EcoCore] Unknown material '" + name + "' in config - falling back to STONE.");
             return Material.STONE;
         }
     }
@@ -76,12 +74,36 @@ public final class ItemUtils {
     }
 
     /**
+     * Builds the icon item used to represent a minion type in shop/
+     * inventory GUIs (the "Beli Minion" screen and the owned-minions
+     * list both use this exact same builder so the two never drift
+     * out of sync visually). Falls back to a Villager Spawn Egg icon
+     * with the raw type name if {@code minions.yml} has no entry for
+     * this type, and logs a warning so a missing config entry is easy
+     * to spot in console instead of silently showing a generic icon.
+     *
+     * @param type          the minion type to build an icon for
+     * @param minionsConfig resolved minions.yml configuration
+     * @return the built icon item stack (no lore - callers add their own)
+     */
+    public static ItemStack buildMinionTypeIcon(MinionType type, MinionsConfig minionsConfig) {
+        MinionsConfig.MinionDefinition definition = minionsConfig.getDefinition(type);
+        if (definition == null) {
+            LOGGER.warning("[EcoCore] minions.yml has no entry for minion type '" + type.configKey()
+                    + "' - showing a fallback icon. Add a 'minions." + type.configKey() + "' section to fix this.");
+        }
+
+        Material material = definition != null ? safeMaterial(definition.icon()) : Material.VILLAGER_SPAWN_EGG;
+        String displayName = definition != null ? definition.displayName() : ("&f" + type.configKey());
+
+        return named(material, 1, displayName, List.of());
+    }
+
+    /**
      * Gives an amount of a material to a player's inventory, splitting
      * into multiple stacks if it exceeds the material's max stack
      * size, and dropping any overflow on the ground at their feet if
-     * their inventory doesn't have room. Shared by {@code ShopManager}
-     * and {@code NightMarketManager} so both purchase flows behave
-     * identically.
+     * their inventory doesn't have room.
      *
      * @param player   the player to give items to
      * @param material the material to give
@@ -106,10 +128,9 @@ public final class ItemUtils {
 
     /**
      * Builds a "minion egg" item: what a player receives after buying
-     * a minion from {@code MinionsBuyGui}, instead of the minion being
-     * placed instantly. Right-clicking the ground with this item (see
-     * {@code listener.MinionEggListener}) consumes one and places the
-     * actual minion at that location.
+     * a minion (or removing a placed one), instead of the minion
+     * being placed instantly. Right-clicking the ground with this
+     * item consumes one and places the actual minion at that location.
      *
      * @param type          the minion type this egg will place
      * @param minionsConfig resolved minions.yml configuration (for display name)
@@ -164,8 +185,7 @@ public final class ItemUtils {
     }
 
     /**
-     * Serializes an array of item stacks into a Base64 string suitable
-     * for storing in a SQLite text column.
+     * Serializes an array of item stacks into a Base64 string.
      *
      * @param logger the logger used to report serialization failures
      * @param items  the item stacks to serialize
@@ -249,4 +269,4 @@ public final class ItemUtils {
 
         return remaining;
     }
-    }
+                    }
