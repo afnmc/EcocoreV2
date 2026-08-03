@@ -19,8 +19,8 @@ import java.util.List;
 /**
  * Detail/upgrade screen for a single minion: shows its current
  * stats and lets the owner purchase storage, radius, and speed
- * upgrades, plus toggle its auto-repair/auto-sell/auto-smelt flags
- * and remove it entirely.
+ * upgrades, toggle auto-repair/auto-sell/auto-smelt, and remove it
+ * (which returns a fresh Minion Egg so it can be placed again elsewhere).
  */
 public final class MinionUpgradeGui extends AbstractGui {
 
@@ -41,7 +41,6 @@ public final class MinionUpgradeGui extends AbstractGui {
     private final GuiConfig guiConfig;
     private final long minionId;
     private final AbstractGui previousGui;
-    private final MinionUpgradeManager upgradeManager;
 
     /**
      * Creates the minion upgrade screen.
@@ -63,13 +62,9 @@ public final class MinionUpgradeGui extends AbstractGui {
         this.guiConfig = guiConfig;
         this.minionId = minionId;
         this.previousGui = previousGui;
-        this.upgradeManager = null; // resolved externally via setter injection below
     }
 
     private MinionUpgradeManager resolveUpgradeManager() {
-        // Upgrade manager is stateless aside from config/economy references already
-        // held by the plugin; MinionsManager instances share one via the bootstrap
-        // wiring in EcoCorePlugin, exposed here through the minion manager's config.
         return io.azthera.ecocore.EcoCorePlugin.getInstance().getMinionUpgradeManager();
     }
 
@@ -112,7 +107,7 @@ public final class MinionUpgradeGui extends AbstractGui {
     }
 
     private ItemStack buildSummaryIcon(MinionData data) {
-        ItemStack icon = new ItemStack(Material.VILLAGER_SPAWN_EGG);
+        ItemStack icon = io.azthera.ecocore.utils.ItemUtils.buildMinionTypeIcon(data.getType(), minionsConfig);
         ItemMeta meta = icon.getItemMeta();
         if (meta != null) {
             meta.setDisplayName("§f" + data.getType().configKey() + " §7Lv." + data.getLevel());
@@ -164,7 +159,11 @@ public final class MinionUpgradeGui extends AbstractGui {
         ItemMeta meta = icon.getItemMeta();
         if (meta != null) {
             meta.setDisplayName("§c§lHapus Minion");
-            meta.setLore(List.of("§7Isi storage akan hilang jika belum diambil."));
+            meta.setLore(List.of(
+                    "§7Entity minion bakal hilang dari dunia,",
+                    "§7isi storage-nya balik ke inventory lu,",
+                    "§7dan lu dapet Minion Egg buat naruh lagi."
+            ));
             icon.setItemMeta(meta);
         }
         return icon;
@@ -234,9 +233,14 @@ public final class MinionUpgradeGui extends AbstractGui {
         }
 
         if (slot == REMOVE_SLOT) {
-            minionManager.removeMinion(minionId);
-            viewer.sendMessage("§7Minion telah dihapus.");
+            boolean removed = minionManager.removeAndRefund(minionId, viewer);
+            if (removed) {
+                viewer.sendMessage("§7Minion telah dihapus. Isi storage & Minion Egg-nya balik ke inventory lu.");
+                guiManager.playSound(viewer, "click");
+            } else {
+                viewer.sendMessage("§cGagal menghapus minion.");
+            }
             viewer.closeInventory();
         }
     }
-}
+                          }
