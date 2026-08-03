@@ -1,9 +1,15 @@
 package io.azthera.ecocore.utils;
 
+import io.azthera.ecocore.EcoCorePlugin;
+import io.azthera.ecocore.config.MinionsConfig;
+import io.azthera.ecocore.model.MinionType;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
 
@@ -12,14 +18,18 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
  * Shared helpers for working with {@link ItemStack}s across EcoCore:
- * safe material lookup, quick named-item construction, and
- * Base64 serialization of item arrays for storage in SQLite text columns.
+ * safe material lookup, quick named-item construction, Base64
+ * serialization of item arrays, inventory insertion, and the minion
+ * spawn-egg item used by the minion purchase flow.
  */
 public final class ItemUtils {
+
+    private static final String MINION_EGG_TYPE_KEY = "minion_egg_type";
 
     private ItemUtils() {
         // Utility class, not instantiable.
@@ -27,7 +37,7 @@ public final class ItemUtils {
 
     /**
      * Resolves a {@link Material} by name, falling back to STONE if the
-     * name is invalid or unknown, so a bad config value never crashes a build.
+     * name is invalid or unknown.
      *
      * @param name the material name
      * @return the resolved material, or {@link Material#STONE} as a fallback
@@ -56,11 +66,9 @@ public final class ItemUtils {
         ItemStack stack = new ItemStack(material, Math.max(1, amount));
         ItemMeta meta = stack.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(org.bukkit.ChatColor.translateAlternateColorCodes('&', name));
+            meta.setDisplayName(ColorUtils.colorize(name));
             if (lore != null && !lore.isEmpty()) {
-                meta.setLore(lore.stream()
-                        .map(line -> org.bukkit.ChatColor.translateAlternateColorCodes('&', line))
-                        .toList());
+                meta.setLore(lore.stream().map(ColorUtils::colorize).toList());
             }
             stack.setItemMeta(meta);
         }
@@ -68,9 +76,96 @@ public final class ItemUtils {
     }
 
     /**
-     * Serializes an array of item stacks (a minion's or container's
-     * inventory contents) into a Base64 string suitable for storing in
-     * a SQLite text column. {@code null} entries are preserved as empty slots.
+     * Gives an amount of a material to a player's inventory, splitting
+     * into multiple stacks if it exceeds the material's max stack
+     * size, and dropping any overflow on the ground at their feet if
+     * their inventory doesn't have room. Shared by {@code ShopManager}
+     * and {@code NightMarketManager} so both purchase flows behave
+     * identically.
+     *
+     * @param player   the player to give items to
+     * @param material the material to give
+     * @param amount   the total quantity to give
+     */
+    public static void giveOrDrop(Player player, Material material, int amount) {
+        int remaining = amount;
+        int maxStackSize = new ItemStack(material).getMaxStackSize();
+
+        while (remaining > 0) {
+            int stackAmount = Math.min(maxStackSize, remaining);
+            ItemStack stack = new ItemStack(material, stackAmount);
+
+            Map<Integer, ItemStack> leftover = player.getInventory().addItem(stack);
+            for (ItemStack leftoverStack : leftover.values()) {
+                player.getWorld().dropItemNaturally(player.getLocation(), leftoverStack);
+            }
+
+            remaining -= stackAmount;
+        }
+    }
+
+    /**
+     * Builds a "minion egg" item: what a player receives after buying
+     * a minion from {@code MinionsBuyGui}, instead of the minion being
+     * placed instantly. Right-clicking the ground with this item (see
+     * {@code listener.MinionEggListener}) consumes one and places the
+     * actual minion at that location.
+     *
+     * @param type          the minion type this egg will place
+     * @param minionsConfig resolved minions.yml configuration (for display name)
+     * @return the built egg item stack
+     */
+    public static ItemStack buildMinionEgg(MinionType type, MinionsConfig minionsConfig) {
+        ItemStack egg = new ItemStack(Material.VILLAGER_SPAWN_EGG);
+        ItemMeta meta = egg.getItemMeta();
+        if (meta != null) {
+            MinionsConfig.MinionDefinition definition = minionsConfig.getDefinition(type);
+            String rawName = definition != null ? definition.displayName() : type.configKey();
+
+            meta.setDisplayName(ColorUtils.colorize("&a&lMinion Egg &7- " + ColorUtils.stripColor(rawName)));
+            meta.setLore(List.of(
+                    ColorUtils.colorize("&7Klik kanan ke tanah buat naruh minion ini."),
+                    ColorUtils.colorize("&7Tipe: &f" + type.configKey())
+            ));
+
+            NamespacedKey key = new NamespacedKey(EcoCorePlugin.getInstance(), MINION_EGG_TYPE_KEY);
+            meta.getPersistentDataContainer().set(key, PersistentDataType.STRING, type.name());
+
+            egg.setItemMeta(meta);
+        }
+        return egg;
+    }
+
+    /**
+     * Reads the minion type tagged on an item stack by
+     * {@link #buildMinionEgg}, if any.
+     *
+     * @param stack the item stack to check
+     * @return the tagged minion type, or {@code null} if this isn't a minion egg
+     */
+    public static MinionType readMinionEggType(ItemStack stack) {
+        if (stack == null || stack.getType() != Material.VILLAGER_SPAWN_EGG || !stack.hasItemMeta()) {
+            return null;
+        }
+        ItemMeta meta = stack.getItemMeta();
+        if (meta == null) {
+            return null;
+        }
+        NamespacedKey key = new NamespacedKey(EcoCorePlugin.getInstance(), MINION_EGG_TYPE_KEY);
+        String raw = meta.getPersistentDataContainer().get(key, PersistentDataType.STRING);
+        if (raw == null) {
+            return null;
+        }
+        try {
+            return MinionType.valueOf(raw);
+        } catch (IllegalArgumentException exception) {
+            return null;
+        }
+    }
+
+    /**
+     * Serializes an array of item stacks into a Base64 string suitable
+     * for storing in a SQLite text column.
      *
      * @param logger the logger used to report serialization failures
      * @param items  the item stacks to serialize
@@ -96,7 +191,7 @@ public final class ItemUtils {
      * into an item stack array.
      *
      * @param logger the logger used to report deserialization failures
-     * @param data   the Base64-encoded serialized form, may be {@code null}/blank for an empty result
+     * @param data   the Base64-encoded serialized form, may be {@code null}/blank
      * @param size   the expected array size if {@code data} is empty
      * @return the deserialized item stacks, or an all-{@code null} array of {@code size} on failure/empty input
      */
@@ -122,8 +217,7 @@ public final class ItemUtils {
 
     /**
      * Attempts to fit a full stack into the first available slot(s) of
-     * an inventory array (simple first-fit, no partial-stack merging
-     * across multiple slots beyond direct same-material top-ups).
+     * an inventory array (simple first-fit).
      *
      * @param storage the inventory array to insert into, modified in place
      * @param toAdd   the item stack to insert
@@ -155,4 +249,4 @@ public final class ItemUtils {
 
         return remaining;
     }
-}
+    }
