@@ -160,4 +160,4 @@ public final class MinionsBuyGui extends AbstractGui {
         guiManager.playSound(viewer, "buy");
         render();
     }
-                           }
+                    }
