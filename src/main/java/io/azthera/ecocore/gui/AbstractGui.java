@@ -6,6 +6,9 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * Base class for every EcoCore inventory-based GUI screen. Each
  * screen owns its own {@link Inventory}, knows how to (re)build its
@@ -17,6 +20,8 @@ import org.bukkit.inventory.InventoryHolder;
  * worry about resetting stale state between views.
  */
 public abstract class AbstractGui implements InventoryHolder {
+
+    private static final Logger LOGGER = Logger.getLogger("EcoCore");
 
     protected final Player viewer;
     protected Inventory inventory;
@@ -32,16 +37,12 @@ public abstract class AbstractGui implements InventoryHolder {
 
     /**
      * Builds (or rebuilds) this screen's {@link #inventory} contents.
-     * Called once by {@link #open()}, and again by screens that
-     * refresh in place (e.g. after a sort change).
+     * Called once by {@link #open()}.
      */
     public abstract void build();
 
     /**
      * Handles a click anywhere within this screen's inventory.
-     * Implementations are responsible for cancelling the event when
-     * the click should not modify the underlying inventory (true for
-     * essentially every EcoCore GUI screen).
      *
      * @param event the triggering inventory click event
      */
@@ -49,8 +50,8 @@ public abstract class AbstractGui implements InventoryHolder {
 
     /**
      * Called when the viewer closes this screen. Default implementation
-     * does nothing; screens holding transient state (e.g. a chest sell
-     * screen) can override this to clean up.
+     * does nothing; screens holding transient state can override this
+     * to clean up or return items.
      *
      * @param event the triggering inventory close event
      */
@@ -60,9 +61,35 @@ public abstract class AbstractGui implements InventoryHolder {
 
     /**
      * Builds this screen and opens it for the viewer.
+     *
+     * <p>Wraps {@link #build()} in a try-catch: previously, an
+     * unexpected exception inside a screen's build logic (a bad
+     * config value, an unresolved item, a null reference from a
+     * stale reference, etc.) would silently abort {@code open()}
+     * before {@code viewer.openInventory(...)} ever ran - the click
+     * that triggered navigation would appear to do nothing at all,
+     * leaving the player stuck on whatever screen they were already
+     * looking at with zero feedback. Now any such failure is reported
+     * to the player and logged with a full stack trace, so a broken
+     * screen is loud instead of silent.
      */
     public void open() {
-        build();
+        try {
+            build();
+        } catch (Exception exception) {
+            LOGGER.log(Level.SEVERE, "[EcoCore] Failed to build GUI screen "
+                    + getClass().getSimpleName() + " for " + viewer.getName(), exception);
+            viewer.sendMessage("§cTerjadi error saat membuka menu ini. Coba lagi, atau lapor ke admin.");
+            return;
+        }
+
+        if (inventory == null) {
+            LOGGER.severe("[EcoCore] GUI screen " + getClass().getSimpleName()
+                    + " finished build() without ever setting an inventory.");
+            viewer.sendMessage("§cTerjadi error saat membuka menu ini.");
+            return;
+        }
+
         viewer.openInventory(inventory);
     }
 
