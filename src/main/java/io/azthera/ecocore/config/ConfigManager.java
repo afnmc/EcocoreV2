@@ -32,6 +32,7 @@ public final class ConfigManager {
     private MessagesConfig messagesConfig;
     private GuiConfig guiConfig;
     private AiConfig aiConfig;
+    private NightMarketConfig nightMarketConfig;
 
     /**
      * Creates a config manager bound to the given plugin instance.
@@ -62,6 +63,7 @@ public final class ConfigManager {
         messagesConfig = new MessagesConfig(loadYaml("messages.yml"));
         guiConfig = new GuiConfig(loadYaml("gui.yml"));
         aiConfig = new AiConfig(loadYaml("ai.yml"));
+        nightMarketConfig = new NightMarketConfig(loadYaml("night-market.yml"));
 
         plugin.getLogger().info("[EcoCore] All configuration files loaded");
     }
@@ -248,4 +250,8 @@ public final class ConfigManager {
     public AiConfig getAiConfig() {
         return aiConfig;
     }
-        }
+
+    public NightMarketConfig getNightMarketConfig() {
+        return nightMarketConfig;
+    }
+    }
