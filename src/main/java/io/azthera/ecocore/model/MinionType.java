@@ -12,7 +12,6 @@ public enum MinionType {
     MOB_KILLER,
     ANIMAL_FARMER,
     SMELTER,
-    CRAFTER,
     STORAGE,
     SELLER,
     HARVESTER,
