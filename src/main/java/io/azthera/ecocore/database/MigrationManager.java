@@ -8,6 +8,7 @@ import io.azthera.ecocore.database.migrations.V4__JobsData;
 import io.azthera.ecocore.database.migrations.V5__MinionsData;
 import io.azthera.ecocore.database.migrations.V6__AiLearning;
 import io.azthera.ecocore.database.migrations.V7__DiscordLogs;
+import io.azthera.ecocore.database.migrations.V8__NightMarket;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -44,11 +45,11 @@ public final class MigrationManager {
         register(new V5__MinionsData());
         register(new V6__AiLearning());
         register(new V7__DiscordLogs());
+        register(new V8__NightMarket());
     }
 
     /**
-     * Registers an additional migration. Exposed for testability;
-     * built-in EcoCore migrations are already registered by the constructor.
+     * Registers an additional migration.
      *
      * @param migration the migration to register
      */
