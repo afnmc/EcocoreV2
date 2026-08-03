@@ -23,13 +23,8 @@ import java.util.Map;
 /**
  * Lets a player purchase a "minion egg" item for any minion type.
  * Purchasing does NOT place the minion immediately - it charges the
- * configured price and gives an egg item (see {@code ItemUtils.buildMinionEgg}),
- * which the player then right-clicks onto the ground to actually
- * place it (see {@code listener.MinionEggListener}).
- *
- * <p>This is why {@code MinionsMainGui} only ever shows minions that
- * have actually been placed: buying alone never adds an entry to
- * {@code MinionManager}'s active minion map.
+ * configured price and gives an egg item, which the player then
+ * right-clicks onto the ground to actually place it.
  */
 public final class MinionsBuyGui extends AbstractGui {
 
@@ -67,10 +62,6 @@ public final class MinionsBuyGui extends AbstractGui {
         render();
     }
 
-    /**
-     * Repopulates the already-created {@link #inventory} in place so
-     * a purchase updates the window the player is actually looking at.
-     */
     private void render() {
         slotToType.clear();
 
@@ -87,7 +78,7 @@ public final class MinionsBuyGui extends AbstractGui {
             infoMeta.setLore(List.of(
                     "§7Beli minion -> lu dapet item §fMinion Egg§7.",
                     "§7Klik kanan tanah pakai Minion Egg buat naruh minion-nya.",
-                    "§7Minion muncul sebagai villager bayi.",
+                    "§7Minion diam di tempat, gak bisa jalan/pindah.",
                     "§7Klik kanan minion buat buka menu upgrade.",
                     "§7Shift + klik kanan minion buat buka storage-nya.",
                     "§7Pegang §fCoal/Coal Block/Lava Bucket §7lalu",
@@ -101,15 +92,11 @@ public final class MinionsBuyGui extends AbstractGui {
     }
 
     private ItemStack buildIcon(MinionType type) {
-        MinionsConfig.MinionDefinition definition = minionsConfig.getDefinition(type);
-        Material material = definition != null ? safeMaterial(definition.icon()) : Material.VILLAGER_SPAWN_EGG;
-        String displayName = definition != null ? definition.displayName() : type.configKey();
+        ItemStack icon = ItemUtils.buildMinionTypeIcon(type, minionsConfig);
         double price = minionsConfig.getPurchasePrice(type);
 
-        ItemStack icon = new ItemStack(material);
         ItemMeta meta = icon.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(org.bukkit.ChatColor.translateAlternateColorCodes('&', displayName));
             meta.setLore(List.of(
                     "§7Harga: §a" + String.format("%.2f", price),
                     "§7Lu bakal dapet item Minion Egg.",
@@ -118,14 +105,6 @@ public final class MinionsBuyGui extends AbstractGui {
             icon.setItemMeta(meta);
         }
         return icon;
-    }
-
-    private Material safeMaterial(String name) {
-        try {
-            return Material.valueOf(name);
-        } catch (IllegalArgumentException exception) {
-            return Material.VILLAGER_SPAWN_EGG;
-        }
     }
 
     @Override
@@ -181,4 +160,4 @@ public final class MinionsBuyGui extends AbstractGui {
         guiManager.playSound(viewer, "buy");
         render();
     }
-                                }
+                           }
