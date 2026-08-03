@@ -26,8 +26,10 @@ public final class MinionFactory {
 
     /**
      * Builds the initial persistent data for a newly placed minion at
-     * level 1 with full starting energy, no fuel, and empty storage.
-     * The returned instance has id {@code -1} until persisted by the caller.
+     * level 1 with full starting energy, no fuel, empty storage, and
+     * no entity uuid yet (assigned once the caller actually spawns
+     * its visual entity). The returned instance has id {@code -1}
+     * until persisted by the caller.
      *
      * @param ownerUuid the placing player's uuid
      * @param type      the minion type being placed
@@ -48,7 +50,7 @@ public final class MinionFactory {
                 minionsConfig.isAutoRepairEnabled(),
                 minionsConfig.isAutoSellEnabled(),
                 minionsConfig.isAutoSmeltEnabled(),
-                now, now
+                now, now, null
         );
     }
 }
