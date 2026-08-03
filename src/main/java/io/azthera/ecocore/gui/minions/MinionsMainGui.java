@@ -6,6 +6,7 @@ import io.azthera.ecocore.gui.AbstractGui;
 import io.azthera.ecocore.gui.GuiManager;
 import io.azthera.ecocore.minions.MinionManager;
 import io.azthera.ecocore.model.MinionData;
+import io.azthera.ecocore.utils.ItemUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -19,8 +20,7 @@ import java.util.Map;
 
 /**
  * The root {@code /minions} screen: lists every minion the player
- * currently owns, plus a button to buy a new one. Left-click a minion
- * opens the upgrade screen for it; shift-click opens its storage directly.
+ * currently owns, plus a button to buy a new one.
  */
 public final class MinionsMainGui extends AbstractGui {
 
@@ -55,6 +55,10 @@ public final class MinionsMainGui extends AbstractGui {
     @Override
     public void build() {
         inventory = Bukkit.createInventory(this, guiConfig.getMinionsMainRows() * 9, "§8Minions");
+        render();
+    }
+
+    private void render() {
         slotToMinionId.clear();
 
         ItemStack buyIcon = new ItemStack(Material.EMERALD);
@@ -84,10 +88,8 @@ public final class MinionsMainGui extends AbstractGui {
 
     private ItemStack buildMinionIcon(MinionData data) {
         boolean fueled = data.getFuelTicksRemaining() > 0;
-        MinionsConfig.MinionDefinition definition = minionsConfig.getDefinition(data.getType());
-        Material material = definition != null ? safeMaterial(definition.icon()) : Material.VILLAGER_SPAWN_EGG;
+        ItemStack icon = ItemUtils.buildMinionTypeIcon(data.getType(), minionsConfig);
 
-        ItemStack icon = new ItemStack(material);
         ItemMeta meta = icon.getItemMeta();
         if (meta != null) {
             meta.setDisplayName("§f" + data.getType().configKey() + " §7Lv." + data.getLevel());
@@ -101,14 +103,6 @@ public final class MinionsMainGui extends AbstractGui {
             icon.setItemMeta(meta);
         }
         return icon;
-    }
-
-    private Material safeMaterial(String name) {
-        try {
-            return Material.valueOf(name);
-        } catch (IllegalArgumentException exception) {
-            return Material.VILLAGER_SPAWN_EGG;
-        }
     }
 
     @Override
