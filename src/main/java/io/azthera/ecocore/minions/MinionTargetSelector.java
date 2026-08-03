@@ -1,8 +1,6 @@
 package io.azthera.ecocore.minions;
 
-import io.azthera.ecocore.config.MinionsConfig;
 import io.azthera.ecocore.minions.types.MinionHandler;
-import io.azthera.ecocore.model.MinionData;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -14,28 +12,26 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Finds the best block or entity target for a minion's next action,
- * within its work radius, honoring the configured obstacle-avoidance
- * and target-selection-strategy settings from {@code minions.yml}.
+ * Finds the nearest matching block or entity for a STATIONARY
+ * minion's next action, within its work radius. Minions never move
+ * from where they were placed - this simply scans the surrounding
+ * radius and acts on whatever's nearest, the same way a hopper or
+ * dispenser reaches into its immediate surroundings without walking
+ * anywhere.
+ *
+ * <p>Deliberately does NOT require a clear line of sight to the
+ * target: for block-breaking minions especially, the whole point is
+ * reaching into solid terrain (ore buried in stone), where a strict
+ * line-of-sight check would almost always fail since the target is,
+ * by definition, surrounded by more of the same solid material.
  */
 public final class MinionTargetSelector {
-
-    private final MinionsConfig minionsConfig;
-
-    /**
-     * Creates a target selector.
-     *
-     * @param minionsConfig resolved minions.yml configuration (AI strategy settings)
-     */
-    public MinionTargetSelector(MinionsConfig minionsConfig) {
-        this.minionsConfig = minionsConfig;
-    }
 
     /**
      * Finds the nearest block within radius matching the handler's
      * target materials.
      *
-     * @param origin  the minion's current location
+     * @param origin  the minion's (fixed) location
      * @param radius  the effective work radius to search within
      * @param handler the minion's handler, providing the target material set
      * @return the nearest matching block, or empty if none found
@@ -60,10 +56,6 @@ public final class MinionTargetSelector {
                         continue;
                     }
 
-                    if (minionsConfig.isObstacleAvoidanceEnabled() && !hasLineOfSight(origin, block.getLocation())) {
-                        continue;
-                    }
-
                     double distanceSq = block.getLocation().distanceSquared(origin);
                     if (distanceSq < nearestDistanceSq) {
                         nearestDistanceSq = distanceSq;
@@ -77,11 +69,10 @@ public final class MinionTargetSelector {
     }
 
     /**
-     * Finds the best living entity within radius matching the
-     * handler's target entity types, chosen according to the
-     * configured target-selection-strategy.
+     * Finds the nearest living entity within radius matching the
+     * handler's target entity types.
      *
-     * @param origin  the minion's current location
+     * @param origin  the minion's (fixed) location
      * @param radius  the effective work radius to search within
      * @param handler the minion's handler, providing the target entity type set
      * @return the selected entity, or empty if none found
@@ -101,21 +92,8 @@ public final class MinionTargetSelector {
             return Optional.empty();
         }
 
-        Comparator<Entity> comparator = "NEAREST_HIGHEST_VALUE".equals(minionsConfig.getTargetSelectionStrategy())
-                ? Comparator.comparingDouble(entity -> entity.getLocation().distanceSquared(origin))
-                : Comparator.comparingDouble(entity -> entity.getLocation().distanceSquared(origin));
-
         return nearby.stream()
-                .min(comparator)
+                .min(Comparator.comparingDouble(entity -> entity.getLocation().distanceSquared(origin)))
                 .map(entity -> (LivingEntity) entity);
-    }
-
-    private boolean hasLineOfSight(Location from, Location to) {
-        if (from.getWorld() == null || !from.getWorld().equals(to.getWorld())) {
-            return false;
-        }
-        var result = from.getWorld().rayTraceBlocks(from, to.toVector().subtract(from.toVector()).normalize(),
-                from.distance(to));
-        return result == null || result.getHitBlock() == null;
     }
 }
