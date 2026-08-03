@@ -16,8 +16,7 @@ import java.util.UUID;
 /**
  * Data access object for the {@code minions_data} table.
  * Inventory contents are persisted separately as a serialized JSON
- * blob ({@code storage_json}); this DAO treats it as an opaque string
- * so the persistence layer stays decoupled from Bukkit's inventory API.
+ * blob ({@code storage_json}); this DAO treats it as an opaque string.
  */
 public final class MinionsDao {
 
@@ -45,8 +44,8 @@ public final class MinionsDao {
                 INSERT INTO minions_data
                     (owner_uuid, type, level, xp, energy, fuel_ticks_remaining, world, x, y, z,
                      storage_slots, radius, speed_ticks, storage_json, auto_repair, auto_sell,
-                     auto_smelt, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                     auto_smelt, entity_uuid, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """;
         try (Connection connection = databaseManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -70,7 +69,7 @@ public final class MinionsDao {
                 UPDATE minions_data SET
                     level = ?, xp = ?, energy = ?, fuel_ticks_remaining = ?, world = ?, x = ?, y = ?, z = ?,
                     storage_slots = ?, radius = ?, speed_ticks = ?, storage_json = ?,
-                    auto_repair = ?, auto_sell = ?, auto_smelt = ?, updated_at = ?
+                    auto_repair = ?, auto_sell = ?, auto_smelt = ?, entity_uuid = ?, updated_at = ?
                 WHERE id = ?
                 """;
         try (Connection connection = databaseManager.getConnection();
@@ -90,14 +89,33 @@ public final class MinionsDao {
             statement.setBoolean(13, data.isAutoRepair());
             statement.setBoolean(14, data.isAutoSell());
             statement.setBoolean(15, data.isAutoSmelt());
-            statement.setLong(16, data.getUpdatedAt());
-            statement.setLong(17, data.getId());
+            statement.setString(16, data.getEntityUuid() != null ? data.getEntityUuid().toString() : null);
+            statement.setLong(17, data.getUpdatedAt());
+            statement.setLong(18, data.getId());
             statement.executeUpdate();
         }
     }
 
     /**
-     * Deletes a minion permanently (e.g. when broken/picked up by its owner).
+     * Persists just the entity uuid for a minion, called right after
+     * its visual entity is (re)spawned.
+     *
+     * @param id         the minion's database id
+     * @param entityUuid the entity uuid to store, may be {@code null}
+     * @throws SQLException if the update fails
+     */
+    public void updateEntityUuid(long id, UUID entityUuid) throws SQLException {
+        String sql = "UPDATE minions_data SET entity_uuid = ? WHERE id = ?";
+        try (Connection connection = databaseManager.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, entityUuid != null ? entityUuid.toString() : null);
+            statement.setLong(2, id);
+            statement.executeUpdate();
+        }
+    }
+
+    /**
+     * Deletes a minion permanently.
      *
      * @param id the minion's database id
      * @throws SQLException if the delete fails
@@ -130,8 +148,7 @@ public final class MinionsDao {
     }
 
     /**
-     * Finds every minion owned by a player, used to enforce per-player
-     * minion limits and to populate {@code MinionsMainGui}.
+     * Finds every minion owned by a player.
      *
      * @param ownerUuid the owning player's uuid
      * @return the player's minions
@@ -154,8 +171,8 @@ public final class MinionsDao {
 
     /**
      * Loads every minion in the database, used at startup by
-     * {@code MinionManager} to re-spawn minion AI controllers for
-     * all previously placed minions across all worlds.
+     * {@code MinionManager} to load minion state (their live entity
+     * is re-attached lazily via chunk load events, not spawned here).
      *
      * @return every persisted minion
      * @throws SQLException if the query fails
@@ -174,9 +191,7 @@ public final class MinionsDao {
     }
 
     /**
-     * Reads the raw serialized storage contents for a minion, kept
-     * separate from {@link #findById(long)} since inventory payloads
-     * can be large and are not always needed.
+     * Reads the raw serialized storage contents for a minion.
      *
      * @param id the minion's database id
      * @return the serialized storage JSON, or {@code null} if empty/not found
@@ -211,11 +226,13 @@ public final class MinionsDao {
         statement.setBoolean(15, data.isAutoRepair());
         statement.setBoolean(16, data.isAutoSell());
         statement.setBoolean(17, data.isAutoSmelt());
-        statement.setLong(18, data.getCreatedAt());
-        statement.setLong(19, data.getUpdatedAt());
+        statement.setString(18, data.getEntityUuid() != null ? data.getEntityUuid().toString() : null);
+        statement.setLong(19, data.getCreatedAt());
+        statement.setLong(20, data.getUpdatedAt());
     }
 
     private MinionData mapRow(ResultSet resultSet) throws SQLException {
+        String entityUuidRaw = resultSet.getString("entity_uuid");
         return new MinionData(
                 resultSet.getLong("id"),
                 UUID.fromString(resultSet.getString("owner_uuid")),
@@ -235,7 +252,8 @@ public final class MinionsDao {
                 resultSet.getBoolean("auto_sell"),
                 resultSet.getBoolean("auto_smelt"),
                 resultSet.getLong("created_at"),
-                resultSet.getLong("updated_at")
+                resultSet.getLong("updated_at"),
+                entityUuidRaw != null ? UUID.fromString(entityUuidRaw) : null
         );
     }
-}
+    }
