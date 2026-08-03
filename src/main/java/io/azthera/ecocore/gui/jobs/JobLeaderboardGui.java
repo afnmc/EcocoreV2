@@ -54,7 +54,7 @@ public final class JobLeaderboardGui extends AbstractGui {
 
     @Override
     public void build() {
-        inventory = Bukkit.createInventory(this, 45, "§8Leaderboard: " + jobType.configKey());
+        inventory = Bukkit.createInventory(this, 54, "§8Leaderboard: " + jobType.configKey());
 
         try {
             List<JobData> top = jobsManager.getLeaderboardManager().getLeaderboard(jobType);
