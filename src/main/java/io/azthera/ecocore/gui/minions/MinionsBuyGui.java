@@ -58,7 +58,7 @@ public final class MinionsBuyGui extends AbstractGui {
 
     @Override
     public void build() {
-        inventory = Bukkit.createInventory(this, 45, "§8Beli Minion");
+        inventory = Bukkit.createInventory(this, 54, "§8Beli Minion");
         render();
     }
 
@@ -160,4 +160,4 @@ public final class MinionsBuyGui extends AbstractGui {
         guiManager.playSound(viewer, "buy");
         render();
     }
-                    }
+        }
