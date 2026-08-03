@@ -29,6 +29,17 @@ public final class MinionData {
     private long updatedAt;
 
     /**
+     * The world-persistent Bukkit entity UUID this minion's visual
+     * villager entity is tagged with. Never trust a cached
+     * {@code Entity} Java object reference across time (it can go
+     * stale when its chunk unloads/reloads) - always re-resolve the
+     * live entity via {@code Bukkit.getEntity(entityUuid)} when
+     * acting on it. {@code null} until the minion's entity has
+     * actually been spawned at least once.
+     */
+    private UUID entityUuid;
+
+    /**
      * Creates minion persistent data.
      *
      * @param id                 database row id, or -1 if not yet persisted
@@ -50,11 +61,13 @@ public final class MinionData {
      * @param autoSmelt          whether auto-smelt is enabled
      * @param createdAt          epoch millis when placed
      * @param updatedAt          epoch millis of the last update
+     * @param entityUuid         the minion's tagged visual entity uuid, or {@code null} if never spawned
      */
     public MinionData(long id, UUID ownerUuid, MinionType type, int level, long xp, int energy,
                        int fuelTicksRemaining, String world, double x, double y, double z,
                        int storageSlots, int radius, int speedTicks, boolean autoRepair,
-                       boolean autoSell, boolean autoSmelt, long createdAt, long updatedAt) {
+                       boolean autoSell, boolean autoSmelt, long createdAt, long updatedAt,
+                       UUID entityUuid) {
         this.id = id;
         this.ownerUuid = ownerUuid;
         this.type = type;
@@ -74,6 +87,7 @@ public final class MinionData {
         this.autoSmelt = autoSmelt;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.entityUuid = entityUuid;
     }
 
     public long getId() {
@@ -221,7 +235,22 @@ public final class MinionData {
         return updatedAt;
     }
 
+    public UUID getEntityUuid() {
+        return entityUuid;
+    }
+
+    /**
+     * Updates the tagged visual entity's uuid, called right after the
+     * minion's entity is (re)spawned.
+     *
+     * @param entityUuid the new entity uuid
+     */
+    public void setEntityUuid(UUID entityUuid) {
+        this.entityUuid = entityUuid;
+        touch();
+    }
+
     private void touch() {
         this.updatedAt = System.currentTimeMillis();
     }
-}
+                            }
