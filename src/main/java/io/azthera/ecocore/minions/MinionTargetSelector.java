@@ -3,6 +3,7 @@ package io.azthera.ecocore.minions;
 import io.azthera.ecocore.minions.types.MinionHandler;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.BoundingBox;
@@ -69,6 +70,38 @@ public final class MinionTargetSelector {
     }
 
     /**
+     * Finds the first matching block along a straight line extending
+     * from the minion's location in a single facing direction, used
+     * by "facing mode" block-break minions (e.g. a Miner tunneling
+     * straight ahead) as an alternative to the default nearest-in-
+     * radius search. Unlike {@link #findNearestBlock}, this does not
+     * scan sideways or vertically at all - it only ever advances
+     * along one axis.
+     *
+     * @param origin      the minion's (fixed) location
+     * @param facing      the direction to scan in
+     * @param maxDistance how many blocks to scan before giving up
+     * @param handler     the minion's handler, providing the target material set
+     * @return the first matching block along the line, or empty if none found
+     */
+    public Optional<Block> findBlockInFacingDirection(Location origin, BlockFace facing, int maxDistance,
+                                                       MinionHandler handler) {
+        if (handler.getTargetMaterials().isEmpty() || origin.getWorld() == null) {
+            return Optional.empty();
+        }
+
+        Block cursor = origin.getBlock();
+        for (int step = 1; step <= maxDistance; step++) {
+            cursor = cursor.getRelative(facing);
+            if (handler.getTargetMaterials().contains(cursor.getType())) {
+                return Optional.of(cursor);
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    /**
      * Finds the nearest living entity within radius matching the
      * handler's target entity types.
      *
@@ -96,4 +129,4 @@ public final class MinionTargetSelector {
                 .min(Comparator.comparingDouble(entity -> entity.getLocation().distanceSquared(origin)))
                 .map(entity -> (LivingEntity) entity);
     }
-}
+            }
