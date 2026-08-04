@@ -13,9 +13,10 @@ import org.bukkit.entity.Player;
  * Routes every inventory click, drag, and close event for a player
  * with an EcoCore screen open to {@link GuiManager}, which forwards
  * it to that player's currently registered {@code AbstractGui}.
- * Drag events are cancelled outright for any EcoCore screen, since
- * no EcoCore GUI supports multi-slot dragging (storage screens use
- * single clicks only, matching vanilla shift-click/pickup behavior).
+ * Drag events are only allowed through for slots a screen explicitly
+ * marks as free-drag (see {@code AbstractGui#isFreeDragSlot}) - most
+ * screens allow none, but deposit/storage-style screens (e.g. the
+ * {@code /sell} deposit area) opt specific slots in.
  */
 public final class InventoryClickListener implements Listener {
 
@@ -43,9 +44,7 @@ public final class InventoryClickListener implements Listener {
         if (!(event.getWhoClicked() instanceof Player player) || !guiManager.hasOpenGui(player)) {
             return;
         }
-        // MinionStorageGui is the only screen that allows free item movement,
-        // and it only needs single-slot clicks; block drag-splitting everywhere.
-        event.setCancelled(true);
+        guiManager.routeDrag(event);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
