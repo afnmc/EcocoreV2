@@ -49,6 +49,28 @@ public abstract class AbstractGui implements InventoryHolder {
     public abstract void handleClick(InventoryClickEvent event);
 
     /**
+     * Whether a raw inventory slot within this screen allows free
+     * multi-slot dragging (placing/spreading an item stack across
+     * several slots in one drag). Used by
+     * {@code listener.InventoryClickListener}, which cancels any
+     * {@code InventoryDragEvent} that touches even one slot for
+     * which this returns {@code false}.
+     *
+     * <p>The default implementation only allows drags confined
+     * entirely to the viewer's own bottom inventory (raw slots at or
+     * beyond this screen's top inventory size) - i.e. players can
+     * always freely rearrange their own inventory, but dragging into
+     * the GUI itself is blocked unless a screen explicitly opts in
+     * for specific slots (e.g. a deposit/storage area).
+     *
+     * @param rawSlot the raw slot index touched by the drag
+     * @return {@code true} if dragging into this slot is allowed
+     */
+    public boolean isFreeDragSlot(int rawSlot) {
+        return inventory != null && rawSlot >= inventory.getSize();
+    }
+
+    /**
      * Called when the viewer closes this screen. Default implementation
      * does nothing; screens holding transient state can override this
      * to clean up or return items.
