@@ -4,6 +4,8 @@ import io.azthera.ecocore.market.NightMarketManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.util.logging.Level;
+
 /**
  * Periodically checks whether the night market's rotation has expired
  * and triggers {@link NightMarketManager#rotate()} if so. Checks
@@ -36,10 +38,26 @@ public final class NightMarketRotationScheduler {
         stop();
         long checkPeriodTicks = 20L * 60 * 5;
         task = plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, () -> {
-            if (nightMarketManager.millisUntilNextRotation() <= 0) {
-                nightMarketManager.rotate();
+            try {
+                long remaining = nightMarketManager.millisUntilNextRotation();
+                if (remaining <= 0) {
+                    plugin.getLogger().info("[EcoCore] Night market rotation due, rotating now...");
+                    nightMarketManager.rotate();
+                }
+            } catch (Exception exception) {
+                // Previously, any exception thrown here (e.g. a transient
+                // SQLITE_BUSY lock during rotate()'s DB writes) would just be
+                // logged by Bukkit's own scheduler wrapper, and the market
+                // would silently never rotate again if the same failure kept
+                // recurring. Logging it explicitly here makes a stuck
+                // rotation loud in console instead of quietly frozen forever.
+                plugin.getLogger().log(Level.SEVERE,
+                        "[EcoCore] Night market rotation check failed, will retry in 5 minutes", exception);
             }
         }, checkPeriodTicks, checkPeriodTicks);
+
+        plugin.getLogger().info("[EcoCore] Night market rotation scheduler started (checking every 5 minutes). "
+                + "If you never see this line in console, 'night-market-enabled' is off in config.yml.");
     }
 
     /**
