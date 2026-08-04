@@ -9,6 +9,7 @@ import io.azthera.ecocore.model.MinionData;
 import io.azthera.ecocore.model.MinionType;
 import io.azthera.ecocore.sell.SellManager;
 import io.azthera.ecocore.utils.ItemUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -17,6 +18,8 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.Container;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -158,25 +161,101 @@ public final class MinionAiController {
     }
 
     /**
-     * Breaks the nearest matching block within radius INSTANTLY. The
-     * minion never moves - it simply reaches into its surroundings,
-     * so there's no walk-time delay and no line-of-sight requirement
+     * Breaks a matching block within radius INSTANTLY. The minion
+     * never moves - it simply reaches into its surroundings, so
+     * there's no walk-time delay and no line-of-sight requirement
      * (which would otherwise make buried ore unreachable by definition).
+     *
+     * <p>Uses "arena mode" (nearest match anywhere in radius) unless
+     * the minion has "facing mode" enabled, in which case it instead
+     * mines in a straight line in the direction its entity is facing
+     * - see {@link MinionManager#isFacingModeEnabled(long)}.
      */
     private void handleBlockBreak(MinionData data, MinionHandler handler, Entity entity, ItemStack[] storage) {
         Location origin = entity.getLocation();
-        Optional<Block> targetBlock = targetSelector.findNearestBlock(origin, effectiveRadius(data), handler);
+        int radius = effectiveRadius(data);
+
+        boolean facingMode = minionManager != null && minionManager.isFacingModeEnabled(data.getId());
+        Optional<Block> targetBlock = facingMode
+                ? targetSelector.findBlockInFacingDirection(origin, yawToBlockFace(origin.getYaw()), radius, handler)
+                : targetSelector.findNearestBlock(origin, radius, handler);
+
         if (targetBlock.isEmpty()) {
             return;
         }
 
         Block block = targetBlock.get();
+
+        if (!canBreakAt(data, block)) {
+            return;
+        }
+
         Material resultMaterial = handler.resultFor(block.getType());
         int leftover = ItemUtils.addToStorage(storage, new ItemStack(resultMaterial, 1));
         if (leftover == 0) {
             block.setType(Material.AIR);
             animationHandler.playActionEffect(block.getLocation());
         }
+    }
+
+    /**
+     * Converts a yaw angle to the horizontal direction it most
+     * closely faces, used to pick a mining direction for "facing
+     * mode" minions. Follows standard Minecraft yaw convention
+     * (0=south, 90=west, 180=north, 270=east).
+     *
+     * @param yaw the entity's yaw in degrees
+     * @return the closest cardinal {@link BlockFace}
+     */
+    private static BlockFace yawToBlockFace(float yaw) {
+        float normalizedYaw = yaw % 360;
+        if (normalizedYaw < 0) {
+            normalizedYaw += 360;
+        }
+
+        if (normalizedYaw >= 315 || normalizedYaw < 45) {
+            return BlockFace.SOUTH;
+        }
+        if (normalizedYaw < 135) {
+            return BlockFace.WEST;
+        }
+        if (normalizedYaw < 225) {
+            return BlockFace.NORTH;
+        }
+        return BlockFace.EAST;
+    }
+
+    /**
+     * Checks whether the minion's owner is currently allowed to break
+     * a block at the given location, by firing a synthetic
+     * {@link BlockBreakEvent} with the owner as the breaker so that
+     * WorldGuard, GriefPrevention, Towny, or any other protection
+     * plugin listening to that event gets a chance to cancel it -
+     * exactly as it would for a real player-caused break. This lets
+     * minions respect land claims (only breaking within land the
+     * owner is actually permitted to build in) without EcoCore
+     * needing a hard dependency on any specific protection plugin.
+     *
+     * <p><b>Limitation:</b> this check can only run while the
+     * minion's owner is online, since {@code BlockBreakEvent}
+     * requires a live {@link Player} instance. If the owner is
+     * offline, this defaults to allowing the break, matching
+     * EcoCore's previous (unconditional) behavior, rather than
+     * silently starving an offline owner's minions.
+     *
+     * @param data  the minion's persistent data (used to resolve the owner)
+     * @param block the block the minion wants to break
+     * @return {@code true} if the break should proceed
+     */
+    private boolean canBreakAt(MinionData data, Block block) {
+        Player owner = Bukkit.getPlayer(data.getOwnerUuid());
+        if (owner == null) {
+            return true;
+        }
+
+        BlockBreakEvent event = new BlockBreakEvent(block, owner);
+        Bukkit.getPluginManager().callEvent(event);
+        return !event.isCancelled();
     }
 
     private void handleBlockPlace(MinionHandler handler, ItemStack[] storage) {
@@ -220,7 +299,7 @@ public final class MinionAiController {
     }
 
     /**
-     * Collector behavior, three parts:
+     * Collector behavior, four parts:
      * <ol>
      *   <li>Sucks up dropped item entities within radius (unchanged from before).</li>
      *   <li>Pulls items directly out of every OTHER minion belonging to
@@ -230,6 +309,10 @@ public final class MinionAiController {
      *   <li>If a hopper, chest, barrel, or any other container block is
      *       directly adjacent (one of the 6 neighboring blocks) to the
      *       collector, pushes whatever it's currently holding into it.</li>
+     *   <li>Pushes whatever's left after that into any nearby Seller
+     *       Minion belonging to the same owner, so a Collector feeding
+     *       a Seller Minion auto-liquidates instead of just piling up
+     *       storage with nowhere to go.</li>
      * </ol>
      */
     private void handleItemPickup(MinionData data, Entity entity, ItemStack[] storage) {
@@ -254,6 +337,7 @@ public final class MinionAiController {
 
         pullFromNearbyMinions(data, entity, storage, radius);
         pushToAdjacentContainer(entity, storage);
+        pushToNearbySellerMinions(data, entity, storage, radius);
     }
 
     private void pullFromNearbyMinions(MinionData data, Entity entity, ItemStack[] storage, int radius) {
@@ -306,6 +390,51 @@ public final class MinionAiController {
                 }
             }
             return; // Only push into the first container found.
+        }
+    }
+
+    /**
+     * Pushes whatever the Collector is currently holding into any
+     * nearby placed Seller Minion belonging to the same owner, so a
+     * Collector sitting near a Seller Minion automatically feeds it
+     * for auto-liquidation - mirroring {@link #pullFromNearbyMinions}
+     * but in the opposite direction and targeting Seller Minions
+     * specifically. Runs AFTER {@link #pushToAdjacentContainer}, so a
+     * directly-adjacent physical chest still takes priority; only
+     * whatever's left afterward flows to a Seller Minion.
+     *
+     * @param data    the Collector's persistent data
+     * @param entity  the Collector's visual entity
+     * @param storage the Collector's live storage array, mutated in place
+     * @param radius  the Collector's effective work radius
+     */
+    private void pushToNearbySellerMinions(MinionData data, Entity entity, ItemStack[] storage, int radius) {
+        if (minionManager == null) {
+            return;
+        }
+
+        List<MinionManager.NearbyMinionView> nearby = minionManager.getNearbyOwnedMinions(
+                entity.getLocation(), radius, data.getOwnerUuid(), data.getId());
+
+        for (MinionManager.NearbyMinionView other : nearby) {
+            if (other.type() != MinionType.SELLER) {
+                continue;
+            }
+
+            ItemStack[] sellerStorage = other.storage();
+            for (int i = 0; i < storage.length; i++) {
+                ItemStack slot = storage[i];
+                if (slot == null) {
+                    continue;
+                }
+
+                int leftover = ItemUtils.addToStorage(sellerStorage, slot);
+                if (leftover <= 0) {
+                    storage[i] = null;
+                } else if (leftover < slot.getAmount()) {
+                    slot.setAmount(leftover);
+                }
+            }
         }
     }
 
