@@ -7,6 +7,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -18,8 +19,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * Tracks which {@link AbstractGui} screen each player currently has
  * open and routes Bukkit inventory events to it. The actual Bukkit
  * listener registration lives in {@code listener.InventoryClickListener},
- * which simply delegates to {@link #routeClick(InventoryClickEvent)}
- * and {@link #routeClose(InventoryCloseEvent)}.
+ * which simply delegates to {@link #routeClick(InventoryClickEvent)},
+ * {@link #routeDrag(InventoryDragEvent)}, and
+ * {@link #routeClose(InventoryCloseEvent)}.
  *
  * <p>Also provides shared icon/sound helpers backed by {@code gui.yml}
  * so individual screens don't each duplicate material-lookup and
@@ -91,6 +93,37 @@ public final class GuiManager {
 
         if (gui != null) {
             gui.handleClick(event);
+        }
+    }
+
+    /**
+     * Routes a Bukkit inventory drag to the dragging player's
+     * currently registered screen. Cancels the drag outright unless
+     * EVERY raw slot it touches is a free-drag slot for that screen
+     * (see {@link AbstractGui#isFreeDragSlot(int)}), so a drag that
+     * partially overlaps a protected control area (icons, buttons,
+     * etc.) never leaks an item into it.
+     *
+     * @param event the inventory drag event to route
+     */
+    public void routeDrag(InventoryDragEvent event) {
+        if (!(event.getWhoClicked() instanceof Player player)) {
+            event.setCancelled(true);
+            return;
+        }
+
+        AbstractGui gui = openGuis.get(player.getUniqueId());
+
+        if (gui == null) {
+            event.setCancelled(true);
+            return;
+        }
+
+        for (int rawSlot : event.getRawSlots()) {
+            if (!gui.isFreeDragSlot(rawSlot)) {
+                event.setCancelled(true);
+                return;
+            }
         }
     }
 
