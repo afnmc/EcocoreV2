@@ -69,6 +69,20 @@ public final class SellMainGui extends AbstractGui {
     }
 
     /**
+     * Whether dragging is allowed at this raw slot: the deposit area
+     * (free placement of any item, including drag-splitting a stack
+     * across several deposit slots at once) plus the viewer's own
+     * bottom inventory (handled by the default implementation).
+     *
+     * @param rawSlot the raw slot index touched by the drag
+     * @return {@code true} if dragging into this slot is allowed
+     */
+    @Override
+    public boolean isFreeDragSlot(int rawSlot) {
+        return (rawSlot >= DEPOSIT_START_SLOT && rawSlot <= DEPOSIT_END_SLOT) || super.isFreeDragSlot(rawSlot);
+    }
+
+    /**
      * Repopulates the control slots in place. Deliberately never
      * touches slots {@link #DEPOSIT_START_SLOT}-{@link #DEPOSIT_END_SLOT}
      * so items the player has placed there survive every re-render
@@ -219,4 +233,4 @@ public final class SellMainGui extends AbstractGui {
             inventory.setItem(slot, null);
         }
     }
-            }
+                                           }
