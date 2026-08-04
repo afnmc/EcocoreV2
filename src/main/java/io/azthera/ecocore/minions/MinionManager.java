@@ -73,6 +73,17 @@ public final class MinionManager {
 
     private static final String MINION_ID_KEY = "minion_id";
 
+    /**
+     * Persistent-data key tagging whether a block-break minion is in
+     * "facing mode" (mines in a straight line in the direction its
+     * entity is facing) rather than the default "arena mode" (mines
+     * the nearest match anywhere within its radius). Stored directly
+     * on the minion's visual entity rather than in the database, so
+     * no schema migration is needed and it survives world saves the
+     * same way the entity's own position/rotation does.
+     */
+    private static final String FACING_MODE_KEY = "minion_facing_mode";
+
     private final Logger logger;
     private final MinionsDao minionsDao;
     private final MinionsConfig minionsConfig;
@@ -424,6 +435,61 @@ public final class MinionManager {
     }
 
     /**
+     * Resolves the current live entity for an active minion by id,
+     * for callers outside this class (e.g. GUIs reading/writing the
+     * facing-mode flag). Re-uses the same stale-reference healing as
+     * {@link #resolveLiveEntity}.
+     *
+     * @param minionId the minion's database id
+     * @return the live entity, or {@code null} if the minion isn't
+     *         active or its chunk isn't currently loaded
+     */
+    public Entity getMinionEntity(long minionId) {
+        ActiveMinion active = activeMinions.get(minionId);
+        return active != null ? resolveLiveEntity(active) : null;
+    }
+
+    /**
+     * Whether a block-break minion currently has "facing mode"
+     * enabled (mines in a straight line in the direction it's facing,
+     * instead of the nearest match anywhere in its radius).
+     *
+     * @param minionId the minion's database id
+     * @return {@code true} if facing mode is on; {@code false} if
+     *         off, unset, or the minion's entity isn't currently
+     *         loaded (defaults to arena mode, its previous-only behavior)
+     */
+    public boolean isFacingModeEnabled(long minionId) {
+        Entity entity = getMinionEntity(minionId);
+        if (entity == null) {
+            return false;
+        }
+
+        NamespacedKey key = new NamespacedKey(EcoCorePlugin.getInstance(), FACING_MODE_KEY);
+        Byte value = entity.getPersistentDataContainer().get(key, PersistentDataType.BYTE);
+        return value != null && value == (byte) 1;
+    }
+
+    /**
+     * Toggles a block-break minion's facing-mode flag. No-ops
+     * silently if the minion's entity isn't currently loaded (the
+     * player would need to be standing near an unloaded minion's GUI
+     * anyway, which shouldn't normally happen).
+     *
+     * @param minionId the minion's database id
+     * @param enabled  the new facing-mode value
+     */
+    public void setFacingModeEnabled(long minionId, boolean enabled) {
+        Entity entity = getMinionEntity(minionId);
+        if (entity == null) {
+            return;
+        }
+
+        NamespacedKey key = new NamespacedKey(EcoCorePlugin.getInstance(), FACING_MODE_KEY);
+        entity.getPersistentDataContainer().set(key, PersistentDataType.BYTE, (byte) (enabled ? 1 : 0));
+    }
+
+    /**
      * Returns every other minion belonging to the same owner within a
      * radius of a location, for the Collector's cross-minion pulling
      * behavior. Distance is computed from each minion's stored
@@ -513,4 +579,4 @@ public final class MinionManager {
     public MinionsConfig getMinionsConfig() {
         return minionsConfig;
     }
-            }
+    }
