@@ -6,6 +6,8 @@ import io.azthera.ecocore.gui.AbstractGui;
 import io.azthera.ecocore.gui.GuiManager;
 import io.azthera.ecocore.minions.MinionManager;
 import io.azthera.ecocore.minions.MinionUpgradeManager;
+import io.azthera.ecocore.minions.types.MinionHandler;
+import io.azthera.ecocore.minions.types.MinionProcessingType;
 import io.azthera.ecocore.model.MinionData;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -31,6 +33,7 @@ public final class MinionUpgradeGui extends AbstractGui {
     private static final int AUTO_SELL_TOGGLE_SLOT = 29;
     private static final int AUTO_SMELT_TOGGLE_SLOT = 31;
     private static final int AUTO_REPAIR_TOGGLE_SLOT = 33;
+    private static final int MODE_TOGGLE_SLOT = 38;
     private static final int REMOVE_SLOT = 40;
     private static final int BACK_SLOT = 45;
     private static final int CLOSE_SLOT = 49;
@@ -101,6 +104,12 @@ public final class MinionUpgradeGui extends AbstractGui {
         inventory.setItem(AUTO_SMELT_TOGGLE_SLOT, buildToggleIcon("Auto Smelt", data.isAutoSmelt()));
         inventory.setItem(AUTO_REPAIR_TOGGLE_SLOT, buildToggleIcon("Auto Repair", data.isAutoRepair()));
 
+        MinionHandler handler = minionManager.getHandler(data.getType());
+        if (handler != null && handler.getProcessingType() == MinionProcessingType.BLOCK_BREAK) {
+            boolean facingMode = minionManager.isFacingModeEnabled(minionId);
+            inventory.setItem(MODE_TOGGLE_SLOT, buildModeToggleIcon(facingMode));
+        }
+
         inventory.setItem(REMOVE_SLOT, buildRemoveIcon());
         inventory.setItem(BACK_SLOT, guiManager.buildButtonIcon("back", "§eKembali"));
         inventory.setItem(CLOSE_SLOT, guiManager.buildButtonIcon("close", "§cTutup"));
@@ -149,6 +158,36 @@ public final class MinionUpgradeGui extends AbstractGui {
         if (meta != null) {
             meta.setDisplayName((enabled ? "§a" : "§7") + label + ": " + (enabled ? "ON" : "OFF"));
             meta.setLore(List.of("§7Klik untuk toggle."));
+            icon.setItemMeta(meta);
+        }
+        return icon;
+    }
+
+    /**
+     * Builds the mining-mode toggle icon, only shown for minions
+     * whose handler processing type is {@code BLOCK_BREAK} (Miner,
+     * Quarry, Lumberjack). "Arena mode" is the original behavior
+     * (nearest matching block anywhere in radius); "facing mode"
+     * mines in a straight line in the direction the minion's entity
+     * is facing, like a tunnel borer.
+     *
+     * @param facingMode whether facing mode is currently active
+     * @return the built toggle icon
+     */
+    private ItemStack buildModeToggleIcon(boolean facingMode) {
+        ItemStack icon = new ItemStack(facingMode ? Material.TARGET : Material.COMPASS);
+        ItemMeta meta = icon.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(facingMode ? "§bMode: Depan Muka" : "§bMode: Arena");
+            meta.setLore(List.of(
+                    facingMode
+                            ? "§7Minion nambang lurus ke arah dia menghadap,"
+                            : "§7Minion nambang blok terdekat di area radius,",
+                    facingMode
+                            ? "§7kayak nge-bor terowongan lurus ke depan."
+                            : "§7gak peduli arah hadap minion-nya.",
+                    "§eKlik untuk ganti mode."
+            ));
             icon.setItemMeta(meta);
         }
         return icon;
@@ -232,6 +271,17 @@ public final class MinionUpgradeGui extends AbstractGui {
             return;
         }
 
+        if (slot == MODE_TOGGLE_SLOT) {
+            MinionHandler handler = minionManager.getHandler(data.getType());
+            if (handler != null && handler.getProcessingType() == MinionProcessingType.BLOCK_BREAK) {
+                boolean nowFacing = !minionManager.isFacingModeEnabled(minionId);
+                minionManager.setFacingModeEnabled(minionId, nowFacing);
+                guiManager.playSound(viewer, "click");
+                render();
+            }
+            return;
+        }
+
         if (slot == REMOVE_SLOT) {
             boolean removed = minionManager.removeAndRefund(minionId, viewer);
             if (removed) {
@@ -243,4 +293,4 @@ public final class MinionUpgradeGui extends AbstractGui {
             viewer.closeInventory();
         }
     }
-                          }
+                                                                 }
