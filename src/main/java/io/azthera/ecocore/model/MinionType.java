@@ -14,10 +14,9 @@ public enum MinionType {
     SMELTER,
     STORAGE,
     SELLER,
-    HARVESTER,
-    PLANTER,
     BREEDER,
-    QUARRY;
+    QUARRY,
+    MINION_CHEST;
 
     /**
      * Returns the lowercase config key used in minions.yml (e.g. "mob_killer").

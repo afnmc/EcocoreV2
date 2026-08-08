@@ -3,7 +3,6 @@ package io.azthera.ecocore.commands;
 import io.azthera.ecocore.config.ConfigManager;
 import io.azthera.ecocore.gui.GuiManager;
 import io.azthera.ecocore.gui.sell.SellMainGui;
-import io.azthera.ecocore.sell.AutoSellManager;
 import io.azthera.ecocore.sell.SellManager;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -17,22 +16,18 @@ import org.bukkit.entity.Player;
 public final class SellCommand implements CommandExecutor {
 
     private final SellManager sellManager;
-    private final AutoSellManager autoSellManager;
     private final ConfigManager configManager;
     private final GuiManager guiManager;
 
     /**
      * Creates the sell command.
      *
-     * @param sellManager     shared sell manager
-     * @param autoSellManager shared auto-sell manager
-     * @param configManager   resolved main config manager
-     * @param guiManager      shared GUI manager
+     * @param sellManager   shared sell manager
+     * @param configManager resolved main config manager
+     * @param guiManager    shared GUI manager
      */
-    public SellCommand(SellManager sellManager, AutoSellManager autoSellManager,
-                        ConfigManager configManager, GuiManager guiManager) {
+    public SellCommand(SellManager sellManager, ConfigManager configManager, GuiManager guiManager) {
         this.sellManager = sellManager;
-        this.autoSellManager = autoSellManager;
         this.configManager = configManager;
         this.guiManager = guiManager;
     }
@@ -49,7 +44,7 @@ public final class SellCommand implements CommandExecutor {
             return true;
         }
 
-        SellMainGui gui = new SellMainGui(player, sellManager, autoSellManager, guiManager, configManager.getMessagesConfig());
+        SellMainGui gui = new SellMainGui(player, sellManager, guiManager, configManager.getMessagesConfig());
         guiManager.register(player, gui);
         gui.open();
         return true;

@@ -3,7 +3,6 @@ package io.azthera.ecocore.gui.sell;
 import io.azthera.ecocore.config.MessagesConfig;
 import io.azthera.ecocore.gui.AbstractGui;
 import io.azthera.ecocore.gui.GuiManager;
-import io.azthera.ecocore.sell.AutoSellManager;
 import io.azthera.ecocore.sell.SellManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -28,6 +27,11 @@ import java.util.Map;
  * to their inventory in {@link #handleClose}, dropping any overflow
  * on the ground if their inventory is full - nothing is ever lost
  * silently.
+ *
+ * <p>This screen no longer offers a player-level Auto Sell toggle:
+ * automatic selling is now exclusively the Sell Minion's job (see
+ * {@code SellerMinion}), so a separate global auto-sell-on-pickup
+ * switch here would be redundant and confusing.
  */
 public final class SellMainGui extends AbstractGui {
 
@@ -36,28 +40,24 @@ public final class SellMainGui extends AbstractGui {
     private static final int DEPOSIT_END_SLOT = 26;
     private static final int SELL_INVENTORY_SLOT = 38;
     private static final int SELL_DEPOSITED_SLOT = 40;
-    private static final int AUTO_SELL_TOGGLE_SLOT = 42;
     private static final int CLOSE_SLOT = 49;
 
     private final SellManager sellManager;
-    private final AutoSellManager autoSellManager;
     private final GuiManager guiManager;
     private final MessagesConfig messagesConfig;
 
     /**
      * Creates the sell main screen.
      *
-     * @param viewer          the viewing player
-     * @param sellManager     shared sell manager
-     * @param autoSellManager shared auto-sell manager
-     * @param guiManager      shared GUI manager
-     * @param messagesConfig  resolved messages.yml configuration
+     * @param viewer         the viewing player
+     * @param sellManager    shared sell manager
+     * @param guiManager     shared GUI manager
+     * @param messagesConfig resolved messages.yml configuration
      */
-    public SellMainGui(Player viewer, SellManager sellManager, AutoSellManager autoSellManager,
+    public SellMainGui(Player viewer, SellManager sellManager,
                         GuiManager guiManager, MessagesConfig messagesConfig) {
         super(viewer);
         this.sellManager = sellManager;
-        this.autoSellManager = autoSellManager;
         this.guiManager = guiManager;
         this.messagesConfig = messagesConfig;
     }
@@ -85,8 +85,7 @@ public final class SellMainGui extends AbstractGui {
     /**
      * Repopulates the control slots in place. Deliberately never
      * touches slots {@link #DEPOSIT_START_SLOT}-{@link #DEPOSIT_END_SLOT}
-     * so items the player has placed there survive every re-render
-     * (auto-sell toggle, selling, etc).
+     * so items the player has placed there survive every re-render.
      */
     private void render() {
         ItemStack info = new ItemStack(Material.HOPPER);
@@ -121,16 +120,6 @@ public final class SellMainGui extends AbstractGui {
         }
         inventory.setItem(SELL_DEPOSITED_SLOT, sellDeposited);
 
-        boolean autoSellOn = autoSellManager.isEnabled(viewer.getUniqueId());
-        ItemStack autoSell = new ItemStack(autoSellOn ? Material.LIME_DYE : Material.GRAY_DYE);
-        ItemMeta autoSellMeta = autoSell.getItemMeta();
-        if (autoSellMeta != null) {
-            autoSellMeta.setDisplayName(autoSellOn ? "§a§lAuto Sell: ON" : "§7§lAuto Sell: OFF");
-            autoSellMeta.setLore(List.of("§7Klik untuk toggle auto-sell."));
-            autoSell.setItemMeta(autoSellMeta);
-        }
-        inventory.setItem(AUTO_SELL_TOGGLE_SLOT, autoSell);
-
         inventory.setItem(CLOSE_SLOT, guiManager.buildButtonIcon("close", "§cTutup"));
     }
 
@@ -140,7 +129,12 @@ public final class SellMainGui extends AbstractGui {
 
         if (slot >= DEPOSIT_START_SLOT && slot <= DEPOSIT_END_SLOT) {
             // Allow completely free vanilla interaction (place, take back,
-            // shift-click in) within the deposit area.
+            // shift-click in) within the deposit area. Explicitly
+            // un-cancel: without this, if anything else already flagged
+            // the event as cancelled before this handler ran, simply
+            // returning here would leave it cancelled and silently
+            // block the player from placing items at all.
+            event.setCancelled(false);
             return;
         }
 
@@ -156,13 +150,6 @@ public final class SellMainGui extends AbstractGui {
                     viewer, sellManager, guiManager, messagesConfig, SellConfirmGui.Mode.INVENTORY, null, this);
             guiManager.register(viewer, confirmGui);
             confirmGui.open();
-            return;
-        }
-
-        if (slot == AUTO_SELL_TOGGLE_SLOT) {
-            boolean nowEnabled = autoSellManager.toggle(viewer.getUniqueId());
-            viewer.sendMessage(nowEnabled ? "§aAuto-sell diaktifkan." : "§7Auto-sell dimatikan.");
-            render();
             return;
         }
 
@@ -233,4 +220,4 @@ public final class SellMainGui extends AbstractGui {
             inventory.setItem(slot, null);
         }
     }
-            }
+}

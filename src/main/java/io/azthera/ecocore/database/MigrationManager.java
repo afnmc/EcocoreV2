@@ -10,6 +10,7 @@ import io.azthera.ecocore.database.migrations.V6__AiLearning;
 import io.azthera.ecocore.database.migrations.V7__DiscordLogs;
 import io.azthera.ecocore.database.migrations.V8__NightMarket;
 import io.azthera.ecocore.database.migrations.V9__MinionEntityUuid;
+import io.azthera.ecocore.database.migrations.V10__MinionConnectors;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -48,6 +49,7 @@ public final class MigrationManager {
         register(new V7__DiscordLogs());
         register(new V8__NightMarket());
         register(new V9__MinionEntityUuid());
+        register(new V10__MinionConnectors());
     }
 
     /**

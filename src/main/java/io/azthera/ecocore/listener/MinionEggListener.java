@@ -57,13 +57,22 @@ public final class MinionEggListener implements Listener {
             return;
         }
 
+        // Every minion always faces a single fixed direction (south,
+        // yaw 0), regardless of which way the player was looking or
+        // which branch placed it. Previously, air-clicks inherited the
+        // player's own yaw while block-clicks used a fixed yaw of 0 -
+        // that mismatch made a minion's working direction depend on
+        // how the player happened to be facing at placement time,
+        // rotating "like a piston" from one placement to the next.
         Location placeLocation;
         Block clickedBlock = event.getClickedBlock();
         if (clickedBlock != null) {
             placeLocation = clickedBlock.getLocation().add(0.5, 1.0, 0.5);
         } else {
-            placeLocation = player.getLocation();
+            placeLocation = player.getLocation().clone();
         }
+        placeLocation.setYaw(0f);
+        placeLocation.setPitch(0f);
 
         MinionData placed = minionManager.placeMinion(player, type, placeLocation);
         if (placed == null) {

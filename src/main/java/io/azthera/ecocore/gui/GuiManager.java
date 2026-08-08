@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -161,6 +162,25 @@ public final class GuiManager {
 
         openGuis.remove(player.getUniqueId());
         gui.handleClose(event);
+    }
+
+    /**
+     * Routes a Bukkit prepare-anvil event (fired whenever the item(s)
+     * or rename text in an open anvil screen change) to the viewing
+     * player's currently registered screen, if any.
+     *
+     * @param event the prepare-anvil event to route
+     */
+    public void routePrepareAnvil(PrepareAnvilEvent event) {
+        if (event.getViewers().isEmpty() || !(event.getViewers().get(0) instanceof Player player)) {
+            return;
+        }
+
+        AbstractGui gui = openGuis.get(player.getUniqueId());
+
+        if (gui != null) {
+            gui.handlePrepareAnvil(event);
+        }
     }
 
     /**

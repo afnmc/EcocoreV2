@@ -32,8 +32,8 @@ public final class MinionUpgradeGui extends AbstractGui {
     private static final int SPEED_UPGRADE_SLOT = 24;
     private static final int AUTO_SELL_TOGGLE_SLOT = 29;
     private static final int AUTO_SMELT_TOGGLE_SLOT = 31;
-    private static final int AUTO_REPAIR_TOGGLE_SLOT = 33;
     private static final int MODE_TOGGLE_SLOT = 38;
+    private static final int CONNECTOR_SLOT = 42;
     private static final int REMOVE_SLOT = 40;
     private static final int BACK_SLOT = 45;
     private static final int CLOSE_SLOT = 49;
@@ -71,6 +71,10 @@ public final class MinionUpgradeGui extends AbstractGui {
         return io.azthera.ecocore.EcoCorePlugin.getInstance().getMinionUpgradeManager();
     }
 
+    private io.azthera.ecocore.minions.MinionConnectorManager resolveConnectorManager() {
+        return io.azthera.ecocore.EcoCorePlugin.getInstance().getMinionConnectorManager();
+    }
+
     @Override
     public void build() {
         inventory = Bukkit.createInventory(this, 54, "§8Upgrade Minion");
@@ -100,9 +104,15 @@ public final class MinionUpgradeGui extends AbstractGui {
                 Material.SUGAR, "§dUpgrade Speed", data, upgrades, MinionUpgradeManager.UpgradeType.SPEED,
                 data.getSpeedTicks() + " tick/aksi"));
 
-        inventory.setItem(AUTO_SELL_TOGGLE_SLOT, buildToggleIcon("Auto Sell", data.isAutoSell()));
         inventory.setItem(AUTO_SMELT_TOGGLE_SLOT, buildToggleIcon("Auto Smelt", data.isAutoSmelt()));
-        inventory.setItem(AUTO_REPAIR_TOGGLE_SLOT, buildToggleIcon("Auto Repair", data.isAutoRepair()));
+
+        // Auto Sell only makes sense for the Sell Minion itself - every
+        // other minion type just fills its own storage and relies on a
+        // Collector/Sell Minion downstream, so the toggle is hidden for
+        // them entirely instead of showing a switch that does nothing.
+        if (data.getType() == io.azthera.ecocore.model.MinionType.SELLER) {
+            inventory.setItem(AUTO_SELL_TOGGLE_SLOT, buildToggleIcon("Auto Sell", data.isAutoSell()));
+        }
 
         MinionHandler handler = minionManager.getHandler(data.getType());
         if (handler != null && handler.getProcessingType() == MinionProcessingType.BLOCK_BREAK) {
@@ -111,6 +121,7 @@ public final class MinionUpgradeGui extends AbstractGui {
         }
 
         inventory.setItem(REMOVE_SLOT, buildRemoveIcon());
+        inventory.setItem(CONNECTOR_SLOT, buildConnectorIcon());
         inventory.setItem(BACK_SLOT, guiManager.buildButtonIcon("back", "§eKembali"));
         inventory.setItem(CLOSE_SLOT, guiManager.buildButtonIcon("close", "§cTutup"));
     }
@@ -193,6 +204,21 @@ public final class MinionUpgradeGui extends AbstractGui {
         return icon;
     }
 
+    private ItemStack buildConnectorIcon() {
+        ItemStack icon = new ItemStack(Material.BLAZE_ROD);
+        ItemMeta meta = icon.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName("§b§lConnector");
+            meta.setLore(List.of(
+                    "§7Lihat & atur kemana minion ini ngirim barang",
+                    "§7lewat Connector Network.",
+                    "§eKlik untuk buka."
+            ));
+            icon.setItemMeta(meta);
+        }
+        return icon;
+    }
+
     private ItemStack buildRemoveIcon() {
         ItemStack icon = new ItemStack(Material.BARRIER);
         ItemMeta meta = icon.getItemMeta();
@@ -247,6 +273,7 @@ public final class MinionUpgradeGui extends AbstractGui {
                 boolean purchased = upgrades.purchaseUpgrade(viewer.getUniqueId(), data, type);
                 if (purchased) {
                     guiManager.playSound(viewer, "level-up");
+                    minionManager.refreshMinionDisplay(minionId);
                 } else {
                     guiManager.playSound(viewer, "error");
                 }
@@ -255,18 +282,13 @@ public final class MinionUpgradeGui extends AbstractGui {
             }
         }
 
-        if (slot == AUTO_SELL_TOGGLE_SLOT) {
+        if (slot == AUTO_SELL_TOGGLE_SLOT && data.getType() == io.azthera.ecocore.model.MinionType.SELLER) {
             data.setAutoSell(!data.isAutoSell());
             render();
             return;
         }
         if (slot == AUTO_SMELT_TOGGLE_SLOT) {
             data.setAutoSmelt(!data.isAutoSmelt());
-            render();
-            return;
-        }
-        if (slot == AUTO_REPAIR_TOGGLE_SLOT) {
-            data.setAutoRepair(!data.isAutoRepair());
             render();
             return;
         }
@@ -279,6 +301,14 @@ public final class MinionUpgradeGui extends AbstractGui {
                 guiManager.playSound(viewer, "click");
                 render();
             }
+            return;
+        }
+
+        if (slot == CONNECTOR_SLOT) {
+            ConnectorGui connectorGui = new ConnectorGui(
+                    viewer, minionManager, resolveConnectorManager(), guiManager, minionId, this);
+            guiManager.register(viewer, connectorGui);
+            connectorGui.open();
             return;
         }
 

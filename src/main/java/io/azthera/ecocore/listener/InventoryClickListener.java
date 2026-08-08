@@ -7,6 +7,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.entity.Player;
 
 /**
@@ -50,5 +51,14 @@ public final class InventoryClickListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onClose(InventoryCloseEvent event) {
         guiManager.routeClose(event);
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onPrepareAnvil(PrepareAnvilEvent event) {
+        if (event.getViewers().isEmpty() || !(event.getViewers().get(0) instanceof Player player)
+                || !guiManager.hasOpenGui(player)) {
+            return;
+        }
+        guiManager.routePrepareAnvil(event);
     }
 }

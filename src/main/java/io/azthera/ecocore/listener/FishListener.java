@@ -3,7 +3,6 @@ package io.azthera.ecocore.listener;
 import io.azthera.ecocore.config.InflationConfig;
 import io.azthera.ecocore.inflation.InflationEngine;
 import io.azthera.ecocore.jobs.JobsManager;
-import io.azthera.ecocore.sell.AutoSellManager;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -14,15 +13,16 @@ import org.bukkit.inventory.ItemStack;
 
 /**
  * Translates successful fishing catches into Fisherman job actions,
- * distinguishing ordinary fish catches from treasure/junk outcomes,
- * and auto-sells the catch if the player has auto-sell enabled.
+ * distinguishing ordinary fish catches from treasure/junk outcomes.
+ *
+ * <p>No longer attempts player-level auto-sell on the catch -
+ * automatic selling is exclusively the Sell Minion's job now.
  */
 public final class FishListener implements Listener {
 
     private final JobsManager jobsManager;
     private final InflationEngine inflationEngine;
     private final InflationConfig inflationConfig;
-    private final AutoSellManager autoSellManager;
 
     /**
      * Creates the fish listener.
@@ -30,14 +30,12 @@ public final class FishListener implements Listener {
      * @param jobsManager     shared jobs manager
      * @param inflationEngine shared inflation engine, used for the current job-bonus multiplier
      * @param inflationConfig resolved inflation.yml configuration
-     * @param autoSellManager shared auto-sell manager
      */
     public FishListener(JobsManager jobsManager, InflationEngine inflationEngine,
-                         InflationConfig inflationConfig, AutoSellManager autoSellManager) {
+                         InflationConfig inflationConfig) {
         this.jobsManager = jobsManager;
         this.inflationEngine = inflationEngine;
         this.inflationConfig = inflationConfig;
-        this.autoSellManager = autoSellManager;
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -63,9 +61,5 @@ public final class FishListener implements Listener {
                 .jobBonusMultiplier();
 
         jobsManager.processAction(player.getUniqueId(), actionKey, jobBonusMultiplier);
-
-        if (autoSellManager.isEnabled(player.getUniqueId())) {
-            autoSellManager.attemptAutoSell(player.getUniqueId(), caught);
-        }
     }
 }

@@ -8,12 +8,11 @@ import io.azthera.ecocore.minions.types.BreederMinion;
 import io.azthera.ecocore.minions.types.CollectorMinion;
 import io.azthera.ecocore.minions.types.FarmerMinion;
 import io.azthera.ecocore.minions.types.FishingMinion;
-import io.azthera.ecocore.minions.types.HarvesterMinion;
 import io.azthera.ecocore.minions.types.LumberjackMinion;
 import io.azthera.ecocore.minions.types.MinerMinion;
+import io.azthera.ecocore.minions.types.MinionChestMinion;
 import io.azthera.ecocore.minions.types.MinionHandler;
 import io.azthera.ecocore.minions.types.MobKillerMinion;
-import io.azthera.ecocore.minions.types.PlanterMinion;
 import io.azthera.ecocore.minions.types.QuarryMinion;
 import io.azthera.ecocore.minions.types.SellerMinion;
 import io.azthera.ecocore.minions.types.SmelterMinion;
@@ -89,6 +88,7 @@ public final class MinionManager {
     private final MinionsConfig minionsConfig;
     private final MinionFactory minionFactory;
     private final MinionAiController aiController;
+    private final MinionConnectorManager connectorManager;
 
     private final Map<MinionType, MinionHandler> handlers = new EnumMap<>(MinionType.class);
 
@@ -131,14 +131,17 @@ public final class MinionManager {
      * @param minionsConfig resolved minions.yml configuration
      * @param minionFactory factory for new minion data
      * @param aiController  shared AI controller ticking every active minion
+     * @param connectorManager shared Connector Network manager, used to clean up connections on removal
      */
     public MinionManager(Logger logger, MinionsDao minionsDao, MinionsConfig minionsConfig,
-                          MinionFactory minionFactory, MinionAiController aiController) {
+                          MinionFactory minionFactory, MinionAiController aiController,
+                          MinionConnectorManager connectorManager) {
         this.logger = logger;
         this.minionsDao = minionsDao;
         this.minionsConfig = minionsConfig;
         this.minionFactory = minionFactory;
         this.aiController = aiController;
+        this.connectorManager = connectorManager;
 
         registerHandlers();
     }
@@ -154,10 +157,9 @@ public final class MinionManager {
         handlers.put(MinionType.SMELTER, new SmelterMinion());
         handlers.put(MinionType.STORAGE, new StorageMinion());
         handlers.put(MinionType.SELLER, new SellerMinion());
-        handlers.put(MinionType.HARVESTER, new HarvesterMinion());
-        handlers.put(MinionType.PLANTER, new PlanterMinion());
         handlers.put(MinionType.BREEDER, new BreederMinion());
         handlers.put(MinionType.QUARRY, new QuarryMinion());
+        handlers.put(MinionType.MINION_CHEST, new MinionChestMinion());
     }
 
     public MinionHandler getHandler(MinionType type) {
@@ -387,6 +389,8 @@ public final class MinionManager {
             return false;
         }
 
+        connectorManager.removeAllInvolving(minionId);
+
         Entity entity = resolveLiveEntity(active);
         if (entity != null) {
             entity.remove();
@@ -427,6 +431,31 @@ public final class MinionManager {
     public MinionData getMinion(long minionId) {
         ActiveMinion active = activeMinions.get(minionId);
         return active != null ? active.data : null;
+    }
+
+    /**
+     * Immediately re-applies a minion's custom-name/level display to
+     * its live entity, instead of waiting for the next scheduled
+     * {@link #tickAll} pass. Call this right after any change that
+     * should be visible on the minion right away (e.g. an upgrade
+     * purchase) - without it, the entity's nametag only refreshes on
+     * its next tick, which for a minion with a long speed interval can
+     * look like it's "stuck" showing stale info even though the GUI
+     * (which reads the data object directly) already shows the change.
+     *
+     * @param minionId the minion whose display should be refreshed
+     */
+    public void refreshMinionDisplay(long minionId) {
+        ActiveMinion active = activeMinions.get(minionId);
+        if (active == null) {
+            return;
+        }
+
+        Entity entity = resolveLiveEntity(active);
+        if (entity instanceof LivingEntity livingEntity) {
+            livingEntity.setCustomNameVisible(true);
+            livingEntity.setCustomName(active.data.getType().configKey() + " Lv." + active.data.getLevel());
+        }
     }
 
     public ItemStack[] getMinionStorage(long minionId) {

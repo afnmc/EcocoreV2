@@ -105,6 +105,11 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.sql.SQLException;
 
+/**
+ * EcoCore's main plugin class: wires every module together in
+ * dependency order on {@link #onEnable()} and tears everything down
+ * cleanly on {@link #onDisable()}.
+ */
 public final class EcoCorePlugin extends JavaPlugin {
 
     private static EcoCorePlugin instance;
@@ -345,6 +350,10 @@ public final class EcoCorePlugin extends JavaPlugin {
         minionManager = new MinionManager(getLogger(), minionsDao, configManager.getMinionsConfig(),
                 minionFactory, aiController, minionConnectorManager);
 
+        // Late-bind: MinionAiController needs to enumerate other active
+        // minions (for the Collector's cross-minion pulling) but MinionManager
+        // is the one that owns/constructs the controller, so this can't be
+        // done via constructor injection without a cycle.
         aiController.setMinionManager(minionManager);
 
         minionManager.loadAll();
@@ -551,4 +560,4 @@ public final class EcoCorePlugin extends JavaPlugin {
     public EcoCoreAPI getApi() {
         return api;
     }
-}
+    }

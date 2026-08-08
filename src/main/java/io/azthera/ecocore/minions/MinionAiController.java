@@ -31,6 +31,21 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Logger;
 
+/**
+ * Runs a single tick of AI behavior for one placed minion: energy
+ * regen, fuel consumption, target selection, and executing whichever
+ * {@link io.azthera.ecocore.minions.types.MinionProcessingType}
+ * behavior its handler declares.
+ *
+ * <p>Minions are STATIONARY - they never move from their placement
+ * spot. Every action here acts directly on whatever's within the
+ * minion's configured radius, the same way a hopper or dispenser
+ * works on its immediate surroundings without walking anywhere.
+ *
+ * <p>Called once per configured tick interval per minion by
+ * {@code MinionManager}, which owns the minion's visual entity and
+ * live storage array.
+ */
 public final class MinionAiController {
 
     private static final double ENERGY_REGEN_PER_TICK_FRACTION = 0.02;
@@ -38,8 +53,20 @@ public final class MinionAiController {
             BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN
     };
 
+    /**
+     * How many of a Farmer's or Lumberjack's storage slots (starting
+     * from index 0) are reserved as "Storage A" - seeds/saplings kept
+     * for replanting - versus "Storage B" (the rest of the array),
+     * which holds normal harvested output. See
+     * {@link #zoneBStart(MinionType)}. Collectors are only ever
+     * allowed to pull from Storage B (see {@link #pullFromNearbyMinions})
+     * and the Connector Network only ever routes out of Storage B
+     * (see {@link #pushAlongConnections}), so a Farmer's seed stash
+     * never accidentally gets vacuumed away by its own logistics.
+     */
     private static final int ZONE_A_SLOTS = 4;
 
+    /** Crop block -> the seed/planting material that grows it, used by {@link #handleFarmCycle}. */
     private static final Map<Material, Material> CROP_SEEDS = Map.of(
             Material.WHEAT, Material.WHEAT_SEEDS,
             Material.CARROTS, Material.CARROT,
@@ -48,6 +75,7 @@ public final class MinionAiController {
             Material.NETHER_WART, Material.NETHER_WART
     );
 
+    /** Log block -> the sapling that regrows it, used by the Lumberjack's auto-replant in {@link #handleBlockBreak}. */
     private static final Map<Material, Material> LOG_SAPLINGS = Map.ofEntries(
             Map.entry(Material.OAK_LOG, Material.OAK_SAPLING),
             Map.entry(Material.BIRCH_LOG, Material.BIRCH_SAPLING),
@@ -68,8 +96,27 @@ public final class MinionAiController {
     private final EconomyEngine economyEngine;
     private final MinionConnectorManager connectorManager;
 
+    /**
+     * Late-bound after construction to break the constructor cycle
+     * with {@link MinionManager} (which itself owns this controller).
+     * Set once from {@code EcoCorePlugin.setupMinions()} right after
+     * both objects are built. Used by the Collector's "pull from
+     * nearby minions" behavior.
+     */
     private MinionManager minionManager;
 
+    /**
+     * Creates the AI controller.
+     *
+     * @param logger           plugin logger
+     * @param minionsConfig    resolved minions.yml configuration
+     * @param fuelManager      fuel consumption/refuel manager
+     * @param targetSelector   block/entity target selection
+     * @param animationHandler visual/audio feedback helper
+     * @param sellManager      used by INTERNAL_SELL minions to liquidate storage
+     * @param economyEngine    used to pay the owner for INTERNAL_SELL results
+     * @param connectorManager shared Connector Network manager, used by Collectors/Minion Chests/Sell Minions to route items along drawn connections
+     */
     public MinionAiController(Logger logger, MinionsConfig minionsConfig, MinionFuelManager fuelManager,
                                MinionTargetSelector targetSelector, MinionAnimationHandler animationHandler,
                                SellManager sellManager, EconomyEngine economyEngine,
@@ -84,10 +131,25 @@ public final class MinionAiController {
         this.connectorManager = connectorManager;
     }
 
+    /**
+     * Wires in the minion manager after both objects exist. Must be
+     * called once before {@link #tick} is ever invoked, or the
+     * Collector's cross-minion pulling silently no-ops.
+     *
+     * @param minionManager the shared minion manager
+     */
     public void setMinionManager(MinionManager minionManager) {
         this.minionManager = minionManager;
     }
 
+    /**
+     * Runs one tick of behavior for a single minion.
+     *
+     * @param data    the minion's persistent data, mutated in place
+     * @param handler the minion's type handler
+     * @param entity  the minion's visual entity in the world (its fixed location)
+     * @param storage the minion's live storage contents array, mutated in place
+     */
     public void tick(MinionData data, MinionHandler handler, Entity entity, ItemStack[] storage) {
         regenerateEnergy(data);
         fuelManager.consumeTick(data);
@@ -122,6 +184,13 @@ public final class MinionAiController {
             }
         }
 
+        // Universal Connector Network step: ANY minion type with outgoing
+        // connections drawn from it (see MinionConnectorManager) pushes
+        // whatever's left in its storage along every one of those
+        // connections after doing its own type-specific work above. This
+        // is what lets a Miner connect straight to a Sell Minion, or a
+        // Collector branch into two Minion Chests, without needing every
+        // producer type to special-case connector-pushing itself.
         pushAlongConnections(data, storage);
     }
 
@@ -141,6 +210,17 @@ public final class MinionAiController {
         return data.getRadius();
     }
 
+    /**
+     * Breaks a matching block within radius INSTANTLY. The minion
+     * never moves - it simply reaches into its surroundings, so
+     * there's no walk-time delay and no line-of-sight requirement
+     * (which would otherwise make buried ore unreachable by definition).
+     *
+     * <p>Uses "arena mode" (nearest match anywhere in radius) unless
+     * the minion has "facing mode" enabled, in which case it instead
+     * mines in a straight line in the direction its entity is facing
+     * - see {@link MinionManager#isFacingModeEnabled(long)}.
+     */
     private void handleBlockBreak(MinionData data, MinionHandler handler, Entity entity, ItemStack[] storage) {
         Location origin = entity.getLocation();
         int radius = effectiveRadius(data);
@@ -172,11 +252,22 @@ public final class MinionAiController {
             animationHandler.playActionEffect(block.getLocation());
 
             if (isBaseOfTrunk && sapling != null && consumeOneInRange(storage, 0, ZONE_A_SLOTS, sapling)) {
+                // Sapling/propagule items share the same Material constant as
+                // their placed-block form in modern versions, so this is a direct set.
                 block.setType(sapling);
             }
         }
     }
 
+    /**
+     * Converts a yaw angle to the horizontal direction it most
+     * closely faces, used to pick a mining direction for "facing
+     * mode" minions. Follows standard Minecraft yaw convention
+     * (0=south, 90=west, 180=north, 270=east).
+     *
+     * @param yaw the entity's yaw in degrees
+     * @return the closest cardinal {@link BlockFace}
+     */
     private static BlockFace yawToBlockFace(float yaw) {
         float normalizedYaw = yaw % 360;
         if (normalizedYaw < 0) {
@@ -195,6 +286,28 @@ public final class MinionAiController {
         return BlockFace.EAST;
     }
 
+    /**
+     * Checks whether the minion's owner is currently allowed to break
+     * a block at the given location, by firing a synthetic
+     * {@link BlockBreakEvent} with the owner as the breaker so that
+     * WorldGuard, GriefPrevention, Towny, or any other protection
+     * plugin listening to that event gets a chance to cancel it -
+     * exactly as it would for a real player-caused break. This lets
+     * minions respect land claims (only breaking within land the
+     * owner is actually permitted to build in) without EcoCore
+     * needing a hard dependency on any specific protection plugin.
+     *
+     * <p><b>Limitation:</b> this check can only run while the
+     * minion's owner is online, since {@code BlockBreakEvent}
+     * requires a live {@link Player} instance. If the owner is
+     * offline, this defaults to allowing the break, matching
+     * EcoCore's previous (unconditional) behavior, rather than
+     * silently starving an offline owner's minions.
+     *
+     * @param data  the minion's persistent data (used to resolve the owner)
+     * @param block the block the minion wants to break
+     * @return {@code true} if the break should proceed
+     */
     private boolean canBreakAt(MinionData data, Block block) {
         Player owner = Bukkit.getPlayer(data.getOwnerUuid());
         if (owner == null) {
@@ -246,14 +359,55 @@ public final class MinionAiController {
         }
     }
 
+    /**
+     * Whether a minion type keeps a dedicated seed/sapling reserve
+     * (see {@link #ZONE_A_SLOTS}) separate from its normal output.
+     *
+     * @param type the minion type to check
+     * @return {@code true} for Farmer and Lumberjack
+     */
     private boolean hasZonedStorage(MinionType type) {
         return type == MinionType.FARMER || type == MinionType.LUMBERJACK;
     }
 
+    /**
+     * The first storage index that's fair game for a Collector to
+     * pull from, or for the Connector Network to route out of - index
+     * 0 for every ordinary minion, or {@link #ZONE_A_SLOTS} for a
+     * Farmer/Lumberjack whose first few slots are its protected seed/
+     * sapling reserve.
+     *
+     * @param type the source minion's type
+     * @return the first index outside that minion's protected zone
+     */
     private int zoneBStart(MinionType type) {
         return hasZonedStorage(type) ? ZONE_A_SLOTS : 0;
     }
 
+    /**
+     * Farmer behavior (also covers what used to be the separate
+     * Planter and Harvester types): each tick, prefers harvesting a
+     * fully-grown crop over planting a new one.
+     * <ol>
+     *   <li>Scans for a mature crop/produce block in radius. A crop
+     *       counts as mature only when its actual growth stage is
+     *       maxed out ({@link Ageable#getAge()} ==
+     *       {@link Ageable#getMaximumAge()}) - an immature crop is
+     *       never touched, no matter how long it's been in radius.</li>
+     *   <li>If found: harvests it into Storage B, then immediately
+     *       replants by consuming one matching seed from Storage A -
+     *       if no seed is available, the plot is simply left empty
+     *       (still counts as a successful harvest either way).</li>
+     *   <li>Otherwise, scans for empty farmland (or, for nether wart,
+     *       empty soul sand) in radius and plants a seed from Storage
+     *       A onto it, if one's available.</li>
+     * </ol>
+     *
+     * @param data    the Farmer's persistent data
+     * @param entity  the Farmer's visual entity
+     * @param storage the Farmer's live storage array (Storage A: indices
+     *                0-{@link #ZONE_A_SLOTS}-1, Storage B: the rest), mutated in place
+     */
     private void handleFarmCycle(MinionData data, Entity entity, ItemStack[] storage) {
         Location origin = entity.getLocation();
         World world = origin.getWorld();
@@ -277,13 +431,14 @@ public final class MinionAiController {
 
             int leftover = addToStorageRange(storage, ZONE_A_SLOTS, storage.length, new ItemStack(harvestResult, 1));
             if (leftover > 0) {
-                return;
+                return; // Storage B full - leave the crop standing rather than losing the harvest.
             }
 
             animationHandler.playActionEffect(matureCrop.getLocation());
 
             Material seed = CROP_SEEDS.get(matureCrop.getType());
             if (seed != null) {
+                // Ageable crop: consuming a seed from Storage A instantly replants it (age reset to 0).
                 if (consumeOneInRange(storage, 0, ZONE_A_SLOTS, seed)) {
                     Ageable ageable = (Ageable) matureCrop.getBlockData();
                     ageable.setAge(0);
@@ -292,6 +447,7 @@ public final class MinionAiController {
                     matureCrop.setType(Material.AIR);
                 }
             } else {
+                // Pumpkin/melon: the stem regrows a new one on its own, nothing to replant.
                 matureCrop.setType(Material.AIR);
             }
             return;
@@ -303,6 +459,10 @@ public final class MinionAiController {
         }
 
         Material seedToPlant = emptyPlot.getType() == Material.SOUL_SAND ? Material.NETHER_WART : Material.WHEAT_SEEDS;
+        // Only Wheat Seeds are auto-selected for open farmland (matching vanilla's own
+        // default crop); Carrots/Potatoes/Beetroot Seeds already in Storage A still get
+        // planted wherever a Farmer harvests and replants one of THEIR OWN plots above -
+        // this just decides what to do with a plot nobody has claimed yet.
         if (!consumeOneInRange(storage, 0, ZONE_A_SLOTS, seedToPlant)) {
             return;
         }
@@ -390,6 +550,17 @@ public final class MinionAiController {
         return nearest;
     }
 
+    /**
+     * Like {@link ItemUtils#addToStorage}, but confined to a slot
+     * range - used to keep output confined to Storage B without
+     * ever touching a Farmer's/Lumberjack's Storage A reserve.
+     *
+     * @param storage    the storage array
+     * @param fromIndex  first index in range (inclusive)
+     * @param toIndex    last index in range (exclusive)
+     * @param toAdd      the item to add
+     * @return the leftover amount that didn't fit
+     */
     private int addToStorageRange(ItemStack[] storage, int fromIndex, int toIndex, ItemStack toAdd) {
         int remaining = toAdd.getAmount();
         int maxStackSize = toAdd.getMaxStackSize();
@@ -415,6 +586,16 @@ public final class MinionAiController {
         return remaining;
     }
 
+    /**
+     * Like {@link #consumeOne}, but confined to a slot range - used
+     * to only ever consume seeds/saplings from Storage A.
+     *
+     * @param storage   the storage array
+     * @param fromIndex first index in range (inclusive)
+     * @param toIndex   last index in range (exclusive)
+     * @param material  the material to consume one of
+     * @return {@code true} if one was found and consumed
+     */
     private boolean consumeOneInRange(ItemStack[] storage, int fromIndex, int toIndex, Material material) {
         for (int i = fromIndex; i < toIndex && i < storage.length; i++) {
             ItemStack slot = storage[i];
@@ -429,6 +610,29 @@ public final class MinionAiController {
         return false;
     }
 
+    /**
+     * Collector behavior:
+     * <ol>
+     *   <li>Sucks up dropped item entities within radius (unchanged from before).</li>
+     *   <li>Pulls items directly out of every OTHER minion belonging to
+     *       the same owner within radius - so placing a collector next
+     *       to a cluster of miners/farmers centralizes their loot
+     *       automatically instead of each one filling up independently.</li>
+     *   <li>If another Collector, a Minion Chest, or a Sell Minion
+     *       belonging to the same owner is directly adjacent, pushes
+     *       into it - this is what lets Collectors chain into each
+     *       other physically (Collector -> Collector -> Chest) without
+     *       needing an explicit Connector Network link for the simple
+     *       side-by-side case.</li>
+     *   <li>Pushes whatever's left after that into any nearby Seller
+     *       Minion belonging to the same owner within radius.</li>
+     * </ol>
+     * Anything still left in storage after all of the above flows out
+     * through the Connector Network in {@link #tick} (see
+     * {@link #pushAlongConnections}), so a Collector no longer ever
+     * pushes directly into a real chest block - it always goes through
+     * a Minion Chest (adjacent or connected) first.
+     */
     private void handleItemPickup(MinionData data, Entity entity, ItemStack[] storage) {
         int radius = effectiveRadius(data);
 
@@ -480,6 +684,20 @@ public final class MinionAiController {
         }
     }
 
+    /**
+     * Pushes an owner-matching minion's storage into another owned
+     * minion (Collector, Minion Chest, or Sell Minion) standing
+     * directly next to it, checked as an ENTITY within 1.5 blocks
+     * rather than a block face - minions are entities, not blocks, so
+     * a block-adjacency check would never find one. This is the
+     * "just stand them next to each other" chaining path; the
+     * Connector Network (see {@link #pushAlongConnections}) is the
+     * general path for non-adjacent or branching routes.
+     *
+     * @param data    the pushing minion's persistent data
+     * @param entity  the pushing minion's visual entity
+     * @param storage the pushing minion's live storage array, mutated in place
+     */
     private void pushToAdjacentMinion(MinionData data, Entity entity, ItemStack[] storage) {
         if (minionManager == null) {
             return;
@@ -519,10 +737,23 @@ public final class MinionAiController {
                     slot.setAmount(leftover);
                 }
             }
-            return;
+            return; // Only push into the first adjacent match found.
         }
     }
 
+    /**
+     * Pushes every outgoing Connector Network destination's storage
+     * full of whatever's left in a minion's own storage. Runs for
+     * EVERY minion type once per tick (see {@link #tick}), not just
+     * Collectors - a Miner with a connection drawn straight to a Sell
+     * Minion works exactly the same way as a Collector feeding a
+     * Minion Chest. Destinations whose chunk isn't currently loaded
+     * are skipped for this tick (their storage array is unavailable
+     * until then) rather than dropping the items.
+     *
+     * @param data    the pushing minion's persistent data
+     * @param storage the pushing minion's live storage array, mutated in place
+     */
     private void pushAlongConnections(MinionData data, ItemStack[] storage) {
         if (minionManager == null || connectorManager == null) {
             return;
@@ -556,6 +787,19 @@ public final class MinionAiController {
         }
     }
 
+    /**
+     * Pushes whatever the Collector is currently holding into any
+     * nearby placed Seller Minion belonging to the same owner, so a
+     * Collector sitting near a Seller Minion automatically feeds it
+     * for auto-liquidation - mirroring {@link #pullFromNearbyMinions}
+     * but in the opposite direction and targeting Seller Minions
+     * specifically.
+     *
+     * @param data    the Collector's persistent data
+     * @param entity  the Collector's visual entity
+     * @param storage the Collector's live storage array, mutated in place
+     * @param radius  the Collector's effective work radius
+     */
     private void pushToNearbySellerMinions(MinionData data, Entity entity, ItemStack[] storage, int radius) {
         if (minionManager == null) {
             return;
@@ -586,6 +830,20 @@ public final class MinionAiController {
         }
     }
 
+    /**
+     * Minion Chest behavior: acts as a buffer between a Collector and
+     * a real chest. Its own storage gets filled by an adjacent/
+     * connected Collector's push (see {@link #pushToAdjacentMinion}/
+     * {@link #pushAlongConnections}); every tick it then drains
+     * whatever it's holding into an adjacent real chest/barrel/other
+     * container block, exactly like the old direct Collector-to-chest
+     * push used to work - just one hop later, so the Collector itself
+     * never touches a real chest directly anymore.
+     *
+     * @param data    the Minion Chest's persistent data
+     * @param entity  the Minion Chest's visual entity
+     * @param storage the Minion Chest's live storage array, mutated in place
+     */
     private void handleChestBuffer(MinionData data, Entity entity, ItemStack[] storage) {
         pushToAdjacentContainer(entity, storage);
     }
@@ -613,7 +871,7 @@ public final class MinionAiController {
                     storage[i] = leftover.values().iterator().next();
                 }
             }
-            return;
+            return; // Only push into the first container found.
         }
     }
 
@@ -640,6 +898,18 @@ public final class MinionAiController {
         }
     }
 
+    /**
+     * Sell Minion behavior: first pulls in any sellable items sitting
+     * in an adjacent real chest/barrel/container block (Method 1:
+     * Adjacent Chest Block), then sells everything sellable currently
+     * in its own storage - which by then also includes anything
+     * routed in via the Connector Network (Method 2, handled
+     * generically by {@link #pushAlongConnections} in {@link #tick}).
+     *
+     * @param data    the Sell Minion's persistent data
+     * @param entity  the Sell Minion's visual entity
+     * @param storage the Sell Minion's live storage array, mutated in place
+     */
     private void handleInternalSell(MinionData data, Entity entity, ItemStack[] storage) {
         pullSellableFromAdjacentContainer(entity, storage);
 
@@ -666,6 +936,17 @@ public final class MinionAiController {
         }
     }
 
+    /**
+     * Pulls sellable items out of an adjacent real chest/barrel/other
+     * container block straight into a Sell Minion's own storage,
+     * leaving anything not currently sellable untouched in the chest -
+     * this is the Sell Minion's "Method 1: Adjacent Chest Block"
+     * input, letting a player just place a normal chest next to a
+     * Sell Minion and have it liquidated automatically.
+     *
+     * @param entity  the Sell Minion's visual entity
+     * @param storage the Sell Minion's live storage array, mutated in place
+     */
     private void pullSellableFromAdjacentContainer(Entity entity, ItemStack[] storage) {
         Block center = entity.getLocation().getBlock();
 
@@ -690,7 +971,7 @@ public final class MinionAiController {
                     sourceInventory.setItem(i, slot);
                 }
             }
-            return;
+            return; // Only pull from the first container found.
         }
     }
 
@@ -707,4 +988,4 @@ public final class MinionAiController {
         }
         return false;
     }
-}
+        }

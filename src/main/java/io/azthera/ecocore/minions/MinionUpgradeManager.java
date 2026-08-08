@@ -107,7 +107,22 @@ public final class MinionUpgradeManager {
                     data.getSpeedTicks() - minionsConfig.getSpeedReductionPerUpgradeTicks()));
         }
 
+        data.setLevel(computeLevel(data));
+
         return true;
+    }
+
+    /**
+     * Computes a minion's level from its total purchased upgrades
+     * (storage + radius + speed tiers combined), starting at level 1
+     * with zero upgrades. Called immediately after every successful
+     * upgrade so the level field always reflects total progress.
+     *
+     * @param data the minion's persistent data (after the upgrade has been applied)
+     * @return the minion's current level
+     */
+    public int computeLevel(MinionData data) {
+        return 1 + currentStorageUpgrades(data) + currentRadiusUpgrades(data) + currentSpeedUpgrades(data);
     }
 
     private int currentStorageUpgrades(MinionData data) {

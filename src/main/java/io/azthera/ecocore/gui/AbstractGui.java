@@ -3,6 +3,7 @@ package io.azthera.ecocore.gui;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 
@@ -78,6 +79,27 @@ public abstract class AbstractGui implements InventoryHolder {
      * @param event the triggering inventory close event
      */
     public void handleClose(InventoryCloseEvent event) {
+        // No-op by default.
+    }
+
+    /**
+     * Optional hook for anvil-based screens (see {@code ShopSearchGui})
+     * to control the result/output slot shown while the player types
+     * in the rename field. Default implementation does nothing, which
+     * leaves vanilla anvil combine logic in charge.
+     *
+     * <p>Vanilla's own rename-result logic silently produces no output
+     * item at all when the typed text exactly matches the item's
+     * default name (e.g. typing "Paper" on a paper item) - fine for a
+     * real anvil, but wrong for a screen that repurposes the rename
+     * field as a search box, since the player would have no result
+     * slot to click to trigger the search. Screens that need every
+     * keystroke to reliably produce a clickable result should override
+     * this and call {@link PrepareAnvilEvent#setResult(org.bukkit.inventory.ItemStack)}.
+     *
+     * @param event the triggering prepare-anvil event
+     */
+    public void handlePrepareAnvil(PrepareAnvilEvent event) {
         // No-op by default.
     }
 

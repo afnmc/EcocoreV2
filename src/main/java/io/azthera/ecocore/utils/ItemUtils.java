@@ -27,6 +27,7 @@ public final class ItemUtils {
 
     private static final Logger LOGGER = Logger.getLogger("EcoCore");
     private static final String MINION_EGG_TYPE_KEY = "minion_egg_type";
+    private static final String CONNECTOR_TOOL_KEY = "connector_tool";
 
     private ItemUtils() {
         // Utility class, not instantiable.
@@ -182,6 +183,52 @@ public final class ItemUtils {
         } catch (IllegalArgumentException exception) {
             return null;
         }
+    }
+
+    /**
+     * Builds a Connector Tool: a WorldEdit-style selection wand for
+     * drawing a Connector Network link between two of a player's own
+     * minions. Right-clicking a first minion with it selects the
+     * source; right-clicking a second selects the destination and
+     * opens a confirmation screen (see {@code listener.ConnectorToolListener}).
+     *
+     * @return the built tool item stack
+     */
+    public static ItemStack buildConnectorTool() {
+        ItemStack tool = new ItemStack(Material.BLAZE_ROD);
+        ItemMeta meta = tool.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(ColorUtils.colorize("&b&lConnector Tool"));
+            meta.setLore(List.of(
+                    ColorUtils.colorize("&7Klik kanan minion pertama buat pilih sumber (source),"),
+                    ColorUtils.colorize("&7lalu klik kanan minion kedua buat pilih tujuan (destination)."),
+                    ColorUtils.colorize("&7Item pindah dari sumber ke tujuan tiap tick.")
+            ));
+            NamespacedKey key = new NamespacedKey(EcoCorePlugin.getInstance(), CONNECTOR_TOOL_KEY);
+            meta.getPersistentDataContainer().set(key, PersistentDataType.BYTE, (byte) 1);
+            tool.setItemMeta(meta);
+        }
+        return tool;
+    }
+
+    /**
+     * Whether an item stack is a Connector Tool built by
+     * {@link #buildConnectorTool}.
+     *
+     * @param stack the item stack to check
+     * @return {@code true} if this is a Connector Tool
+     */
+    public static boolean isConnectorTool(ItemStack stack) {
+        if (stack == null || stack.getType() != Material.BLAZE_ROD || !stack.hasItemMeta()) {
+            return false;
+        }
+        ItemMeta meta = stack.getItemMeta();
+        if (meta == null) {
+            return false;
+        }
+        NamespacedKey key = new NamespacedKey(EcoCorePlugin.getInstance(), CONNECTOR_TOOL_KEY);
+        Byte value = meta.getPersistentDataContainer().get(key, PersistentDataType.BYTE);
+        return value != null && value == (byte) 1;
     }
 
     /**

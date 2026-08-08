@@ -60,14 +60,6 @@ minions:
     display-name: "&aSeller Minion"
     icon: "EMERALD"
     base-efficiency: 1.0
-  harvester:
-    display-name: "&2Harvester Minion"
-    icon: "DIAMOND_HOE"
-    base-efficiency: 1.1
-  planter:
-    display-name: "&2Planter Minion"
-    icon: "WHEAT_SEEDS"
-    base-efficiency: 1.0
   breeder:
     display-name: "&6Breeder Minion"
     icon: "EGG"
@@ -76,6 +68,10 @@ minions:
     display-name: "&7Quarry Minion"
     icon: "DIAMOND_PICKAXE"
     base-efficiency: 1.3
+  minion_chest:
+    display-name: "&6Minion Chest"
+    icon: "BARREL"
+    base-efficiency: 1.0
 
 purchase:
   prices:
@@ -89,10 +85,9 @@ purchase:
     smelter: 500.0
     storage: 300.0
     seller: 550.0
-    harvester: 500.0
-    planter: 450.0
     breeder: 550.0
     quarry: 700.0
+    minion_chest: 200.0
 
 ai:
   # Sudah gak dipakai lagi - minion sekarang selalu diam di tempat dan

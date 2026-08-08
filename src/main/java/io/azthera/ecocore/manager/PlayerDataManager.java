@@ -3,7 +3,6 @@ package io.azthera.ecocore.manager;
 import io.azthera.ecocore.economy.EconomyEngine;
 import io.azthera.ecocore.jobs.JobMissionManager;
 import io.azthera.ecocore.model.JobType;
-import io.azthera.ecocore.sell.AutoSellManager;
 import io.azthera.ecocore.shop.ShopFavoriteManager;
 import io.azthera.ecocore.utils.TimeUtils;
 import org.bukkit.entity.Player;
@@ -13,8 +12,8 @@ import java.util.logging.Logger;
 
 /**
  * Coordinates the per-player join/quit lifecycle across every module
- * that keeps in-memory or session state: loads/unloads the economy
- * account, clears session-only shop/auto-sell state, and refreshes
+ * that keeps in-memory session state: loads/unloads the economy
+ * account, clears session-only shop-favorite state, and refreshes
  * daily/weekly job missions when a player's missions have gone stale.
  */
 public final class PlayerDataManager {
@@ -22,7 +21,6 @@ public final class PlayerDataManager {
     private final Logger logger;
     private final EconomyEngine economyEngine;
     private final ShopFavoriteManager shopFavoriteManager;
-    private final AutoSellManager autoSellManager;
     private final JobMissionManager jobMissionManager;
 
     /**
@@ -31,15 +29,13 @@ public final class PlayerDataManager {
      * @param logger              plugin logger
      * @param economyEngine       economy engine owning account load/unload
      * @param shopFavoriteManager shop favorites, cleared on quit
-     * @param autoSellManager     auto-sell state, cleared on quit
      * @param jobMissionManager   mission manager, used to refresh stale missions on join
      */
     public PlayerDataManager(Logger logger, EconomyEngine economyEngine, ShopFavoriteManager shopFavoriteManager,
-                              AutoSellManager autoSellManager, JobMissionManager jobMissionManager) {
+                              JobMissionManager jobMissionManager) {
         this.logger = logger;
         this.economyEngine = economyEngine;
         this.shopFavoriteManager = shopFavoriteManager;
-        this.autoSellManager = autoSellManager;
         this.jobMissionManager = jobMissionManager;
     }
 
@@ -88,6 +84,5 @@ public final class PlayerDataManager {
     public void handleQuit(Player player) {
         economyEngine.unloadAccount(player.getUniqueId());
         shopFavoriteManager.clear(player.getUniqueId());
-        autoSellManager.clear(player.getUniqueId());
     }
 }

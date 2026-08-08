@@ -13,6 +13,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -119,6 +120,39 @@ public final class ShopSearchGui extends AbstractGui {
         } catch (IllegalArgumentException exception) {
             return Material.STONE;
         }
+    }
+
+    /**
+     * Forces the anvil's result slot to always show a renamed preview
+     * of the search-trigger item while the player is typing, so it is
+     * always clickable regardless of vanilla's own rename-result logic
+     * (which produces no output at all when the typed text matches the
+     * item's default name - e.g. typing "Paper" on a paper item - which
+     * previously made that exact, very plausible search term
+     * impossible to submit).
+     *
+     * @param event the triggering prepare-anvil event
+     */
+    @Override
+    public void handlePrepareAnvil(PrepareAnvilEvent event) {
+        if (showingResults) {
+            return;
+        }
+
+        String text = event.getInventory().getRenameText();
+        ItemStack input = event.getInventory().getItem(0);
+        if (text == null || text.isBlank() || input == null || input.getType().isAir()) {
+            event.setResult(null);
+            return;
+        }
+
+        ItemStack preview = input.clone();
+        ItemMeta meta = preview.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(text);
+            preview.setItemMeta(meta);
+        }
+        event.setResult(preview);
     }
 
     @Override
