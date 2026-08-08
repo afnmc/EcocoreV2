@@ -28,6 +28,7 @@ import io.azthera.ecocore.database.dao.InflationHistoryDao;
 import io.azthera.ecocore.database.dao.JobMissionDao;
 import io.azthera.ecocore.database.dao.JobsDao;
 import io.azthera.ecocore.database.dao.MarketHistoryDao;
+import io.azthera.ecocore.database.dao.MinionConnectionDao;
 import io.azthera.ecocore.database.dao.MinionsDao;
 import io.azthera.ecocore.database.dao.MoneyDao;
 import io.azthera.ecocore.database.dao.NightMarketDao;
@@ -79,6 +80,7 @@ import io.azthera.ecocore.manager.PlayerDataManager;
 import io.azthera.ecocore.market.NightMarketManager;
 import io.azthera.ecocore.minions.MinionAiController;
 import io.azthera.ecocore.minions.MinionAnimationHandler;
+import io.azthera.ecocore.minions.MinionConnectorManager;
 import io.azthera.ecocore.minions.MinionFactory;
 import io.azthera.ecocore.minions.MinionFuelManager;
 import io.azthera.ecocore.minions.MinionManager;
@@ -91,7 +93,6 @@ import io.azthera.ecocore.scheduler.InflationTaskScheduler;
 import io.azthera.ecocore.scheduler.MinionTickScheduler;
 import io.azthera.ecocore.scheduler.NightMarketRotationScheduler;
 import io.azthera.ecocore.scheduler.RestockTaskScheduler;
-import io.azthera.ecocore.sell.AutoSellManager;
 import io.azthera.ecocore.sell.SellBlacklistManager;
 import io.azthera.ecocore.sell.SellManager;
 import io.azthera.ecocore.sell.SellWhitelistManager;
@@ -104,11 +105,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.sql.SQLException;
 
-/**
- * EcoCore's main plugin class: wires every module together in
- * dependency order on {@link #onEnable()} and tears everything down
- * cleanly on {@link #onDisable()}.
- */
 public final class EcoCorePlugin extends JavaPlugin {
 
     private static EcoCorePlugin instance;
@@ -127,6 +123,7 @@ public final class EcoCorePlugin extends JavaPlugin {
     private JobsDao jobsDao;
     private JobMissionDao jobMissionDao;
     private MinionsDao minionsDao;
+    private MinionConnectionDao minionConnectionDao;
     private AiLearningDao aiLearningDao;
     private DiscordLogDao discordLogDao;
     private NightMarketDao nightMarketDao;
@@ -139,7 +136,6 @@ public final class EcoCorePlugin extends JavaPlugin {
     private ShopManager shopManager;
     private RestockScheduler restockScheduler;
     private SellManager sellManager;
-    private AutoSellManager autoSellManager;
 
     private NightMarketManager nightMarketManager;
 
@@ -147,6 +143,7 @@ public final class EcoCorePlugin extends JavaPlugin {
 
     private JobsManager jobsManager;
     private MinionManager minionManager;
+    private MinionConnectorManager minionConnectorManager;
     private MinionUpgradeManager minionUpgradeManager;
     private MinionFuelManager minionFuelManager;
 
@@ -256,6 +253,7 @@ public final class EcoCorePlugin extends JavaPlugin {
         jobsDao = new JobsDao(databaseManager);
         jobMissionDao = new JobMissionDao(databaseManager);
         minionsDao = new MinionsDao(databaseManager);
+        minionConnectionDao = new MinionConnectionDao(databaseManager);
         aiLearningDao = new AiLearningDao(databaseManager);
         discordLogDao = new DiscordLogDao(databaseManager);
         nightMarketDao = new NightMarketDao(databaseManager);
@@ -306,7 +304,6 @@ public final class EcoCorePlugin extends JavaPlugin {
 
         sellManager = new SellManager(getLogger(), shopManager, economyEngine, sellHistoryDao,
                 configManager.getPricesConfig(), sellBlacklistManager, sellWhitelistManager, itemIdentityResolver);
-        autoSellManager = new AutoSellManager(getLogger(), sellManager, economyEngine);
     }
 
     private void setupNightMarket() {
@@ -337,21 +334,21 @@ public final class EcoCorePlugin extends JavaPlugin {
         MinionTargetSelector targetSelector = new MinionTargetSelector();
         MinionAnimationHandler animationHandler = new MinionAnimationHandler(configManager.getGuiConfig());
 
+        minionConnectorManager = new MinionConnectorManager(getLogger(), minionConnectionDao);
+
         MinionAiController aiController = new MinionAiController(getLogger(), configManager.getMinionsConfig(),
-                minionFuelManager, targetSelector, animationHandler, sellManager, economyEngine);
+                minionFuelManager, targetSelector, animationHandler, sellManager, economyEngine,
+                minionConnectorManager);
 
         MinionFactory minionFactory = new MinionFactory(configManager.getMinionsConfig());
 
         minionManager = new MinionManager(getLogger(), minionsDao, configManager.getMinionsConfig(),
-                minionFactory, aiController);
+                minionFactory, aiController, minionConnectorManager);
 
-        // Late-bind: MinionAiController needs to enumerate other active
-        // minions (for the Collector's cross-minion pulling) but MinionManager
-        // is the one that owns/constructs the controller, so this can't be
-        // done via constructor injection without a cycle.
         aiController.setMinionManager(minionManager);
 
         minionManager.loadAll();
+        minionConnectorManager.loadAll();
 
         minionUpgradeManager = new MinionUpgradeManager(configManager.getMinionsConfig(), economyEngine);
     }
@@ -387,7 +384,7 @@ public final class EcoCorePlugin extends JavaPlugin {
 
     private void setupManagers() {
         playerDataManager = new PlayerDataManager(getLogger(), economyEngine, shopManager.getFavoriteManager(),
-                autoSellManager, jobsManager.getMissionManager());
+                jobsManager.getMissionManager());
 
         notificationManager = new NotificationManager(getLogger(), configManager, configManager.getMessagesConfig(),
                 discordBotManager, discordWebhookSender, discordEmbedBuilder);
@@ -424,13 +421,14 @@ public final class EcoCorePlugin extends JavaPlugin {
         pluginManager.registerEvents(new InventoryClickListener(guiManager), this);
 
         var inflationConfig = configManager.getInflationConfig();
-        pluginManager.registerEvents(new BlockBreakListener(jobsManager, inflationEngine, inflationConfig, autoSellManager), this);
-        pluginManager.registerEvents(new EntityDeathListener(jobsManager, inflationEngine, inflationConfig, autoSellManager), this);
-        pluginManager.registerEvents(new FishListener(jobsManager, inflationEngine, inflationConfig, autoSellManager), this);
+        pluginManager.registerEvents(new BlockBreakListener(jobsManager, inflationEngine, inflationConfig), this);
+        pluginManager.registerEvents(new EntityDeathListener(jobsManager, inflationEngine, inflationConfig), this);
+        pluginManager.registerEvents(new FishListener(jobsManager, inflationEngine, inflationConfig), this);
         pluginManager.registerEvents(new CraftListener(jobsManager, inflationEngine, inflationConfig), this);
 
         pluginManager.registerEvents(new MinionInteractListener(
-                minionManager, minionFuelManager, configManager.getMinionsConfig(), guiManager, configManager.getGuiConfig()), this);
+                minionManager, minionFuelManager, configManager.getMinionsConfig(), guiManager,
+                configManager.getGuiConfig(), minionConnectorManager), this);
         pluginManager.registerEvents(new MinionEggListener(minionManager), this);
         pluginManager.registerEvents(new MinionChunkListener(minionManager), this);
     }
@@ -439,7 +437,7 @@ public final class EcoCorePlugin extends JavaPlugin {
         var guiConfig = configManager.getGuiConfig();
 
         setExecutor("shop", new ShopCommand(shopManager, configManager, guiManager, guiConfig));
-        setExecutor("sell", new SellCommand(sellManager, autoSellManager, configManager, guiManager));
+        setExecutor("sell", new SellCommand(sellManager, configManager, guiManager));
         setExecutor("jobs", new JobsCommand(jobsManager, configManager, guiManager, guiConfig));
         setExecutor("job", new JobCommand(jobsManager, configManager, guiManager, guiConfig));
         setExecutor("minions", new MinionsCommand(minionManager, configManager, guiManager, guiConfig));
@@ -514,10 +512,6 @@ public final class EcoCorePlugin extends JavaPlugin {
         return sellManager;
     }
 
-    public AutoSellManager getAutoSellManager() {
-        return autoSellManager;
-    }
-
     public NightMarketManager getNightMarketManager() {
         return nightMarketManager;
     }
@@ -538,6 +532,10 @@ public final class EcoCorePlugin extends JavaPlugin {
         return minionManager;
     }
 
+    public MinionConnectorManager getMinionConnectorManager() {
+        return minionConnectorManager;
+    }
+
     public MinionUpgradeManager getMinionUpgradeManager() {
         return minionUpgradeManager;
     }
@@ -553,4 +551,4 @@ public final class EcoCorePlugin extends JavaPlugin {
     public EcoCoreAPI getApi() {
         return api;
     }
-    }
+}
