@@ -16,6 +16,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Container;
+import org.bukkit.block.data.Ageable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -30,27 +31,33 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Logger;
 
-/**
- * Runs a single tick of AI behavior for one placed minion: energy
- * regen, fuel consumption, target selection, and executing whichever
- * {@link io.azthera.ecocore.minions.types.MinionProcessingType}
- * behavior its handler declares.
- *
- * <p>Minions are STATIONARY - they never move from their placement
- * spot. Every action here acts directly on whatever's within the
- * minion's configured radius, the same way a hopper or dispenser
- * works on its immediate surroundings without walking anywhere.
- *
- * <p>Called once per configured tick interval per minion by
- * {@code MinionManager}, which owns the minion's visual entity and
- * live storage array.
- */
 public final class MinionAiController {
 
     private static final double ENERGY_REGEN_PER_TICK_FRACTION = 0.02;
     private static final BlockFace[] ADJACENT_FACES = {
             BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN
     };
+
+    private static final int ZONE_A_SLOTS = 4;
+
+    private static final Map<Material, Material> CROP_SEEDS = Map.of(
+            Material.WHEAT, Material.WHEAT_SEEDS,
+            Material.CARROTS, Material.CARROT,
+            Material.POTATOES, Material.POTATO,
+            Material.BEETROOTS, Material.BEETROOT_SEEDS,
+            Material.NETHER_WART, Material.NETHER_WART
+    );
+
+    private static final Map<Material, Material> LOG_SAPLINGS = Map.ofEntries(
+            Map.entry(Material.OAK_LOG, Material.OAK_SAPLING),
+            Map.entry(Material.BIRCH_LOG, Material.BIRCH_SAPLING),
+            Map.entry(Material.SPRUCE_LOG, Material.SPRUCE_SAPLING),
+            Map.entry(Material.JUNGLE_LOG, Material.JUNGLE_SAPLING),
+            Map.entry(Material.ACACIA_LOG, Material.ACACIA_SAPLING),
+            Map.entry(Material.DARK_OAK_LOG, Material.DARK_OAK_SAPLING),
+            Map.entry(Material.MANGROVE_LOG, Material.MANGROVE_PROPAGULE),
+            Map.entry(Material.CHERRY_LOG, Material.CHERRY_SAPLING)
+    );
 
     private final Logger logger;
     private final MinionsConfig minionsConfig;
@@ -59,30 +66,14 @@ public final class MinionAiController {
     private final MinionAnimationHandler animationHandler;
     private final SellManager sellManager;
     private final EconomyEngine economyEngine;
+    private final MinionConnectorManager connectorManager;
 
-    /**
-     * Late-bound after construction to break the constructor cycle
-     * with {@link MinionManager} (which itself owns this controller).
-     * Set once from {@code EcoCorePlugin.setupMinions()} right after
-     * both objects are built. Used by the Collector's "pull from
-     * nearby minions" behavior.
-     */
     private MinionManager minionManager;
 
-    /**
-     * Creates the AI controller.
-     *
-     * @param logger           plugin logger
-     * @param minionsConfig    resolved minions.yml configuration
-     * @param fuelManager      fuel consumption/refuel manager
-     * @param targetSelector   block/entity target selection
-     * @param animationHandler visual/audio feedback helper
-     * @param sellManager      used by INTERNAL_SELL minions to liquidate storage
-     * @param economyEngine    used to pay the owner for INTERNAL_SELL results
-     */
     public MinionAiController(Logger logger, MinionsConfig minionsConfig, MinionFuelManager fuelManager,
                                MinionTargetSelector targetSelector, MinionAnimationHandler animationHandler,
-                               SellManager sellManager, EconomyEngine economyEngine) {
+                               SellManager sellManager, EconomyEngine economyEngine,
+                               MinionConnectorManager connectorManager) {
         this.logger = logger;
         this.minionsConfig = minionsConfig;
         this.fuelManager = fuelManager;
@@ -90,27 +81,13 @@ public final class MinionAiController {
         this.animationHandler = animationHandler;
         this.sellManager = sellManager;
         this.economyEngine = economyEngine;
+        this.connectorManager = connectorManager;
     }
 
-    /**
-     * Wires in the minion manager after both objects exist. Must be
-     * called once before {@link #tick} is ever invoked, or the
-     * Collector's cross-minion pulling silently no-ops.
-     *
-     * @param minionManager the shared minion manager
-     */
     public void setMinionManager(MinionManager minionManager) {
         this.minionManager = minionManager;
     }
 
-    /**
-     * Runs one tick of behavior for a single minion.
-     *
-     * @param data    the minion's persistent data, mutated in place
-     * @param handler the minion's type handler
-     * @param entity  the minion's visual entity in the world (its fixed location)
-     * @param storage the minion's live storage contents array, mutated in place
-     */
     public void tick(MinionData data, MinionHandler handler, Entity entity, ItemStack[] storage) {
         regenerateEnergy(data);
         fuelManager.consumeTick(data);
@@ -137,11 +114,15 @@ public final class MinionAiController {
             case ITEM_PICKUP -> handleItemPickup(data, entity, storage);
             case FISHING -> handleFishing(handler, entity, storage);
             case INTERNAL_SMELT -> handleInternalConversion(handler, storage);
-            case INTERNAL_SELL -> handleInternalSell(data, storage);
+            case INTERNAL_SELL -> handleInternalSell(data, entity, storage);
+            case CHEST_BUFFER -> handleChestBuffer(data, entity, storage);
+            case FARM_CYCLE -> handleFarmCycle(data, entity, storage);
             case PASSIVE -> {
                 // No action; storage-only minion type.
             }
         }
+
+        pushAlongConnections(data, storage);
     }
 
     private void regenerateEnergy(MinionData data) {
@@ -160,17 +141,6 @@ public final class MinionAiController {
         return data.getRadius();
     }
 
-    /**
-     * Breaks a matching block within radius INSTANTLY. The minion
-     * never moves - it simply reaches into its surroundings, so
-     * there's no walk-time delay and no line-of-sight requirement
-     * (which would otherwise make buried ore unreachable by definition).
-     *
-     * <p>Uses "arena mode" (nearest match anywhere in radius) unless
-     * the minion has "facing mode" enabled, in which case it instead
-     * mines in a straight line in the direction its entity is facing
-     * - see {@link MinionManager#isFacingModeEnabled(long)}.
-     */
     private void handleBlockBreak(MinionData data, MinionHandler handler, Entity entity, ItemStack[] storage) {
         Location origin = entity.getLocation();
         int radius = effectiveRadius(data);
@@ -193,20 +163,20 @@ public final class MinionAiController {
         Material resultMaterial = handler.resultFor(block.getType());
         int leftover = ItemUtils.addToStorage(storage, new ItemStack(resultMaterial, 1));
         if (leftover == 0) {
+            boolean isBaseOfTrunk = data.getType() == MinionType.LUMBERJACK
+                    && LOG_SAPLINGS.containsKey(block.getType())
+                    && !LOG_SAPLINGS.containsKey(block.getRelative(BlockFace.DOWN).getType());
+            Material sapling = LOG_SAPLINGS.get(block.getType());
+
             block.setType(Material.AIR);
             animationHandler.playActionEffect(block.getLocation());
+
+            if (isBaseOfTrunk && sapling != null && consumeOneInRange(storage, 0, ZONE_A_SLOTS, sapling)) {
+                block.setType(sapling);
+            }
         }
     }
 
-    /**
-     * Converts a yaw angle to the horizontal direction it most
-     * closely faces, used to pick a mining direction for "facing
-     * mode" minions. Follows standard Minecraft yaw convention
-     * (0=south, 90=west, 180=north, 270=east).
-     *
-     * @param yaw the entity's yaw in degrees
-     * @return the closest cardinal {@link BlockFace}
-     */
     private static BlockFace yawToBlockFace(float yaw) {
         float normalizedYaw = yaw % 360;
         if (normalizedYaw < 0) {
@@ -225,28 +195,6 @@ public final class MinionAiController {
         return BlockFace.EAST;
     }
 
-    /**
-     * Checks whether the minion's owner is currently allowed to break
-     * a block at the given location, by firing a synthetic
-     * {@link BlockBreakEvent} with the owner as the breaker so that
-     * WorldGuard, GriefPrevention, Towny, or any other protection
-     * plugin listening to that event gets a chance to cancel it -
-     * exactly as it would for a real player-caused break. This lets
-     * minions respect land claims (only breaking within land the
-     * owner is actually permitted to build in) without EcoCore
-     * needing a hard dependency on any specific protection plugin.
-     *
-     * <p><b>Limitation:</b> this check can only run while the
-     * minion's owner is online, since {@code BlockBreakEvent}
-     * requires a live {@link Player} instance. If the owner is
-     * offline, this defaults to allowing the break, matching
-     * EcoCore's previous (unconditional) behavior, rather than
-     * silently starving an offline owner's minions.
-     *
-     * @param data  the minion's persistent data (used to resolve the owner)
-     * @param block the block the minion wants to break
-     * @return {@code true} if the break should proceed
-     */
     private boolean canBreakAt(MinionData data, Block block) {
         Player owner = Bukkit.getPlayer(data.getOwnerUuid());
         if (owner == null) {
@@ -298,25 +246,190 @@ public final class MinionAiController {
         }
     }
 
-    /**
-     * Collector behavior, four parts:
-     * <ol>
-     *   <li>Sucks up dropped item entities within radius (unchanged from before).</li>
-     *   <li>Pulls items directly out of every OTHER minion belonging to
-     *       the same owner within radius - so placing a collector next
-     *       to a cluster of miners/farmers centralizes their loot
-     *       automatically instead of each one filling up independently.</li>
-     *   <li>If a hopper, chest, barrel, or any other container block is
-     *       directly adjacent (one of the 6 neighboring blocks) to the
-     *       collector, pushes whatever it's currently holding into it.</li>
-     *   <li>Pushes whatever's left after that into any nearby Seller
-     *       Minion belonging to the same owner, so a Collector feeding
-     *       a Seller Minion auto-liquidates instead of just piling up
-     *       storage with nowhere to go.</li>
-     * </ol>
-     */
+    private boolean hasZonedStorage(MinionType type) {
+        return type == MinionType.FARMER || type == MinionType.LUMBERJACK;
+    }
+
+    private int zoneBStart(MinionType type) {
+        return hasZonedStorage(type) ? ZONE_A_SLOTS : 0;
+    }
+
+    private void handleFarmCycle(MinionData data, Entity entity, ItemStack[] storage) {
+        Location origin = entity.getLocation();
+        World world = origin.getWorld();
+        if (world == null) {
+            return;
+        }
+        int radius = effectiveRadius(data);
+
+        Block matureCrop = findMatureCrop(origin, radius, world);
+        if (matureCrop != null) {
+            Material harvestResult = CROP_SEEDS.containsKey(matureCrop.getType())
+                    ? switch (matureCrop.getType()) {
+                        case WHEAT -> Material.WHEAT;
+                        case CARROTS -> Material.CARROT;
+                        case POTATOES -> Material.POTATO;
+                        case BEETROOTS -> Material.BEETROOT;
+                        case NETHER_WART -> Material.NETHER_WART;
+                        default -> matureCrop.getType();
+                    }
+                    : (matureCrop.getType() == Material.PUMPKIN ? Material.PUMPKIN : Material.MELON_SLICE);
+
+            int leftover = addToStorageRange(storage, ZONE_A_SLOTS, storage.length, new ItemStack(harvestResult, 1));
+            if (leftover > 0) {
+                return;
+            }
+
+            animationHandler.playActionEffect(matureCrop.getLocation());
+
+            Material seed = CROP_SEEDS.get(matureCrop.getType());
+            if (seed != null) {
+                if (consumeOneInRange(storage, 0, ZONE_A_SLOTS, seed)) {
+                    Ageable ageable = (Ageable) matureCrop.getBlockData();
+                    ageable.setAge(0);
+                    matureCrop.setBlockData(ageable);
+                } else {
+                    matureCrop.setType(Material.AIR);
+                }
+            } else {
+                matureCrop.setType(Material.AIR);
+            }
+            return;
+        }
+
+        Block emptyPlot = findEmptyFarmPlot(origin, radius, world);
+        if (emptyPlot == null) {
+            return;
+        }
+
+        Material seedToPlant = emptyPlot.getType() == Material.SOUL_SAND ? Material.NETHER_WART : Material.WHEAT_SEEDS;
+        if (!consumeOneInRange(storage, 0, ZONE_A_SLOTS, seedToPlant)) {
+            return;
+        }
+
+        if (seedToPlant == Material.NETHER_WART) {
+            emptyPlot.getRelative(BlockFace.UP).setType(Material.NETHER_WART);
+        } else {
+            emptyPlot.getRelative(BlockFace.UP).setType(cropForSeed(seedToPlant));
+        }
+    }
+
+    private Material cropForSeed(Material seed) {
+        return switch (seed) {
+            case CARROT -> Material.CARROTS;
+            case POTATO -> Material.POTATOES;
+            case BEETROOT_SEEDS -> Material.BEETROOTS;
+            default -> Material.WHEAT;
+        };
+    }
+
+    private Block findMatureCrop(Location origin, int radius, World world) {
+        int baseX = origin.getBlockX();
+        int baseY = origin.getBlockY();
+        int baseZ = origin.getBlockZ();
+
+        Block nearest = null;
+        double nearestDistanceSq = Double.MAX_VALUE;
+
+        for (int dx = -radius; dx <= radius; dx++) {
+            for (int dy = -Math.min(radius, 4); dy <= Math.min(radius, 4); dy++) {
+                for (int dz = -radius; dz <= radius; dz++) {
+                    Block block = world.getBlockAt(baseX + dx, baseY + dy, baseZ + dz);
+                    Material type = block.getType();
+
+                    boolean matches;
+                    if (CROP_SEEDS.containsKey(type)) {
+                        matches = block.getBlockData() instanceof Ageable ageable
+                                && ageable.getAge() >= ageable.getMaximumAge();
+                    } else {
+                        matches = type == Material.PUMPKIN || type == Material.MELON;
+                    }
+                    if (!matches) {
+                        continue;
+                    }
+
+                    double distanceSq = block.getLocation().distanceSquared(origin);
+                    if (distanceSq < nearestDistanceSq) {
+                        nearestDistanceSq = distanceSq;
+                        nearest = block;
+                    }
+                }
+            }
+        }
+        return nearest;
+    }
+
+    private Block findEmptyFarmPlot(Location origin, int radius, World world) {
+        int baseX = origin.getBlockX();
+        int baseY = origin.getBlockY();
+        int baseZ = origin.getBlockZ();
+
+        Block nearest = null;
+        double nearestDistanceSq = Double.MAX_VALUE;
+
+        for (int dx = -radius; dx <= radius; dx++) {
+            for (int dy = -Math.min(radius, 4); dy <= Math.min(radius, 4); dy++) {
+                for (int dz = -radius; dz <= radius; dz++) {
+                    Block block = world.getBlockAt(baseX + dx, baseY + dy, baseZ + dz);
+                    boolean isFarmland = block.getType() == Material.FARMLAND
+                            && block.getRelative(BlockFace.UP).getType() == Material.AIR;
+                    boolean isSoulSand = block.getType() == Material.SOUL_SAND
+                            && block.getRelative(BlockFace.UP).getType() == Material.AIR;
+                    if (!isFarmland && !isSoulSand) {
+                        continue;
+                    }
+
+                    double distanceSq = block.getLocation().distanceSquared(origin);
+                    if (distanceSq < nearestDistanceSq) {
+                        nearestDistanceSq = distanceSq;
+                        nearest = block;
+                    }
+                }
+            }
+        }
+        return nearest;
+    }
+
+    private int addToStorageRange(ItemStack[] storage, int fromIndex, int toIndex, ItemStack toAdd) {
+        int remaining = toAdd.getAmount();
+        int maxStackSize = toAdd.getMaxStackSize();
+
+        for (int i = fromIndex; i < toIndex && i < storage.length && remaining > 0; i++) {
+            ItemStack slot = storage[i];
+            if (slot != null && slot.isSimilar(toAdd) && slot.getAmount() < maxStackSize) {
+                int space = maxStackSize - slot.getAmount();
+                int move = Math.min(space, remaining);
+                slot.setAmount(slot.getAmount() + move);
+                remaining -= move;
+            }
+        }
+        for (int i = fromIndex; i < toIndex && i < storage.length && remaining > 0; i++) {
+            if (storage[i] == null) {
+                int move = Math.min(maxStackSize, remaining);
+                ItemStack newStack = toAdd.clone();
+                newStack.setAmount(move);
+                storage[i] = newStack;
+                remaining -= move;
+            }
+        }
+        return remaining;
+    }
+
+    private boolean consumeOneInRange(ItemStack[] storage, int fromIndex, int toIndex, Material material) {
+        for (int i = fromIndex; i < toIndex && i < storage.length; i++) {
+            ItemStack slot = storage[i];
+            if (slot != null && slot.getType() == material) {
+                slot.setAmount(slot.getAmount() - 1);
+                if (slot.getAmount() <= 0) {
+                    storage[i] = null;
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void handleItemPickup(MinionData data, Entity entity, ItemStack[] storage) {
-        World world = entity.getWorld();
         int radius = effectiveRadius(data);
 
         entity.getNearbyEntities(radius, radius, radius).stream()
@@ -336,7 +449,7 @@ public final class MinionAiController {
                 });
 
         pullFromNearbyMinions(data, entity, storage, radius);
-        pushToAdjacentContainer(entity, storage);
+        pushToAdjacentMinion(data, entity, storage);
         pushToNearbySellerMinions(data, entity, storage, radius);
     }
 
@@ -350,7 +463,8 @@ public final class MinionAiController {
 
         for (MinionManager.NearbyMinionView other : nearby) {
             ItemStack[] otherStorage = other.storage();
-            for (int i = 0; i < otherStorage.length; i++) {
+            int startIndex = zoneBStart(other.type());
+            for (int i = startIndex; i < otherStorage.length; i++) {
                 ItemStack slot = otherStorage[i];
                 if (slot == null) {
                     continue;
@@ -366,48 +480,82 @@ public final class MinionAiController {
         }
     }
 
-    private void pushToAdjacentContainer(Entity entity, ItemStack[] storage) {
-        Block center = entity.getLocation().getBlock();
+    private void pushToAdjacentMinion(MinionData data, Entity entity, ItemStack[] storage) {
+        if (minionManager == null) {
+            return;
+        }
 
-        for (BlockFace face : ADJACENT_FACES) {
-            Block adjacent = center.getRelative(face);
-            if (!(adjacent.getState() instanceof Container container)) {
+        for (Entity nearby : entity.getNearbyEntities(1.5, 1.5, 1.5)) {
+            Long otherId = minionManager.resolveMinionId(nearby);
+            if (otherId == null || otherId == data.getId()) {
                 continue;
             }
 
-            Inventory targetInventory = container.getInventory();
+            MinionData otherData = minionManager.getMinion(otherId);
+            if (otherData == null || !otherData.getOwnerUuid().equals(data.getOwnerUuid())) {
+                continue;
+            }
+            if (otherData.getType() != MinionType.MINION_CHEST
+                    && otherData.getType() != MinionType.COLLECTOR
+                    && otherData.getType() != MinionType.SELLER) {
+                continue;
+            }
+
+            ItemStack[] otherStorage = minionManager.getMinionStorage(otherId);
+            if (otherStorage == null) {
+                continue;
+            }
+
             for (int i = 0; i < storage.length; i++) {
                 ItemStack slot = storage[i];
                 if (slot == null) {
                     continue;
                 }
 
-                Map<Integer, ItemStack> leftover = targetInventory.addItem(slot.clone());
-                if (leftover.isEmpty()) {
+                int leftover = ItemUtils.addToStorage(otherStorage, slot);
+                if (leftover <= 0) {
                     storage[i] = null;
-                } else {
-                    storage[i] = leftover.values().iterator().next();
+                } else if (leftover < slot.getAmount()) {
+                    slot.setAmount(leftover);
                 }
             }
-            return; // Only push into the first container found.
+            return;
         }
     }
 
-    /**
-     * Pushes whatever the Collector is currently holding into any
-     * nearby placed Seller Minion belonging to the same owner, so a
-     * Collector sitting near a Seller Minion automatically feeds it
-     * for auto-liquidation - mirroring {@link #pullFromNearbyMinions}
-     * but in the opposite direction and targeting Seller Minions
-     * specifically. Runs AFTER {@link #pushToAdjacentContainer}, so a
-     * directly-adjacent physical chest still takes priority; only
-     * whatever's left afterward flows to a Seller Minion.
-     *
-     * @param data    the Collector's persistent data
-     * @param entity  the Collector's visual entity
-     * @param storage the Collector's live storage array, mutated in place
-     * @param radius  the Collector's effective work radius
-     */
+    private void pushAlongConnections(MinionData data, ItemStack[] storage) {
+        if (minionManager == null || connectorManager == null) {
+            return;
+        }
+
+        List<Long> destinations = connectorManager.getOutgoing(data.getId());
+        if (destinations.isEmpty()) {
+            return;
+        }
+        int startIndex = zoneBStart(data.getType());
+
+        for (long destinationId : destinations) {
+            ItemStack[] destinationStorage = minionManager.getMinionStorage(destinationId);
+            if (destinationStorage == null) {
+                continue;
+            }
+
+            for (int i = startIndex; i < storage.length; i++) {
+                ItemStack slot = storage[i];
+                if (slot == null) {
+                    continue;
+                }
+
+                int leftover = ItemUtils.addToStorage(destinationStorage, slot);
+                if (leftover <= 0) {
+                    storage[i] = null;
+                } else if (leftover < slot.getAmount()) {
+                    slot.setAmount(leftover);
+                }
+            }
+        }
+    }
+
     private void pushToNearbySellerMinions(MinionData data, Entity entity, ItemStack[] storage, int radius) {
         if (minionManager == null) {
             return;
@@ -438,6 +586,37 @@ public final class MinionAiController {
         }
     }
 
+    private void handleChestBuffer(MinionData data, Entity entity, ItemStack[] storage) {
+        pushToAdjacentContainer(entity, storage);
+    }
+
+    private void pushToAdjacentContainer(Entity entity, ItemStack[] storage) {
+        Block center = entity.getLocation().getBlock();
+
+        for (BlockFace face : ADJACENT_FACES) {
+            Block adjacent = center.getRelative(face);
+            if (!(adjacent.getState() instanceof Container container)) {
+                continue;
+            }
+
+            Inventory targetInventory = container.getInventory();
+            for (int i = 0; i < storage.length; i++) {
+                ItemStack slot = storage[i];
+                if (slot == null) {
+                    continue;
+                }
+
+                Map<Integer, ItemStack> leftover = targetInventory.addItem(slot.clone());
+                if (leftover.isEmpty()) {
+                    storage[i] = null;
+                } else {
+                    storage[i] = leftover.values().iterator().next();
+                }
+            }
+            return;
+        }
+    }
+
     private void handleFishing(MinionHandler handler, Entity entity, ItemStack[] storage) {
         if (handler.getPossibleCatches().isEmpty()) {
             return;
@@ -461,7 +640,9 @@ public final class MinionAiController {
         }
     }
 
-    private void handleInternalSell(MinionData data, ItemStack[] storage) {
+    private void handleInternalSell(MinionData data, Entity entity, ItemStack[] storage) {
+        pullSellableFromAdjacentContainer(entity, storage);
+
         double totalPayout = 0.0;
 
         for (int i = 0; i < storage.length; i++) {
@@ -485,6 +666,34 @@ public final class MinionAiController {
         }
     }
 
+    private void pullSellableFromAdjacentContainer(Entity entity, ItemStack[] storage) {
+        Block center = entity.getLocation().getBlock();
+
+        for (BlockFace face : ADJACENT_FACES) {
+            Block adjacent = center.getRelative(face);
+            if (!(adjacent.getState() instanceof Container container)) {
+                continue;
+            }
+
+            Inventory sourceInventory = container.getInventory();
+            for (int i = 0; i < sourceInventory.getSize(); i++) {
+                ItemStack slot = sourceInventory.getItem(i);
+                if (slot == null || slot.getType().isAir() || !sellManager.isSellable(slot)) {
+                    continue;
+                }
+
+                int leftover = ItemUtils.addToStorage(storage, slot.clone());
+                if (leftover <= 0) {
+                    sourceInventory.setItem(i, null);
+                } else if (leftover < slot.getAmount()) {
+                    slot.setAmount(leftover);
+                    sourceInventory.setItem(i, slot);
+                }
+            }
+            return;
+        }
+    }
+
     private boolean consumeOne(ItemStack[] storage, Material material) {
         for (int i = 0; i < storage.length; i++) {
             ItemStack slot = storage[i];
@@ -498,4 +707,4 @@ public final class MinionAiController {
         }
         return false;
     }
-        }
+}
