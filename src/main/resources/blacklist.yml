@@ -1,0 +1,57 @@
+# ==========================================================
+# EcoCore - Trade Blacklist Configuration
+# Items matching any rule below cannot be bought or sold.
+# ==========================================================
+category-flags:
+  event-item: true
+  quest-item: true
+  boss-drop: true
+  artifact: true
+  relic: true
+  unique: true
+  legendary: true
+  admin-item: true
+  creative-only: true
+  bedrock-item: true
+  command-item: true
+  museum-item: true
+
+detection:
+  persistent-data-key: "ecocore:untradeable"
+  namespace: "ecocore"
+
+materials:
+  - "BEDROCK"
+  - "COMMAND_BLOCK"
+  - "BARRIER"
+  - "STRUCTURE_BLOCK"
+  - "STRUCTURE_VOID"
+  - "JIGSAW"
+  - "DEBUG_STICK"
+
+namespaced-keys: [ ]
+
+custom-model-data: [ ]
+
+nbt-keys:
+  - "Unbreakable"
+
+hooks:
+  itemsadder:
+    enabled: true
+    blacklisted-ids: [ ]
+  oraxen:
+    enabled: true
+    blacklisted-ids: [ ]
+  mmoitems:
+    enabled: true
+    blacklisted-ids: [ ]
+  slimefun:
+    enabled: true
+    blacklisted-ids: [ ]
+  ecoitems:
+    enabled: true
+    blacklisted-ids: [ ]
+  executableitems:
+    enabled: true
+    blacklisted-ids: [ ]

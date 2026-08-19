@@ -1,0 +1,211 @@
+# ==========================================================
+# EcoCore - Shop Item Catalog
+# Ini SUMBER UTAMA & SATU-SATUNYA isi shop. Item yang gak ada
+# di sini otomatis KEHAPUS dari database pas /ecocore reload -
+# jadi jangan hapus baris sembarangan kalau gak mau itemnya hilang.
+# Tambah/edit item di sini, reload, langsung masuk. Harga & stock
+# yang udah berjalan (live) TIDAK direset saat reload untuk item
+# yang tetap ada di sini.
+# ==========================================================
+items:
+
+  # ---------------- blocks ----------------
+  stone: { category: blocks, material: STONE, base-price: 1.0 }
+  cobblestone: { category: blocks, material: COBBLESTONE, base-price: 0.6 }
+  dirt: { category: blocks, material: DIRT, base-price: 0.2 }
+  sand: { category: blocks, material: SAND, base-price: 0.35 }
+  gravel: { category: blocks, material: GRAVEL, base-price: 0.4 }
+  andesite: { category: blocks, material: ANDESITE, base-price: 0.5 }
+  diorite: { category: blocks, material: DIORITE, base-price: 0.5 }
+  granite: { category: blocks, material: GRANITE, base-price: 0.5 }
+  clay_block: { category: blocks, material: CLAY, base-price: 1.5 }
+  obsidian: { category: blocks, material: OBSIDIAN, base-price: 12.0 }
+  glowstone: { category: blocks, material: GLOWSTONE, base-price: 6.0 }
+  netherrack: { category: blocks, material: NETHERRACK, base-price: 0.4 }
+  end_stone: { category: blocks, material: END_STONE, base-price: 2.5 }
+  deepslate: { category: blocks, material: DEEPSLATE, base-price: 1.2 }
+  blackstone: { category: blocks, material: BLACKSTONE, base-price: 1.0 }
+  soul_sand: { category: blocks, material: SOUL_SAND, base-price: 2.5 }
+  magma_block: { category: blocks, material: MAGMA_BLOCK, base-price: 5.0 }
+  ice: { category: blocks, material: ICE, base-price: 1.5 }
+  packed_ice: { category: blocks, material: PACKED_ICE, base-price: 3.0 }
+  moss_block: { category: blocks, material: MOSS_BLOCK, base-price: 2.0 }
+  mud: { category: blocks, material: MUD, base-price: 0.6 }
+  tuff: { category: blocks, material: TUFF, base-price: 0.8 }
+  calcite: { category: blocks, material: CALCITE, base-price: 1.0 }
+
+  # ---------------- ores & minerals ----------------
+  coal: { category: ores, material: COAL, base-price: 3.0 }
+  raw_iron: { category: ores, material: RAW_IRON, base-price: 6.0 }
+  iron_ingot: { category: ores, material: IRON_INGOT, base-price: 8.0 }
+  raw_gold: { category: ores, material: RAW_GOLD, base-price: 10.0 }
+  gold_ingot: { category: ores, material: GOLD_INGOT, base-price: 15.0 }
+  raw_copper: { category: ores, material: RAW_COPPER, base-price: 3.5 }
+  copper_ingot: { category: ores, material: COPPER_INGOT, base-price: 5.0 }
+  diamond: { category: ores, material: DIAMOND, base-price: 60.0, elasticity: 1.3 }
+  emerald: { category: ores, material: EMERALD, base-price: 50.0, elasticity: 1.3 }
+  lapis_lazuli: { category: ores, material: LAPIS_LAZULI, base-price: 4.0 }
+  redstone_dust: { category: ores, material: REDSTONE, base-price: 2.0 }
+  quartz: { category: ores, material: QUARTZ, base-price: 5.0 }
+  glowstone_dust: { category: ores, material: GLOWSTONE_DUST, base-price: 3.0 }
+  amethyst_shard: { category: ores, material: AMETHYST_SHARD, base-price: 7.0 }
+  netherite_scrap: { category: ores, material: NETHERITE_SCRAP, base-price: 250.0, elasticity: 1.5, max-price: 1500.0, max-stock: 64 }
+  netherite_ingot: { category: ores, material: NETHERITE_INGOT, base-price: 400.0, elasticity: 1.5, max-price: 2500.0, max-stock: 32, tradeable: false }
+
+  # ---------------- food ----------------
+  bread: { category: food, material: BREAD, base-price: 2.0 }
+  cooked_beef: { category: food, material: COOKED_BEEF, base-price: 4.0 }
+  cooked_porkchop: { category: food, material: COOKED_PORKCHOP, base-price: 4.0 }
+  cooked_chicken: { category: food, material: COOKED_CHICKEN, base-price: 3.0 }
+  cooked_mutton: { category: food, material: COOKED_MUTTON, base-price: 3.5 }
+  cooked_rabbit: { category: food, material: COOKED_RABBIT, base-price: 3.0 }
+  cooked_cod: { category: food, material: COOKED_COD, base-price: 2.5 }
+  cooked_salmon: { category: food, material: COOKED_SALMON, base-price: 3.0 }
+  apple: { category: food, material: APPLE, base-price: 1.5 }
+  golden_apple: { category: food, material: GOLDEN_APPLE, base-price: 80.0, elasticity: 0.7, max-stock: 64 }
+  golden_carrot: { category: food, material: GOLDEN_CARROT, base-price: 12.0 }
+  cake: { category: food, material: CAKE, base-price: 10.0 }
+  pumpkin_pie: { category: food, material: PUMPKIN_PIE, base-price: 5.0 }
+  honey_bottle: { category: food, material: HONEY_BOTTLE, base-price: 4.0 }
+  baked_potato: { category: food, material: BAKED_POTATO, base-price: 1.2 }
+  cookie: { category: food, material: COOKIE, base-price: 0.8 }
+  melon_slice: { category: food, material: MELON_SLICE, base-price: 0.6 }
+  dried_kelp: { category: food, material: DRIED_KELP, base-price: 0.5 }
+
+  # ---------------- farming ----------------
+  wheat: { category: farming, material: WHEAT, base-price: 1.0 }
+  wheat_seeds: { category: farming, material: WHEAT_SEEDS, base-price: 0.3 }
+  carrot: { category: farming, material: CARROT, base-price: 0.8 }
+  potato: { category: farming, material: POTATO, base-price: 0.8 }
+  beetroot: { category: farming, material: BEETROOT, base-price: 1.0 }
+  beetroot_seeds: { category: farming, material: BEETROOT_SEEDS, base-price: 0.3 }
+  pumpkin: { category: farming, material: PUMPKIN, base-price: 2.0 }
+  melon: { category: farming, material: MELON, base-price: 1.8 }
+  sugar_cane: { category: farming, material: SUGAR_CANE, base-price: 0.7 }
+  nether_wart: { category: farming, material: NETHER_WART, base-price: 1.6 }
+  cocoa_beans: { category: farming, material: COCOA_BEANS, base-price: 1.4 }
+  sweet_berries: { category: farming, material: SWEET_BERRIES, base-price: 1.0 }
+  bamboo: { category: farming, material: BAMBOO, base-price: 0.4 }
+  kelp: { category: farming, material: KELP, base-price: 0.3 }
+  cactus: { category: farming, material: CACTUS, base-price: 0.5 }
+
+  # ---------------- mob drops ----------------
+  rotten_flesh: { category: mob-drops, material: ROTTEN_FLESH, base-price: 0.1 }
+  bone: { category: mob-drops, material: BONE, base-price: 0.5 }
+  bone_meal: { category: mob-drops, material: BONE_MEAL, base-price: 0.6 }
+  string: { category: mob-drops, material: STRING, base-price: 0.5 }
+  spider_eye: { category: mob-drops, material: SPIDER_EYE, base-price: 1.0 }
+  gunpowder: { category: mob-drops, material: GUNPOWDER, base-price: 2.0 }
+  ender_pearl: { category: mob-drops, material: ENDER_PEARL, base-price: 20.0 }
+  ender_eye: { category: mob-drops, material: ENDER_EYE, base-price: 30.0 }
+  blaze_rod: { category: mob-drops, material: BLAZE_ROD, base-price: 15.0 }
+  blaze_powder: { category: mob-drops, material: BLAZE_POWDER, base-price: 8.0 }
+  ghast_tear: { category: mob-drops, material: GHAST_TEAR, base-price: 25.0 }
+  slime_ball: { category: mob-drops, material: SLIME_BALL, base-price: 2.0 }
+  magma_cream: { category: mob-drops, material: MAGMA_CREAM, base-price: 3.0 }
+  phantom_membrane: { category: mob-drops, material: PHANTOM_MEMBRANE, base-price: 8.0 }
+  rabbit_hide: { category: mob-drops, material: RABBIT_HIDE, base-price: 1.0 }
+  rabbit_foot: { category: mob-drops, material: RABBIT_FOOT, base-price: 6.0 }
+  leather: { category: mob-drops, material: LEATHER, base-price: 2.0 }
+  feather: { category: mob-drops, material: FEATHER, base-price: 0.5 }
+  ink_sac: { category: mob-drops, material: INK_SAC, base-price: 1.0 }
+  glow_ink_sac: { category: mob-drops, material: GLOW_INK_SAC, base-price: 2.5 }
+  turtle_scute: { category: mob-drops, material: TURTLE_SCUTE, base-price: 10.0 }
+  shulker_shell: { category: mob-drops, material: SHULKER_SHELL, base-price: 90.0, elasticity: 1.4, max-price: 500.0, max-stock: 128 }
+  wither_skeleton_skull: { category: mob-drops, material: WITHER_SKELETON_SKULL, base-price: 150.0, elasticity: 1.5, max-price: 800.0, max-stock: 32 }
+  nether_star: { category: mob-drops, material: NETHER_STAR, base-price: 400.0, elasticity: 1.6, max-price: 2500.0, max-stock: 16, tradeable: false }
+  dragon_breath: { category: mob-drops, material: DRAGON_BREATH, base-price: 60.0, max-stock: 32 }
+
+  # ---------------- fishing ----------------
+  cod: { category: fishing, material: COD, base-price: 2.0 }
+  salmon: { category: fishing, material: SALMON, base-price: 2.5 }
+  pufferfish: { category: fishing, material: PUFFERFISH, base-price: 3.0 }
+  tropical_fish: { category: fishing, material: TROPICAL_FISH, base-price: 3.5 }
+  nautilus_shell: { category: fishing, material: NAUTILUS_SHELL, base-price: 25.0 }
+  prismarine_shard: { category: fishing, material: PRISMARINE_SHARD, base-price: 2.0 }
+  prismarine_crystals: { category: fishing, material: PRISMARINE_CRYSTALS, base-price: 2.5 }
+  heart_of_the_sea: { category: fishing, material: HEART_OF_THE_SEA, base-price: 200.0, max-price: 1200.0, max-stock: 16, tradeable: false }
+
+  # ---------------- wood ----------------
+  oak_log: { category: wood, material: OAK_LOG, base-price: 1.5 }
+  birch_log: { category: wood, material: BIRCH_LOG, base-price: 1.5 }
+  spruce_log: { category: wood, material: SPRUCE_LOG, base-price: 1.5 }
+  jungle_log: { category: wood, material: JUNGLE_LOG, base-price: 1.8 }
+  acacia_log: { category: wood, material: ACACIA_LOG, base-price: 1.8 }
+  dark_oak_log: { category: wood, material: DARK_OAK_LOG, base-price: 2.0 }
+  mangrove_log: { category: wood, material: MANGROVE_LOG, base-price: 2.0 }
+  cherry_log: { category: wood, material: CHERRY_LOG, base-price: 2.2 }
+  oak_planks: { category: wood, material: OAK_PLANKS, base-price: 0.5 }
+  stick: { category: wood, material: STICK, base-price: 0.2 }
+  crimson_stem: { category: wood, material: CRIMSON_STEM, base-price: 2.5 }
+  warped_stem: { category: wood, material: WARPED_STEM, base-price: 2.5 }
+
+  # ---------------- redstone ----------------
+  redstone_torch: { category: redstone, material: REDSTONE_TORCH, base-price: 1.5 }
+  repeater: { category: redstone, material: REPEATER, base-price: 5.0 }
+  comparator: { category: redstone, material: COMPARATOR, base-price: 6.0 }
+  piston: { category: redstone, material: PISTON, base-price: 4.0 }
+  sticky_piston: { category: redstone, material: STICKY_PISTON, base-price: 5.5 }
+  observer: { category: redstone, material: OBSERVER, base-price: 5.0 }
+  hopper: { category: redstone, material: HOPPER, base-price: 8.0 }
+  dispenser: { category: redstone, material: DISPENSER, base-price: 6.0 }
+  dropper: { category: redstone, material: DROPPER, base-price: 4.0 }
+  redstone_lamp: { category: redstone, material: REDSTONE_LAMP, base-price: 4.5 }
+  target: { category: redstone, material: TARGET, base-price: 3.0 }
+  lever: { category: redstone, material: LEVER, base-price: 1.0 }
+  tripwire_hook: { category: redstone, material: TRIPWIRE_HOOK, base-price: 1.5 }
+  daylight_detector: { category: redstone, material: DAYLIGHT_DETECTOR, base-price: 7.0 }
+
+  # ---------------- building ----------------
+  bricks: { category: building, material: BRICKS, base-price: 1.5 }
+  white_wool: { category: building, material: WHITE_WOOL, base-price: 1.0 }
+  red_wool: { category: building, material: RED_WOOL, base-price: 1.0 }
+  black_wool: { category: building, material: BLACK_WOOL, base-price: 1.0 }
+  blue_wool: { category: building, material: BLUE_WOOL, base-price: 1.0 }
+  white_concrete: { category: building, material: WHITE_CONCRETE, base-price: 1.8 }
+  gray_concrete: { category: building, material: GRAY_CONCRETE, base-price: 1.8 }
+  red_concrete: { category: building, material: RED_CONCRETE, base-price: 1.8 }
+  black_concrete: { category: building, material: BLACK_CONCRETE, base-price: 1.8 }
+  white_terracotta: { category: building, material: WHITE_TERRACOTTA, base-price: 1.6 }
+  orange_terracotta: { category: building, material: ORANGE_TERRACOTTA, base-price: 1.6 }
+  glass: { category: building, material: GLASS, base-price: 0.6 }
+  white_stained_glass: { category: building, material: WHITE_STAINED_GLASS, base-price: 0.8 }
+  quartz_block: { category: building, material: QUARTZ_BLOCK, base-price: 4.0 }
+  smooth_stone: { category: building, material: SMOOTH_STONE, base-price: 1.2 }
+  polished_andesite: { category: building, material: POLISHED_ANDESITE, base-price: 0.8 }
+  polished_granite: { category: building, material: POLISHED_GRANITE, base-price: 0.8 }
+  sandstone: { category: building, material: SANDSTONE, base-price: 0.9 }
+  purpur_block: { category: building, material: PURPUR_BLOCK, base-price: 6.0 }
+  prismarine: { category: building, material: PRISMARINE, base-price: 3.5 }
+  sea_lantern: { category: building, material: SEA_LANTERN, base-price: 8.0 }
+  oak_stairs: { category: building, material: OAK_STAIRS, base-price: 0.8 }
+  stone_bricks: { category: building, material: STONE_BRICKS, base-price: 1.0 }
+  nether_bricks: { category: building, material: NETHER_BRICKS, base-price: 1.5 }
+  ladder: { category: building, material: LADDER, base-price: 0.6 }
+  scaffolding: { category: building, material: SCAFFOLDING, base-price: 0.5 }
+
+  # ---------------- brewing ----------------
+  glass_bottle: { category: brewing, material: GLASS_BOTTLE, base-price: 0.4 }
+  fermented_spider_eye: { category: brewing, material: FERMENTED_SPIDER_EYE, base-price: 3.0 }
+  glistering_melon_slice: { category: brewing, material: GLISTERING_MELON_SLICE, base-price: 5.0 }
+  potion: { category: brewing, material: POTION, base-price: 10.0, max-stock: 128, tradeable: false }
+  sugar: { category: brewing, material: SUGAR, base-price: 0.6 }
+  pufferfish_brewing: { category: brewing, material: PUFFERFISH, base-price: 3.0 }
+  spider_eye_brewing: { category: brewing, material: SPIDER_EYE, base-price: 1.0 }
+  netherwart_brewing: { category: brewing, material: NETHER_WART, base-price: 1.6 }
+
+  # ---------------- misc ----------------
+  book: { category: misc, material: BOOK, base-price: 3.0 }
+  paper: { category: misc, material: PAPER, base-price: 0.5 }
+  flint: { category: misc, material: FLINT, base-price: 0.5 }
+  clay_ball: { category: misc, material: CLAY_BALL, base-price: 0.4 }
+  brick: { category: misc, material: BRICK, base-price: 0.8 }
+  name_tag: { category: misc, material: NAME_TAG, base-price: 15.0 }
+  saddle: { category: misc, material: SADDLE, base-price: 20.0 }
+  arrow: { category: misc, material: ARROW, base-price: 0.5 }
+  spectral_arrow: { category: misc, material: SPECTRAL_ARROW, base-price: 1.5 }
+  fire_charge: { category: misc, material: FIRE_CHARGE, base-price: 2.0 }
+  totem_of_undying: { category: misc, material: TOTEM_OF_UNDYING, base-price: 350.0, elasticity: 1.6, max-price: 2000.0, max-stock: 16, tradeable: false }
+  elytra: { category: misc, material: ELYTRA, base-price: 500.0, max-price: 3000.0, max-stock: 8, tradeable: false }
+  music_disc_cat: { category: misc, material: MUSIC_DISC_CAT, base-price: 40.0, max-stock: 32 }
+  firework_rocket: { category: misc, material: FIREWORK_ROCKET, base-price: 3.0 }

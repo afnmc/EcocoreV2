@@ -1,0 +1,27 @@
+# ==========================================================
+# EcoCore - Night Market Configuration
+# Shop terpisah dari shop-items.yml, isinya barang mahal &
+# langka. Gak restock sampai rotasi berikutnya - habis ya
+# habis, tunggu jadwal rotasi.
+# ==========================================================
+rotation:
+  interval-hours: 6
+  slots: 5
+  stock-per-item: 5
+  price-multiplier: 1.4
+
+pool:
+  netherite_ingot: { material: NETHERITE_INGOT, base-price: 450.0 }
+  totem_of_undying: { material: TOTEM_OF_UNDYING, base-price: 320.0 }
+  elytra: { material: ELYTRA, base-price: 480.0 }
+  nether_star: { material: NETHER_STAR, base-price: 380.0 }
+  dragon_breath: { material: DRAGON_BREATH, base-price: 55.0 }
+  shulker_shell: { material: SHULKER_SHELL, base-price: 85.0 }
+  wither_skeleton_skull: { material: WITHER_SKELETON_SKULL, base-price: 140.0 }
+  heart_of_the_sea: { material: HEART_OF_THE_SEA, base-price: 190.0 }
+  enchanted_golden_apple: { material: ENCHANTED_GOLDEN_APPLE, base-price: 260.0 }
+  music_disc_pigstep: { material: MUSIC_DISC_PIGSTEP, base-price: 90.0 }
+  saddle: { material: SADDLE, base-price: 45.0 }
+  name_tag: { material: NAME_TAG, base-price: 35.0 }
+  end_crystal: { material: END_CRYSTAL, base-price: 120.0 }
+  conduit: { material: CONDUIT, base-price: 150.0 }

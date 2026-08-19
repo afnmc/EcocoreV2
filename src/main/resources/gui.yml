@@ -1,0 +1,47 @@
+# ==========================================================
+# EcoCore - GUI Configuration
+# ==========================================================
+general:
+  animations-enabled: true
+  sounds-enabled: true
+  resource-pack-support: true
+
+sounds:
+  click: "UI_BUTTON_CLICK"
+  buy: "ENTITY_EXPERIENCE_ORB_PICKUP"
+  sell: "ENTITY_VILLAGER_TRADE"
+  error: "ENTITY_VILLAGER_NO"
+  page-turn: "ITEM_BOOK_PAGE_TURN"
+  level-up: "ENTITY_PLAYER_LEVELUP"
+
+buttons:
+  next-page:
+    material: "ARROW"
+    custom-model-data: 1001
+  prev-page:
+    material: "ARROW"
+    custom-model-data: 1002
+  close:
+    material: "BARRIER"
+    custom-model-data: 1003
+  back:
+    material: "ARROW"
+    custom-model-data: 1004
+  search:
+    material: "COMPASS"
+    custom-model-data: 1005
+  sort:
+    material: "HOPPER"
+    custom-model-data: 1006
+  favorite-on:
+    material: "NETHER_STAR"
+    custom-model-data: 1007
+  favorite-off:
+    material: "GRAY_DYE"
+    custom-model-data: 1008
+
+layouts:
+  shop-main-rows: 6
+  sell-main-rows: 6
+  jobs-main-rows: 3
+  minions-main-rows: 4
