@@ -27,4 +27,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: EcoCore-jar
-          path: target/EcoCore-1.0.0.ja
+          path: target/EcoCore-1.0.0.jar
