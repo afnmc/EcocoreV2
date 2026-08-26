@@ -1,4 +1,3 @@
-// FILE: src/main/java/io/azthera/ecocore/model/MinionData.java
 package io.azthera.ecocore.model;
 
 import org.bukkit.block.BlockFace;
@@ -154,7 +153,7 @@ public final class MinionData {
      * @return {@code true} if there was enough energy, {@code false} otherwise
      */
     public boolean consumeEnergy(int amount) {
-        if (energy ) {
+        if (energy < amount) {
             return false;
         }
         energy -= amount;

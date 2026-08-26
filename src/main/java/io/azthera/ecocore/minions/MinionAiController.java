@@ -1,4 +1,3 @@
-// FILE: src/main/java/io/azthera/ecocore/minions/MinionAiController.java
 package io.azthera.ecocore.minions;
 
 import io.azthera.ecocore.claim.ClaimManager;
@@ -94,7 +93,13 @@ public final class MinionAiController {
 
         switch (handler.getProcessingType()) {
             case BLOCK_BREAK -> handleBlockBreak(data, handler, entity, pages);
-            case FARM_CYCLE -> handleFarmCycle(data, handler, entity, pages);
+            case FARM_CYCLE -> {
+                if (handler.getType() == MinionType.LUMBERJACK) {
+                    handleLumberChop(data, handler, entity, pages);
+                } else {
+                    handleFarmCycle(data, handler, entity, pages);
+                }
+            }
             case FISHING -> handleFishing(data, handler, entity, pages);
             case ENTITY_INTERACT -> handleEntityInteract(data, handler, entity, pages);
             case INTERNAL_SMELT -> handleInternalSmelt(data, handler, entity, pages);
@@ -194,11 +199,11 @@ public final class MinionAiController {
         BlockFace facing = data.getFacing();
         Block best = null;
         double bestDistSq = Double.MAX_VALUE;
-        for (int dx = arena ? -radius : 0; dx ; dx++) {
-            for (int dz = arena ? -radius : 0; dz ; dz++) {
+        for (int dx = arena ? -radius : 0; dx <= radius; dx++) {
+            for (int dz = arena ? -radius : 0; dz <= radius; dz++) {
                 int x = arena ? baseX + dx : baseX + facing.getModX() * dz + (facing.getModX() == 0 ? dx : 0);
                 int z = arena ? baseZ + dz : baseZ + facing.getModZ() * dz + (facing.getModZ() == 0 ? dx : 0);
-                for (int dy = -2; dy 2; dy++) {
+                for (int dy = -2; dy <= 2; dy++) {
                     Block block = origin.getWorld().getBlockAt(x, baseY + dy, z);
                     if (!handler.getTargetMaterials().contains(block.getType())) {
                         continue;
@@ -207,7 +212,7 @@ public final class MinionAiController {
                         continue;
                     }
                     double distSq = block.getLocation().distanceSquared(origin);
-                    if (distSq ) {
+                    if (distSq < bestDistSq) {
                         bestDistSq = distSq;
                         best = block;
                     }
@@ -262,7 +267,7 @@ public final class MinionAiController {
         }
         MinionStorage zoneAPage = pages.get(0);
         int seedSlot = -1;
-        for (int i = 0; i ; i++) {
+        for (int i = 0; i < ZONE_A_SLOTS; i++) {
             ItemStack slot = zoneAPage.getSlot(i);
             if (slot != null && slot.getType() == handler.getSeedItem() && slot.getAmount() > 0) {
                 seedSlot = i;
@@ -286,7 +291,7 @@ public final class MinionAiController {
         }
         ItemStack seedStack = zoneAPage.getSlot(seedSlot);
         seedStack.setAmount(seedStack.getAmount() - 1);
-        if (seedStack.getAmount() 0) {
+        if (seedStack.getAmount() <= 0) {
             zoneAPage.setSlot(seedSlot, null);
         }
         animationHandler.playActionEffect(spot.getLocation());
@@ -320,8 +325,8 @@ public final class MinionAiController {
         int baseY = origin.getBlockY() - 1;
         int baseZ = origin.getBlockZ();
         BlockFace facing = data.getFacing();
-        for (int dx = arena ? -radius : 0; dx ; dx++) {
-            for (int dz = arena ? -radius : 0; dz ; dz++) {
+        for (int dx = arena ? -radius : 0; dx <= radius; dx++) {
+            for (int dz = arena ? -radius : 0; dz <= radius; dz++) {
                 int x = arena ? baseX + dx : baseX + facing.getModX() * dz + (facing.getModX() == 0 ? dx : 0);
                 int z = arena ? baseZ + dz : baseZ + facing.getModZ() * dz + (facing.getModZ() == 0 ? dx : 0);
                 Block ground = origin.getWorld().getBlockAt(x, baseY, z);
@@ -342,11 +347,11 @@ public final class MinionAiController {
     }
 
     private boolean hasNearbyMatchingCrop(Block spot, java.util.Set<Material> cropMaterials, int spacing) {
-        if (spacing 0) {
+        if (spacing <= 0) {
             return false;
         }
-        for (int dx = -spacing; dx ; dx++) {
-            for (int dz = -spacing; dz ; dz++) {
+        for (int dx = -spacing; dx <= spacing; dx++) {
+            for (int dz = -spacing; dz <= spacing; dz++) {
                 if (dx == 0 && dz == 0) {
                     continue;
                 }
@@ -394,10 +399,10 @@ public final class MinionAiController {
         drops.add(new ItemStack(log.getType(), 1));
         if (species != null) {
             ThreadLocalRandom random = ThreadLocalRandom.current();
-            if (random.nextDouble() .appleChance()) {
+            if (random.nextDouble() < species.appleChance()) {
                 drops.add(new ItemStack(Material.APPLE, 1));
             }
-            if (random.nextDouble() .stickChance()) {
+            if (random.nextDouble() < species.stickChance()) {
                 drops.add(new ItemStack(Material.STICK, 1));
             }
         }
@@ -416,7 +421,7 @@ public final class MinionAiController {
         // Chance to also chop an adjacent leaf block into a sapling for the Zone A replant stock.
         if (species != null) {
             Block leaf = findAdjacentLeaf(log, species.leavesMaterial());
-            if (leaf != null && ThreadLocalRandom.current().nextDouble() 0.15) {
+            if (leaf != null && ThreadLocalRandom.current().nextDouble() < 0.15) {
                 ItemStack sapling = new ItemStack(species.saplingMaterial(), 1);
                 addToZoneA(pages, sapling);
                 leaf.setType(Material.AIR);
@@ -439,7 +444,7 @@ public final class MinionAiController {
         MinionStorage zoneAPage = pages.get(0);
         int saplingSlot = -1;
         Material saplingType = null;
-        for (int i = 0; i ; i++) {
+        for (int i = 0; i < ZONE_A_SLOTS; i++) {
             ItemStack slot = zoneAPage.getSlot(i);
             if (slot != null && slot.getAmount() > 0) {
                 boolean isKnownSapling = handler.getTreeSpeciesData().values().stream()
@@ -470,7 +475,7 @@ public final class MinionAiController {
         spot.get().setType(saplingType);
         ItemStack saplingStack = zoneAPage.getSlot(saplingSlot);
         saplingStack.setAmount(saplingStack.getAmount() - 1);
-        if (saplingStack.getAmount() 0) {
+        if (saplingStack.getAmount() <= 0) {
             zoneAPage.setSlot(saplingSlot, null);
         }
         animationHandler.playActionEffect(spot.get().getLocation());
@@ -484,8 +489,8 @@ public final class MinionAiController {
         int baseX = origin.getBlockX();
         int baseY = origin.getBlockY() - 1;
         int baseZ = origin.getBlockZ();
-        for (int dx = -radius; dx ; dx++) {
-            for (int dz = -radius; dz ; dz++) {
+        for (int dx = -radius; dx <= radius; dx++) {
+            for (int dz = -radius; dz <= radius; dz++) {
                 Block ground = origin.getWorld().getBlockAt(baseX + dx, baseY, baseZ + dz);
                 Block above = ground.getRelative(BlockFace.UP);
                 if (!isSuitableSoil(ground.getType()) || !above.getType().isAir()) {
@@ -516,8 +521,8 @@ public final class MinionAiController {
     }
 
     private boolean has2x2SpaceAvailable(Block spot) {
-        for (int dx = 0; dx 1; dx++) {
-            for (int dz = 0; dz 1; dz++) {
+        for (int dx = 0; dx <= 1; dx++) {
+            for (int dz = 0; dz <= 1; dz++) {
                 Block candidate = spot.getRelative(dx, 0, dz);
                 Block ground = candidate.getRelative(BlockFace.DOWN);
                 if (!isSuitableSoil(ground.getType()) || !candidate.getType().isAir()) {
@@ -529,11 +534,11 @@ public final class MinionAiController {
     }
 
     private boolean hasNearbySapling(Block spot, Material saplingType, int spacing) {
-        if (spacing 0) {
+        if (spacing <= 0) {
             return false;
         }
-        for (int dx = -spacing; dx ; dx++) {
-            for (int dz = -spacing; dz ; dz++) {
+        for (int dx = -spacing; dx <= spacing; dx++) {
+            for (int dz = -spacing; dz <= spacing; dz++) {
                 if (dx == 0 && dz == 0) {
                     continue;
                 }
@@ -547,7 +552,7 @@ public final class MinionAiController {
     }
 
     private boolean hasCanopyClearance(Block spot, int canopyClearance) {
-        for (int dy = 1; dy 3; dy++) {
+        for (int dy = 1; dy <= canopyClearance + 3; dy++) {
             if (!spot.getRelative(0, dy, 0).getType().isAir()) {
                 return false;
             }
@@ -557,13 +562,13 @@ public final class MinionAiController {
 
     private void addToZoneA(List<MinionStorage> pages, ItemStack item) {
         MinionStorage zoneAPage = pages.get(0);
-        for (int i = 0; i ; i++) {
+        for (int i = 0; i < ZONE_A_SLOTS; i++) {
             ItemStack slot = zoneAPage.getSlot(i);
             if (slot == null) {
                 zoneAPage.setSlot(i, item);
                 return;
             }
-            if (slot.isSimilar(item) && slot.getAmount() .getMaxStackSize()) {
+            if (slot.isSimilar(item) && slot.getAmount() < slot.getMaxStackSize()) {
                 slot.setAmount(slot.getAmount() + item.getAmount());
                 return;
             }
@@ -597,14 +602,14 @@ public final class MinionAiController {
 
     private Material rollRarityCatch(List<FishRarityTier> tiers) {
         double totalWeight = tiers.stream().mapToDouble(FishRarityTier::weight).sum();
-        if (totalWeight 0) {
+        if (totalWeight <= 0) {
             return null;
         }
         double roll = ThreadLocalRandom.current().nextDouble() * totalWeight;
         double cumulative = 0;
         for (FishRarityTier tier : tiers) {
             cumulative += tier.weight();
-            if (roll .pool().isEmpty()) {
+            if (roll <= cumulative && !tier.pool().isEmpty()) {
                 return tier.pool().get(ThreadLocalRandom.current().nextInt(tier.pool().size()));
             }
         }
@@ -648,9 +653,9 @@ public final class MinionAiController {
     private void handleInternalSmelt(MinionData data, MinionHandler handler, Entity entity, List<MinionStorage> pages) {
         MinionStorage inputPage = pages.get(0);
         java.util.Map<Material, Material> recipes = handler.getSmeltingRecipes();
-        for (int i = 0; i ; i++) {
+        for (int i = 0; i < ZONE_A_SLOTS; i++) {
             ItemStack input = inputPage.getSlot(i);
-            if (input == null || input.getAmount() 0) {
+            if (input == null || input.getAmount() <= 0) {
                 continue;
             }
             Material outputMaterial = recipes.get(input.getType());
@@ -666,7 +671,7 @@ public final class MinionAiController {
                 return;
             }
             input.setAmount(input.getAmount() - 1);
-            if (input.getAmount() 0) {
+            if (input.getAmount() <= 0) {
                 inputPage.setSlot(i, null);
             }
             addToPagesWithOverflow(outputPages, output);
@@ -739,19 +744,19 @@ public final class MinionAiController {
     private void addToPagesWithOverflow(List<MinionStorage> pages, ItemStack item) {
         for (MinionStorage page : pages) {
             ItemStack[] contents = page.getContents();
-            for (int i = 0; i .length; i++) {
+            for (int i = 0; i < contents.length; i++) {
                 ItemStack slot = contents[i];
-                if (slot != null && slot.isSimilar(item) && slot.getAmount() .getMaxStackSize()) {
+                if (slot != null && slot.isSimilar(item) && slot.getAmount() < slot.getMaxStackSize()) {
                     int space = slot.getMaxStackSize() - slot.getAmount();
                     int toAdd = Math.min(space, item.getAmount());
                     slot.setAmount(slot.getAmount() + toAdd);
                     item.setAmount(item.getAmount() - toAdd);
-                    if (item.getAmount() 0) {
+                    if (item.getAmount() <= 0) {
                         return;
                     }
                 }
             }
-            for (int i = 0; i .length; i++) {
+            for (int i = 0; i < contents.length; i++) {
                 if (contents[i] == null) {
                     page.setSlot(i, item.clone());
                     return;
@@ -790,9 +795,9 @@ public final class MinionAiController {
     private void transferOneStack(List<MinionStorage> fromPages, List<MinionStorage> toPages) {
         for (MinionStorage fromPage : fromPages) {
             ItemStack[] contents = fromPage.getContents();
-            for (int i = 0; i .length; i++) {
+            for (int i = 0; i < contents.length; i++) {
                 ItemStack stack = contents[i];
-                if (stack == null || stack.getAmount() 0) {
+                if (stack == null || stack.getAmount() <= 0) {
                     continue;
                 }
                 if (!hasSpaceInAnyPage(toPages, stack)) {
@@ -802,7 +807,7 @@ public final class MinionAiController {
                 moved.setAmount(1);
                 addToPagesWithOverflow(toPages, moved);
                 stack.setAmount(stack.getAmount() - 1);
-                if (stack.getAmount() 0) {
+                if (stack.getAmount() <= 0) {
                     fromPage.setSlot(i, null);
                 }
                 return;

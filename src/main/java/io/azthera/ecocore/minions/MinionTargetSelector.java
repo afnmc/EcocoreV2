@@ -1,4 +1,3 @@
-// FILE: src/main/java/io/azthera/ecocore/minions/MinionTargetSelector.java
 package io.azthera.ecocore.minions;
 
 import io.azthera.ecocore.minions.types.MinionHandler;
@@ -20,7 +19,7 @@ import java.util.Optional;
  * direction (FACING mode - Revisi 1/2). Minions never move from
  * where they were placed and never use pathfinding of any kind.
  *
- * Deliberately does NOT require a clear line of sight to the
+ * <p>Deliberately does NOT require a clear line of sight to the
  * target: for block-breaking minions especially, the whole point is
  * reaching into solid terrain (ore buried in stone), where a strict
  * line-of-sight check would almost always fail since the target is,
@@ -46,15 +45,15 @@ public final class MinionTargetSelector {
         int baseX = origin.getBlockX();
         int baseY = origin.getBlockY();
         int baseZ = origin.getBlockZ();
-        for (int dx = -radius; dx ; dx++) {
-            for (int dy = -Math.min(radius, 6); dy .min(radius, 6); dy++) {
-                for (int dz = -radius; dz ; dz++) {
+        for (int dx = -radius; dx <= radius; dx++) {
+            for (int dy = -Math.min(radius, 6); dy <= Math.min(radius, 6); dy++) {
+                for (int dz = -radius; dz <= radius; dz++) {
                     Block block = origin.getWorld().getBlockAt(baseX + dx, baseY + dy, baseZ + dz);
                     if (!handler.getTargetMaterials().contains(block.getType())) {
                         continue;
                     }
                     double distanceSq = block.getLocation().distanceSquared(origin);
-                    if (distanceSq ) {
+                    if (distanceSq < nearestDistanceSq) {
                         nearestDistanceSq = distanceSq;
                         nearest = block;
                     }
@@ -89,11 +88,11 @@ public final class MinionTargetSelector {
         int baseZ = origin.getBlockZ();
         Block nearest = null;
         double nearestDistanceSq = Double.MAX_VALUE;
-        for (int depth = 1; depth ; depth++) {
+        for (int depth = 1; depth <= radius; depth++) {
             int centerX = baseX + facing.getModX() * depth;
             int centerZ = baseZ + facing.getModZ() * depth;
-            for (int side = -radius; side ; side++) {
-                for (int dy = -Math.min(radius, 6); dy .min(radius, 6); dy++) {
+            for (int side = -radius; side <= radius; side++) {
+                for (int dy = -Math.min(radius, 6); dy <= Math.min(radius, 6); dy++) {
                     int x = facing.getModX() == 0 ? centerX + side : centerX;
                     int z = facing.getModZ() == 0 ? centerZ + side : centerZ;
                     Block block = origin.getWorld().getBlockAt(x, baseY + dy, z);
@@ -101,7 +100,7 @@ public final class MinionTargetSelector {
                         continue;
                     }
                     double distanceSq = block.getLocation().distanceSquared(origin);
-                    if (distanceSq ) {
+                    if (distanceSq < nearestDistanceSq) {
                         nearestDistanceSq = distanceSq;
                         nearest = block;
                     }

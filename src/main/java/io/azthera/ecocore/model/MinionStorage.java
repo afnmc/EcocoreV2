@@ -1,4 +1,3 @@
-// FILE: src/main/java/io/azthera/ecocore/model/MinionStorage.java
 package io.azthera.ecocore.model;
 
 import org.bukkit.inventory.ItemStack;
@@ -76,7 +75,7 @@ public final class MinionStorage {
             if (slot == null) {
                 return true;
             }
-            if (slot.isSimilar(toAdd) && slot.getAmount() ) {
+            if (slot.isSimilar(toAdd) && slot.getAmount() < maxStackSize) {
                 return true;
             }
         }
@@ -94,7 +93,7 @@ public final class MinionStorage {
             if (slot == null) {
                 return false;
             }
-            if (slot.getAmount() .getMaxStackSize()) {
+            if (slot.getAmount() < slot.getMaxStackSize()) {
                 return false;
             }
         }

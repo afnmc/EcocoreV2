@@ -1,4 +1,3 @@
-// FILE: src/main/java/io/azthera/ecocore/minions/MinionManager.java
 package io.azthera.ecocore.minions;
 
 import io.azthera.ecocore.EcoCorePlugin;
@@ -67,7 +66,7 @@ public final class MinionManager {
      * @param type the minion's type
      * @param pages the minion's live storage pages (index 0 first)
      */
-    public record NearbyMinionView(long id, MinionType type, List pages) {
+    public record NearbyMinionView(long id, MinionType type, List<MinionStorage> pages) {
     }
 
     private static final class ActiveMinion {
@@ -174,12 +173,12 @@ public final class MinionManager {
         if (legacyJson != null && !legacyJson.isBlank()) {
             ItemStack[] legacyContents = ItemUtils.deserialize(logger, legacyJson, MinionStorage.SLOTS_PER_PAGE);
             int copyLength = Math.min(legacyContents.length, MinionStorage.SLOTS_PER_PAGE);
-            for (int i = 0; i ; i++) {
+            for (int i = 0; i < copyLength; i++) {
                 firstPage.setSlot(i, legacyContents[i]);
             }
         }
         pages.add(firstPage);
-        for (int i = 1; i .max(1, data.getStoragePageCount()); i++) {
+        for (int i = 1; i < Math.max(1, data.getStoragePageCount()); i++) {
             pages.add(MinionStorage.empty(i));
         }
         return pages;
@@ -188,8 +187,8 @@ public final class MinionManager {
     private List<MinionStorage> deserializePages(int pageCount, String pagesJson) {
         List<MinionStorage> pages = new ArrayList<>();
         String[] rawPages = pagesJson.split(PAGE_DELIMITER, -1);
-        for (int i = 0; i .max(1, pageCount); i++) {
-            String rawPage = i .length ? rawPages[i] : null;
+        for (int i = 0; i < Math.max(1, pageCount); i++) {
+            String rawPage = i < rawPages.length ? rawPages[i] : null;
             ItemStack[] contents = ItemUtils.deserialize(logger, rawPage, MinionStorage.SLOTS_PER_PAGE);
             if (contents.length != MinionStorage.SLOTS_PER_PAGE) {
                 ItemStack[] resized = new ItemStack[MinionStorage.SLOTS_PER_PAGE];
@@ -203,7 +202,7 @@ public final class MinionManager {
 
     private String serializePages(List<MinionStorage> pages) {
         StringBuilder builder = new StringBuilder();
-        for (int i = 0; i .size(); i++) {
+        for (int i = 0; i < pages.size(); i++) {
             if (i > 0) {
                 builder.append(PAGE_DELIMITER);
             }
@@ -268,16 +267,16 @@ public final class MinionManager {
      */
     public static BlockFace snapYawToCardinal(float yaw) {
         float normalizedYaw = yaw % 360;
-        if (normalizedYaw 0) {
+        if (normalizedYaw < 0) {
             normalizedYaw += 360;
         }
-        if (normalizedYaw >= 315 || normalizedYaw 45) {
+        if (normalizedYaw >= 315 || normalizedYaw < 45) {
             return BlockFace.SOUTH;
         }
-        if (normalizedYaw 135) {
+        if (normalizedYaw < 135) {
             return BlockFace.WEST;
         }
-        if (normalizedYaw 225) {
+        if (normalizedYaw < 225) {
             return BlockFace.NORTH;
         }
         return BlockFace.EAST;
@@ -487,7 +486,7 @@ public final class MinionManager {
             double dy = otherData.getY() - origin.getY();
             double dz = otherData.getZ() - origin.getZ();
             double distSq = (dx * dx) + (dy * dy) + (dz * dz);
-            if (distSq ) {
+            if (distSq <= radiusSq) {
                 results.add(new NearbyMinionView(otherData.getId(), otherData.getType(), active.pages));
             }
         }
@@ -508,7 +507,7 @@ public final class MinionManager {
             active.tickAccumulator += elapsedGameTicks;
             int actionsToRun = (int) Math.min(active.tickAccumulator / speedTicks, MAX_CATCH_UP_ACTIONS_PER_PASS);
             active.tickAccumulator %= speedTicks;
-            for (int i = 0; i ; i++) {
+            for (int i = 0; i < actionsToRun; i++) {
                 aiController.tick(active.data, handler, entity, active.pages);
             }
             if (entity instanceof LivingEntity livingEntity) {

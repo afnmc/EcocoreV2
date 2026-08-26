@@ -1,4 +1,3 @@
-// FILE: src/main/java/io/azthera/ecocore/jobs/JobMissionManager.java
 package io.azthera.ecocore.jobs;
 
 import io.azthera.ecocore.config.JobsConfig;
@@ -14,6 +13,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
 import java.sql.SQLException;
+import java.util.Map;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,7 +24,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * player in chat (with a reward summary and sound) the moment a
  * mission is completed.
  *
- * Revisi 18: missions are now drawn from each job's configured
+ * <p>Revisi 18: missions are now drawn from each job's configured
  * {@code jobs.yml mission-pools} rather than always being the single
  * generic "do X actions" template - a real variety of mission types
  * (breaking specific blocks, harvesting specific crops, fishing,
@@ -86,7 +86,7 @@ public final class JobMissionManager {
     private void assignMissions(UUID playerUuid, JobType jobType, String period, int count) throws SQLException {
         long now = System.currentTimeMillis();
         List<MissionTemplate> pool = jobsConfig.getMissionPool(jobType);
-        for (int i = 0; i ; i++) {
+        for (int i = 0; i < count; i++) {
             MissionTemplate template = pickWeightedTemplate(pool, period);
             String missionKey;
             int target;
@@ -120,14 +120,14 @@ public final class JobMissionManager {
             return null;
         }
         double totalWeight = eligible.stream().mapToDouble(MissionTemplate::weight).sum();
-        if (totalWeight 0) {
+        if (totalWeight <= 0) {
             return eligible.get(ThreadLocalRandom.current().nextInt(eligible.size()));
         }
         double roll = ThreadLocalRandom.current().nextDouble() * totalWeight;
         double cumulative = 0;
         for (MissionTemplate template : eligible) {
             cumulative += template.weight();
-            if (roll ) {
+            if (roll <= cumulative) {
                 return template;
             }
         }
@@ -145,7 +145,7 @@ public final class JobMissionManager {
      * matches both, paying out and notifying the player for any
      * mission that reaches its target as a result.
      *
-     * Revisi 18 anti-abuse: an action is silently dropped (counts
+     * <p>Revisi 18 anti-abuse: an action is silently dropped (counts
      * toward nothing) if it arrives within the configured cooldown
      * window of the last counted action for that same mission, or if
      * that mission has already hit its daily action cap - both are
@@ -251,7 +251,7 @@ public final class JobMissionManager {
         long now = System.currentTimeMillis();
         long cooldownMillis = (long) (jobsConfig.getAntiAbuseCooldownSeconds() * 1000L);
         Long lastActionAt = lastActionAtByMissionId.get(mission.id());
-        if (lastActionAt != null && (now - lastActionAt) ) {
+        if (lastActionAt != null && (now - lastActionAt) < cooldownMillis) {
             return false;
         }
         long currentDayBucket = now / 86_400_000L;

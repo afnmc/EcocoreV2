@@ -1,4 +1,3 @@
-// FILE: src/main/java/io/azthera/ecocore/gui/sell/SellMainGui.java
 package io.azthera.ecocore.gui.sell;
 
 import io.azthera.ecocore.config.MessagesConfig;
@@ -27,7 +26,7 @@ import java.util.Map;
  * InventoryClickEvent}/{@code InventoryDragEvent} and both are
  * explicitly un-cancelled for deposit slots here.
  *
- * A live preview of the deposit area's total sell value is shown
+ * <p>A live preview of the deposit area's total sell value is shown
  * and refreshed on every click. If the player closes the screen with
  * items still sitting in the deposit area, those items are returned
  * to their inventory in {@link #handleClose} (dropping overflow on
@@ -72,7 +71,7 @@ public final class SellMainGui extends AbstractGui {
      */
     @Override
     public boolean isFreeDragSlot(int rawSlot) {
-        return (rawSlot >= DEPOSIT_START_SLOT && rawSlot ) || super.isFreeDragSlot(rawSlot);
+        return (rawSlot >= DEPOSIT_START_SLOT && rawSlot <= DEPOSIT_END_SLOT) || super.isFreeDragSlot(rawSlot);
     }
 
     /**
@@ -106,7 +105,7 @@ public final class SellMainGui extends AbstractGui {
         double total = 0;
         int itemCount = 0;
         if (inventory != null) {
-            for (int slot = DEPOSIT_START_SLOT; slot ; slot++) {
+            for (int slot = DEPOSIT_START_SLOT; slot <= DEPOSIT_END_SLOT; slot++) {
                 ItemStack stack = inventory.getItem(slot);
                 if (stack == null || stack.getType().isAir()) {
                     continue;
@@ -138,7 +137,7 @@ public final class SellMainGui extends AbstractGui {
     @Override
     public void handleClick(InventoryClickEvent event) {
         int slot = event.getRawSlot();
-        if (slot >= DEPOSIT_START_SLOT && slot ) {
+        if (slot >= DEPOSIT_START_SLOT && slot <= DEPOSIT_END_SLOT) {
             // Revisi 15: fully free vanilla interaction in the deposit area -
             // explicitly un-cancel in case an earlier handler already flagged
             // this event, then refresh the live price preview.
@@ -171,7 +170,7 @@ public final class SellMainGui extends AbstractGui {
         int totalAmount = 0;
         double totalPayout = 0;
         int skipped = 0;
-        for (int slot = DEPOSIT_START_SLOT; slot ; slot++) {
+        for (int slot = DEPOSIT_START_SLOT; slot <= DEPOSIT_END_SLOT; slot++) {
             ItemStack stack = inventory.getItem(slot);
             if (stack == null || stack.getType().isAir()) {
                 continue;
@@ -203,7 +202,7 @@ public final class SellMainGui extends AbstractGui {
 
     @Override
     public void handleClose(InventoryCloseEvent event) {
-        for (int slot = DEPOSIT_START_SLOT; slot ; slot++) {
+        for (int slot = DEPOSIT_START_SLOT; slot <= DEPOSIT_END_SLOT; slot++) {
             ItemStack stack = inventory.getItem(slot);
             if (stack == null || stack.getType().isAir()) {
                 continue;
