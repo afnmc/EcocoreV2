@@ -124,7 +124,7 @@ public final class SellMainGui extends AbstractGui {
         ));
     }
 
-    private ItemStack namedItem(Material material, String name, ListString> lore) {
+    private ItemStack namedItem(Material material, String name, List<String> lore) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
@@ -208,7 +208,7 @@ public final class SellMainGui extends AbstractGui {
             if (stack == null || stack.getType().isAir()) {
                 continue;
             }
-            MapInteger, ItemStack> leftover = getViewer().getInventory().addItem(stack);
+            Map<Integer, ItemStack> leftover = getViewer().getInventory().addItem(stack);
             for (ItemStack over : leftover.values()) {
                 getViewer().getWorld().dropItemNaturally(getViewer().getLocation(), over);
             }

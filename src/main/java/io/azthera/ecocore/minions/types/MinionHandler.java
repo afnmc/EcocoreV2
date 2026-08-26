@@ -34,11 +34,11 @@ public interface MinionHandler {
 
     int getEnergyCostPerAction();
 
-    SetMaterial> getTargetMaterials();
+    Set<Material> getTargetMaterials();
 
     Material resultFor(Material target);
 
-    SetEntityType> getTargetEntities();
+    Set<EntityType> getTargetEntities();
 
     Material resultForEntity(EntityType type);
 
@@ -54,7 +54,7 @@ public interface MinionHandler {
      *
      * @return the possible catch materials, empty if not applicable
      */
-    ListMaterial> getPossibleCatches();
+    List<Material> getPossibleCatches();
 
     /**
      * Weighted rarity tiers for a fishing catch (Revisi 8). Empty for
@@ -62,7 +62,7 @@ public interface MinionHandler {
      *
      * @return the configured rarity tiers, in no particular order
      */
-    default ListFishRarityTier> getRarityTiers() {
+    default List<FishRarityTier> getRarityTiers() {
         return List.of();
     }
 
@@ -72,7 +72,7 @@ public interface MinionHandler {
      *
      * @return log material to species-data mapping
      */
-    default java.util.MapMaterial, TreeSpeciesData> getTreeSpeciesData() {
+    default java.util.Map<Material, TreeSpeciesData> getTreeSpeciesData() {
         return java.util.Map.of();
     }
 
@@ -82,7 +82,7 @@ public interface MinionHandler {
      *
      * @return the smelting recipe map
      */
-    default java.util.MapMaterial, Material> getSmeltingRecipes() {
+    default java.util.Map<Material, Material> getSmeltingRecipes() {
         return java.util.Map.of();
     }
 }

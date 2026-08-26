@@ -47,7 +47,7 @@ public final class MinionsConfig {
     private final int minSpeedTicks;
     private final int baseEnergy;
     private final int energyDrainPerAction;
-    private final ListString> fuelTypes;
+    private final List<String> fuelTypes;
     private final boolean autoRepairEnabled;
 
     // Revisi 3: tree/farming planting spacing.
@@ -55,9 +55,9 @@ public final class MinionsConfig {
     private final int defaultTreeSpacing;
     private final int defaultCanopyClearance;
     private final int cropSpacing;
-    private final MapMaterial, Integer> perTreeSpacing = new HashMap<>();
-    private final MapMaterial, Integer> perTreeCanopyClearance = new HashMap<>();
-    private final SetMaterial> require2x2Species = new HashSet<>();
+    private final Map<Material, Integer> perTreeSpacing = new HashMap<>();
+    private final Map<Material, Integer> perTreeCanopyClearance = new HashMap<>();
+    private final Set<Material> require2x2Species = new HashSet<>();
 
     // Revisi 9: connector network tuning.
     private final double connectorBaseRange;
@@ -67,16 +67,16 @@ public final class MinionsConfig {
     private final double connectorUpgradeCostGrowth;
 
     // Revisi 2: per-type work mode override.
-    private final MapMinionType, MinionWorkMode> workModeOverrides = new EnumMap<>(MinionType.class);
+    private final Map<MinionType, MinionWorkMode> workModeOverrides = new EnumMap<>(MinionType.class);
 
     // Revisi 12: per-type target material/entity lists, all config-sourced.
-    private final MapMinionType, SetMaterial>> targetBlocks = new EnumMap<>(MinionType.class);
-    private final MapMaterial, Material> smeltingRecipes = new HashMap<>();
-    private final MapMaterial, TreeSpeciesData> treeSpeciesData = new HashMap<>();
-    private final ListFishRarityTier> fishRarityTiers = new ArrayList<>();
+    private final Map<MinionType, Set<Material>> targetBlocks = new EnumMap<>(MinionType.class);
+    private final Map<Material, Material> smeltingRecipes = new HashMap<>();
+    private final Map<Material, TreeSpeciesData> treeSpeciesData = new HashMap<>();
+    private final List<FishRarityTier> fishRarityTiers = new ArrayList<>();
 
-    private final MapMinionType, MinionDefinition> minionDefinitions = new EnumMap<>(MinionType.class);
-    private final MapMinionType, Double> purchasePrices = new EnumMap<>(MinionType.class);
+    private final Map<MinionType, MinionDefinition> minionDefinitions = new EnumMap<>(MinionType.class);
+    private final Map<MinionType, Double> purchasePrices = new EnumMap<>(MinionType.class);
 
     private final boolean obstacleAvoidanceEnabled;
     private final String targetSelectionStrategy;
@@ -200,8 +200,8 @@ public final class MinionsConfig {
             if (type == null) {
                 continue;
             }
-            ListString> materialNames = section.getStringList(key);
-            SetMaterial> materials = new HashSet<>();
+            List<String> materialNames = section.getStringList(key);
+            Set<Material> materials = new HashSet<>();
             for (String name : materialNames) {
                 Material material = safeMaterial(name);
                 if (material != null) {
@@ -283,7 +283,7 @@ public final class MinionsConfig {
                 continue;
             }
             double weight = entry.getDouble("weight", 1.0);
-            ListMaterial> pool = new ArrayList<>();
+            List<Material> pool = new ArrayList<>();
             for (String materialName : entry.getStringList("pool")) {
                 Material material = safeMaterial(materialName);
                 if (material != null) {
@@ -296,8 +296,8 @@ public final class MinionsConfig {
         }
     }
 
-    private ListMaterial> safeMaterialList(String... names) {
-        ListMaterial> result = new ArrayList<>();
+    private List<Material> safeMaterialList(String... names) {
+        List<Material> result = new ArrayList<>();
         for (String name : names) {
             Material material = safeMaterial(name);
             if (material != null) {
@@ -364,7 +364,7 @@ public final class MinionsConfig {
         return energyDrainPerAction;
     }
 
-    public ListString> getFuelTypes() {
+    public List<String> getFuelTypes() {
         return fuelTypes;
     }
 
@@ -445,19 +445,19 @@ public final class MinionsConfig {
      * @param type the minion type
      * @return the configured target material set
      */
-    public SetMaterial> getTargetBlocksFor(MinionType type) {
+    public Set<Material> getTargetBlocksFor(MinionType type) {
         return targetBlocks.getOrDefault(type, Set.of());
     }
 
-    public MapMaterial, Material> getSmeltingRecipes() {
+    public Map<Material, Material> getSmeltingRecipes() {
         return smeltingRecipes;
     }
 
-    public MapMaterial, TreeSpeciesData> getTreeSpeciesData() {
+    public Map<Material, TreeSpeciesData> getTreeSpeciesData() {
         return treeSpeciesData;
     }
 
-    public ListFishRarityTier> getFishRarityTiers() {
+    public List<FishRarityTier> getFishRarityTiers() {
         return fishRarityTiers;
     }
 

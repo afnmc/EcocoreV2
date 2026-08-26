@@ -107,9 +107,9 @@ public final class MinionConnectorEntityDao {
         }
     }
 
-    public ListConnectorEntityRecord> findAll() throws SQLException {
+    public List<ConnectorEntityRecord> findAll() throws SQLException {
         String sql = "SELECT * FROM minion_connector_entities";
-        ListConnectorEntityRecord> results = new ArrayList<>();
+        List<ConnectorEntityRecord> results = new ArrayList<>();
         try (Connection connection = databaseManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql);
              ResultSet resultSet = statement.executeQuery()) {

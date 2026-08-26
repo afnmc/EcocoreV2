@@ -53,10 +53,10 @@ public final class MinionConnectionDao {
      * @return every connection currently stored
      * @throws SQLException if the query fails
      */
-    public ListConnection_> findAll() throws SQLException {
+    public List<Connection_> findAll() throws SQLException {
         String sql = "SELECT id, owner_uuid, source_minion_id, destination_minion_id, link_mode, relay_connector_id "
                 + "FROM minion_link_connections";
-        ListConnection_> results = new ArrayList<>();
+        List<Connection_> results = new ArrayList<>();
         try (Connection connection = databaseManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql);
              ResultSet resultSet = statement.executeQuery()) {

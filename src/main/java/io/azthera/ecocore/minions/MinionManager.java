@@ -56,7 +56,7 @@ public final class MinionManager {
     private final MinionFactory minionFactory;
     private final MinionAiController aiController;
     private final MinionConnectorManager connectorManager;
-    private final MapMinionType, MinionHandler> handlers = new EnumMap<>(MinionType.class);
+    private final Map<MinionType, MinionHandler> handlers = new EnumMap<>(MinionType.class);
 
     /**
      * A read-only snapshot of a nearby owned minion, used by
@@ -72,18 +72,18 @@ public final class MinionManager {
 
     private static final class ActiveMinion {
         private final MinionData data;
-        private ListMinionStorage> pages;
+        private List<MinionStorage> pages;
         private Entity entity;
         private long tickAccumulator;
 
-        private ActiveMinion(MinionData data, ListMinionStorage> pages, Entity entity) {
+        private ActiveMinion(MinionData data, List<MinionStorage> pages, Entity entity) {
             this.data = data;
             this.pages = pages;
             this.entity = entity;
         }
     }
 
-    private final MapLong, ActiveMinion> activeMinions = new ConcurrentHashMap<>();
+    private final Map<Long, ActiveMinion> activeMinions = new ConcurrentHashMap<>();
 
     public MinionManager(Logger logger, MinionsDao minionsDao, MinionsConfig minionsConfig,
                           MinionFactory minionFactory, MinionAiController aiController,
@@ -114,15 +114,15 @@ public final class MinionManager {
         return handlers.get(type);
     }
 
-    public MapMinionType, MinionHandler> getAllHandlers() {
+    public Map<MinionType, MinionHandler> getAllHandlers() {
         return handlers;
     }
 
     public void loadAll() {
         try {
-            ListMinionData> allMinions = minionsDao.findAll();
+            List<MinionData> allMinions = minionsDao.findAll();
             for (MinionData data : allMinions) {
-                ListMinionStorage> pages = loadPagesForMinion(data);
+                List<MinionStorage> pages = loadPagesForMinion(data);
                 activeMinions.put(data.getId(), new ActiveMinion(data, pages, null));
             }
             logger.info("[EcoCore] Loaded " + activeMinions.size() + " minion records from database");
@@ -152,7 +152,7 @@ public final class MinionManager {
      * single-page format forward (one-time, transparent) if the new
      * column is still empty for this row.
      */
-    private ListMinionStorage> loadPagesForMinion(MinionData data) {
+    private List<MinionStorage> loadPagesForMinion(MinionData data) {
         String pagesJson;
         try {
             pagesJson = minionsDao.findStoragePagesJson(data.getId());
@@ -163,7 +163,7 @@ public final class MinionManager {
             return deserializePages(data.getStoragePageCount(), pagesJson);
         }
         // Legacy fallback: migrate the old single flat storage array into page 0.
-        ListMinionStorage> pages = new ArrayList<>();
+        List<MinionStorage> pages = new ArrayList<>();
         String legacyJson;
         try {
             legacyJson = minionsDao.findLegacyStorageJson(data.getId());
@@ -185,8 +185,8 @@ public final class MinionManager {
         return pages;
     }
 
-    private ListMinionStorage> deserializePages(int pageCount, String pagesJson) {
-        ListMinionStorage> pages = new ArrayList<>();
+    private List<MinionStorage> deserializePages(int pageCount, String pagesJson) {
+        List<MinionStorage> pages = new ArrayList<>();
         String[] rawPages = pagesJson.split(PAGE_DELIMITER, -1);
         for (int i = 0; i .max(1, pageCount); i++) {
             String rawPage = i .length ? rawPages[i] : null;
@@ -201,7 +201,7 @@ public final class MinionManager {
         return pages;
     }
 
-    private String serializePages(ListMinionStorage> pages) {
+    private String serializePages(List<MinionStorage> pages) {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i .size(); i++) {
             if (i > 0) {
@@ -344,7 +344,7 @@ public final class MinionManager {
         BlockFace facing = snapYawToCardinal(location.getYaw());
         MinionData data = minionFactory.create(player.getUniqueId(), type, location, facing);
         try {
-            ListMinionStorage> pages = new ArrayList<>();
+            List<MinionStorage> pages = new ArrayList<>();
             pages.add(MinionStorage.empty(0));
             String pagesJson = serializePages(pages);
             long id = minionsDao.insert(data, pagesJson);
@@ -391,21 +391,21 @@ public final class MinionManager {
                 if (stack == null || stack.getType().isAir()) {
                     continue;
                 }
-                MapInteger, ItemStack> leftover = player.getInventory().addItem(stack);
+                Map<Integer, ItemStack> leftover = player.getInventory().addItem(stack);
                 for (ItemStack over : leftover.values()) {
                     player.getWorld().dropItemNaturally(player.getLocation(), over);
                 }
             }
         }
         ItemStack egg = ItemUtils.buildMinionEgg(active.data.getType(), minionsConfig);
-        MapInteger, ItemStack> eggLeftover = player.getInventory().addItem(egg);
+        Map<Integer, ItemStack> eggLeftover = player.getInventory().addItem(egg);
         for (ItemStack over : eggLeftover.values()) {
             player.getWorld().dropItemNaturally(player.getLocation(), over);
         }
         return true;
     }
 
-    public ListMinionData> getMinionsOwnedBy(UUID ownerUuid) {
+    public List<MinionData> getMinionsOwnedBy(UUID ownerUuid) {
         return activeMinions.values().stream()
                 .filter(active -> active.data.getOwnerUuid().equals(ownerUuid))
                 .map(active -> active.data)
@@ -433,7 +433,7 @@ public final class MinionManager {
      * Returns the minion's storage pages (index 0 first). Never
      * returns {@code null} for a known minion - always at least one page.
      */
-    public ListMinionStorage> getMinionPages(long minionId) {
+    public List<MinionStorage> getMinionPages(long minionId) {
         ActiveMinion active = activeMinions.get(minionId);
         return active != null ? active.pages : null;
     }
@@ -465,8 +465,8 @@ public final class MinionManager {
      * Finds owned minions within radius of an origin point, excluding
      * one minion id (typically the caller itself).
      */
-    public ListNearbyMinionView> getNearbyOwnedMinions(Location origin, double radius, UUID ownerUuid, long excludeId) {
-        ListNearbyMinionView> results = new ArrayList<>();
+    public List<NearbyMinionView> getNearbyOwnedMinions(Location origin, double radius, UUID ownerUuid, long excludeId) {
+        List<NearbyMinionView> results = new ArrayList<>();
         if (origin.getWorld() == null) {
             return results;
         }

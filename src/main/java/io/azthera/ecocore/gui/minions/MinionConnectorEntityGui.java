@@ -74,7 +74,7 @@ public final class MinionConnectorEntityGui extends AbstractGui {
         inventory.setItem(CLOSE_SLOT, guiManager.buildButtonIcon("close", "§cTutup"));
     }
 
-    private ItemStack namedItem(Material material, String name, ListString> lore) {
+    private ItemStack namedItem(Material material, String name, List<String> lore) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {

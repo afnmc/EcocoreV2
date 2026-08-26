@@ -38,8 +38,8 @@ public final class MinionConnectorManager {
     private record Edge(long destinationId, MinionConnectionDao.LinkMode linkMode, Long relayConnectorId) {
     }
 
-    private final MapLong, ListEdge>> outgoing = new ConcurrentHashMap<>();
-    private final MapUUID, Long> pendingSourceSelection = new ConcurrentHashMap<>();
+    private final Map<Long, List<Edge>> outgoing = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> pendingSourceSelection = new ConcurrentHashMap<>();
 
     public MinionConnectorManager(Logger logger, MinionConnectionDao connectionDao,
                                    MinionConnectorEntityManager connectorEntityManager) {
@@ -50,7 +50,7 @@ public final class MinionConnectorManager {
 
     public void loadAll() {
         try {
-            ListMinionConnectionDao.Connection_> all = connectionDao.findAll();
+            List<MinionConnectionDao.Connection_> all = connectionDao.findAll();
             for (MinionConnectionDao.Connection_ connection : all) {
                 outgoing.computeIfAbsent(connection.sourceId(), id -> new CopyOnWriteArrayList<>())
                         .add(new Edge(connection.destinationId(), connection.linkMode(), connection.relayConnectorId()));
@@ -182,7 +182,7 @@ public final class MinionConnectorManager {
             logger.severe("[EcoCore] Failed to remove minion connection " + sourceId + " -> "
                     + destinationId + ": " + exception.getMessage());
         }
-        ListEdge> list = outgoing.get(sourceId);
+        List<Edge> list = outgoing.get(sourceId);
         if (list != null) {
             list.removeIf(edge -> edge.destinationId() == destinationId);
         }
@@ -195,7 +195,7 @@ public final class MinionConnectorManager {
             logger.severe("[EcoCore] Failed to clean up connections for minion " + minionId + ": " + exception.getMessage());
         }
         outgoing.remove(minionId);
-        for (ListEdge> destinations : outgoing.values()) {
+        for (List<Edge> destinations : outgoing.values()) {
             destinations.removeIf(edge -> edge.destinationId() == minionId);
         }
     }
@@ -212,24 +212,24 @@ public final class MinionConnectorManager {
         } catch (SQLException exception) {
             logger.severe("[EcoCore] Failed to clean up relay connections for connector " + connectorId + ": " + exception.getMessage());
         }
-        for (ListEdge> destinations : outgoing.values()) {
+        for (List<Edge> destinations : outgoing.values()) {
             destinations.removeIf(edge -> connectorId == (edge.relayConnectorId() != null ? edge.relayConnectorId() : -1L));
         }
     }
 
-    public ListLong> getOutgoingIds(long sourceId) {
-        ListLong> results = new ArrayList<>();
+    public List<Long> getOutgoingIds(long sourceId) {
+        List<Long> results = new ArrayList<>();
         for (Edge edge : getOutgoing(sourceId)) {
             results.add(edge.destinationId());
         }
         return results;
     }
 
-    private ListEdge> getOutgoing(long sourceId) {
+    private List<Edge> getOutgoing(long sourceId) {
         return outgoing.getOrDefault(sourceId, List.of());
     }
 
-    public ListLong> listConnectionsFrom(long sourceId) {
+    public List<Long> listConnectionsFrom(long sourceId) {
         return getOutgoingIds(sourceId);
     }
 }

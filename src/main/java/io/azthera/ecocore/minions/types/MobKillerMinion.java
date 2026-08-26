@@ -18,7 +18,7 @@ import java.util.Map;
  */
 public final class MobKillerMinion extends AbstractMinionHandler {
 
-    private static final MapEntityType, Material> DROPS = Map.of(
+    private static final Map<EntityType, Material> DROPS = Map.of(
             EntityType.ZOMBIE, Material.ROTTEN_FLESH,
             EntityType.SKELETON, Material.BONE,
             EntityType.SPIDER, Material.STRING,

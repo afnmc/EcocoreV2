@@ -33,7 +33,7 @@ public abstract class AbstractMinionHandler implements MinionHandler {
 
     private final MinionType type;
     private final MinionProcessingType processingType;
-    private final MapEntityType, Material> entityResults;
+    private final Map<EntityType, Material> entityResults;
     private final Material seedItem;
     private final Material plantResult;
 
@@ -47,7 +47,7 @@ public abstract class AbstractMinionHandler implements MinionHandler {
      * @param plantResult planting cycle output material, may be {@code null}
      */
     protected AbstractMinionHandler(MinionType type, MinionProcessingType processingType,
-                                     MapEntityType, Material> entityResults,
+                                     Map<EntityType, Material> entityResults,
                                      Material seedItem, Material plantResult) {
         this.type = type;
         this.processingType = processingType;
@@ -91,7 +91,7 @@ public abstract class AbstractMinionHandler implements MinionHandler {
      * with no code change, and removing it takes that ability away.
      */
     @Override
-    public SetMaterial> getTargetMaterials() {
+    public Set<Material> getTargetMaterials() {
         return config().getTargetBlocksFor(type);
     }
 
@@ -109,7 +109,7 @@ public abstract class AbstractMinionHandler implements MinionHandler {
     }
 
     @Override
-    public SetEntityType> getTargetEntities() {
+    public Set<EntityType> getTargetEntities() {
         return entityResults.keySet();
     }
 
@@ -129,7 +129,7 @@ public abstract class AbstractMinionHandler implements MinionHandler {
     }
 
     @Override
-    public ListMaterial> getPossibleCatches() {
+    public List<Material> getPossibleCatches() {
         return getRarityTiers().stream()
                 .flatMap(tier -> tier.pool().stream())
                 .distinct()
@@ -137,21 +137,21 @@ public abstract class AbstractMinionHandler implements MinionHandler {
     }
 
     @Override
-    public ListFishRarityTier> getRarityTiers() {
+    public List<FishRarityTier> getRarityTiers() {
         return type == MinionType.FISHERMAN ? config().getFishRarityTiers() : List.of();
     }
 
     @Override
-    public MapMaterial, TreeSpeciesData> getTreeSpeciesData() {
+    public Map<Material, TreeSpeciesData> getTreeSpeciesData() {
         return type == MinionType.LUMBERJACK ? config().getTreeSpeciesData() : Map.of();
     }
 
     @Override
-    public MapMaterial, Material> getSmeltingRecipes() {
+    public Map<Material, Material> getSmeltingRecipes() {
         return type == MinionType.SMELTER ? config().getSmeltingRecipes() : Map.of();
     }
 
-    protected static MapEntityType, Material> noEntities() {
+    protected static Map<EntityType, Material> noEntities() {
         return Collections.emptyMap();
     }
 }

@@ -51,11 +51,11 @@ public final class GriefPreventionHook implements ClaimHook {
             if (griefPreventionPlugin == null) {
                 return false;
             }
-            Class?> griefPreventionClass = Class.forName("me.ryanhamshire.GriefPrevention.GriefPrevention");
+            Class<?> griefPreventionClass = Class.forName("me.ryanhamshire.GriefPrevention.GriefPrevention");
             Object instanceField = griefPreventionClass.getField("instance").get(null);
             java.lang.reflect.Field dataStoreField = griefPreventionClass.getField("dataStore");
             dataStoreInstance = dataStoreField.get(instanceField);
-            Class?> claimClass = Class.forName("me.ryanhamshire.GriefPrevention.Claim");
+            Class<?> claimClass = Class.forName("me.ryanhamshire.GriefPrevention.Claim");
             getClaimAtMethod = dataStoreInstance.getClass().getMethod(
                     "getClaimAt", Location.class, boolean.class, claimClass);
             getOwnerIdMethod = claimClass.getMethod("getOwnerID");

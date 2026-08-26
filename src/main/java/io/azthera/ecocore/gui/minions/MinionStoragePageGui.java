@@ -31,7 +31,7 @@ public final class MinionStoragePageGui extends AbstractGui {
 
     @Override
     public void build() {
-        ListMinionStorage> pages = minionManager.getMinionPages(minionId);
+        List<MinionStorage> pages = minionManager.getMinionPages(minionId);
         if (pages == null || pageIndex >= pages.size()) {
             inventory = Bukkit.createInventory(this, 54, "§8Storage tidak ditemukan");
             return;
@@ -58,7 +58,7 @@ public final class MinionStoragePageGui extends AbstractGui {
 
     @Override
     public void handleClose(InventoryCloseEvent event) {
-        ListMinionStorage> pages = minionManager.getMinionPages(minionId);
+        List<MinionStorage> pages = minionManager.getMinionPages(minionId);
         if (pages == null || pageIndex >= pages.size() || inventory == null) {
             return;
         }

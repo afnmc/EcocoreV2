@@ -79,7 +79,7 @@ public final class MinionAiController {
      * @param entity the minion's live visual entity (never moved)
      * @param pages the minion's live storage pages
      */
-    public void tick(MinionData data, MinionHandler handler, Entity entity, ListMinionStorage> pages) {
+    public void tick(MinionData data, MinionHandler handler, Entity entity, List<MinionStorage> pages) {
         if (handler.getWorkMode() != MinionWorkMode.NONE) {
             if (!fuelManager.isFueled(data)) {
                 fuelManager.tryConsumeFuelFromStorage(data, pages);
@@ -128,14 +128,14 @@ public final class MinionAiController {
         };
     }
 
-    private OptionalBlock> findTargetBlock(MinionData data, MinionHandler handler, Location origin) {
+    private Optional<Block> findTargetBlock(MinionData data, MinionHandler handler, Location origin) {
         if (isArenaActive(data, handler)) {
             return targetSelector.findNearestBlockInArena(origin, data.getRadius(), handler);
         }
         return targetSelector.findNearestBlockInFacingSlab(origin, data.getFacing(), data.getRadius(), handler);
     }
 
-    private OptionalLivingEntity> findTargetEntity(MinionData data, MinionHandler handler, Location origin) {
+    private Optional<LivingEntity> findTargetEntity(MinionData data, MinionHandler handler, Location origin) {
         if (isArenaActive(data, handler)) {
             return targetSelector.findBestEntityInArena(origin, data.getRadius(), handler);
         }
@@ -146,8 +146,8 @@ public final class MinionAiController {
     // MINER / QUARRY - block breaking (Revisi 12: reads target set live from handler/config)
     // ------------------------------------------------------------------
 
-    private void handleBlockBreak(MinionData data, MinionHandler handler, Entity entity, ListMinionStorage> pages) {
-        OptionalBlock> targetOpt = findTargetBlock(data, handler, entity.getLocation());
+    private void handleBlockBreak(MinionData data, MinionHandler handler, Entity entity, List<MinionStorage> pages) {
+        Optional<Block> targetOpt = findTargetBlock(data, handler, entity.getLocation());
         if (targetOpt.isEmpty()) {
             return;
         }
@@ -173,10 +173,10 @@ public final class MinionAiController {
     // FARMER - dual zone plant/harvest/replant with spacing (Revisi 3/4/12)
     // ------------------------------------------------------------------
 
-    private void handleFarmCycle(MinionData data, MinionHandler handler, Entity entity, ListMinionStorage> pages) {
+    private void handleFarmCycle(MinionData data, MinionHandler handler, Entity entity, List<MinionStorage> pages) {
         Location origin = entity.getLocation();
         // First priority: harvest anything mature within range.
-        OptionalBlock> matureCrop = findMatureCropInRange(data, handler, origin);
+        Optional<Block> matureCrop = findMatureCropInRange(data, handler, origin);
         if (matureCrop.isPresent()) {
             harvestCrop(data, handler, matureCrop.get(), pages);
             return;
@@ -185,7 +185,7 @@ public final class MinionAiController {
         plantFromSeedZone(data, handler, origin, pages);
     }
 
-    private OptionalBlock> findMatureCropInRange(MinionData data, MinionHandler handler, Location origin) {
+    private Optional<Block> findMatureCropInRange(MinionData data, MinionHandler handler, Location origin) {
         boolean arena = isArenaActive(data, handler);
         int radius = data.getRadius();
         int baseX = origin.getBlockX();
@@ -225,14 +225,14 @@ public final class MinionAiController {
         return block.getType() == Material.PUMPKIN || block.getType() == Material.MELON;
     }
 
-    private void harvestCrop(MinionData data, MinionHandler handler, Block crop, ListMinionStorage> pages) {
+    private void harvestCrop(MinionData data, MinionHandler handler, Block crop, List<MinionStorage> pages) {
         // Revisi 19: cek claim land sebelum minion melakukan break/harvest.
         if (!claimManager.isAllowed(data.getOwnerUuid(), crop.getLocation())) {
             return;
         }
         Material produceMaterial = handler.resultFor(crop.getType());
         ItemStack produce = new ItemStack(produceMaterial != null ? produceMaterial : crop.getType());
-        ListMinionStorage> outputPages = zoneOutputPages(pages);
+        List<MinionStorage> outputPages = zoneOutputPages(pages);
         if (!hasSpaceInAnyPage(outputPages, produce)) {
             return;
         }
@@ -256,7 +256,7 @@ public final class MinionAiController {
      * if no safely-spaced spot exists nearby, the minion idles rather
      * than planting anyway.
      */
-    private void plantFromSeedZone(MinionData data, MinionHandler handler, Location origin, ListMinionStorage> pages) {
+    private void plantFromSeedZone(MinionData data, MinionHandler handler, Location origin, List<MinionStorage> pages) {
         if (handler.getSeedItem() == null) {
             return;
         }
@@ -272,7 +272,7 @@ public final class MinionAiController {
         if (seedSlot == -1) {
             return; // Revisi 4: seed habis -> idle.
         }
-        OptionalBlock> plantSpot = findSpacedPlantingSpot(data, handler, origin);
+        Optional<Block> plantSpot = findSpacedPlantingSpot(data, handler, origin);
         if (plantSpot.isEmpty()) {
             return; // Revisi 3: tidak ada lokasi valid -> idle, jangan memaksa.
         }
@@ -312,7 +312,7 @@ public final class MinionAiController {
      * adjacent to another crop of the same kind if spacing requires
      * distance between them.
      */
-    private OptionalBlock> findSpacedPlantingSpot(MinionData data, MinionHandler handler, Location origin) {
+    private Optional<Block> findSpacedPlantingSpot(MinionData data, MinionHandler handler, Location origin) {
         boolean arena = isArenaActive(data, handler);
         int radius = data.getRadius();
         int spacing = minionsConfig.getCropSpacing();
@@ -341,7 +341,7 @@ public final class MinionAiController {
         return Optional.empty();
     }
 
-    private boolean hasNearbyMatchingCrop(Block spot, java.util.SetMaterial> cropMaterials, int spacing) {
+    private boolean hasNearbyMatchingCrop(Block spot, java.util.Set<Material> cropMaterials, int spacing) {
         if (spacing 0) {
             return false;
         }
@@ -360,7 +360,7 @@ public final class MinionAiController {
     }
 
     /** Zone B (output) pages: the rest of page 0's slots beyond Zone A, plus every overflow page. */
-    private ListMinionStorage> zoneOutputPages(ListMinionStorage> pages) {
+    private List<MinionStorage> zoneOutputPages(List<MinionStorage> pages) {
         return pages; // addToPagesWithOverflow already skips Zone A slots on page 0 for dual-zone types via zone-aware overload
     }
 
@@ -375,9 +375,9 @@ public final class MinionAiController {
     // for planting purposes. See handleLumberChop, invoked from handleFarmCycle
     // when handler.getType() == LUMBERJACK.
 
-    private void handleLumberChop(MinionData data, MinionHandler handler, Entity entity, ListMinionStorage> pages) {
+    private void handleLumberChop(MinionData data, MinionHandler handler, Entity entity, List<MinionStorage> pages) {
         Location origin = entity.getLocation();
-        OptionalBlock> logTarget = findTargetBlock(data, handler, origin);
+        Optional<Block> logTarget = findTargetBlock(data, handler, origin);
         if (logTarget.isPresent()) {
             choplog(data, handler, logTarget.get(), pages);
             return;
@@ -385,12 +385,12 @@ public final class MinionAiController {
         plantSaplingFromZoneA(data, handler, origin, pages);
     }
 
-    private void choplog(MinionData data, MinionHandler handler, Block log, ListMinionStorage> pages) {
+    private void choplog(MinionData data, MinionHandler handler, Block log, List<MinionStorage> pages) {
         if (!claimManager.isAllowed(data.getOwnerUuid(), log.getLocation())) {
             return;
         }
         TreeSpeciesData species = handler.getTreeSpeciesData().get(log.getType());
-        ListItemStack> drops = new java.util.ArrayList<>();
+        List<ItemStack> drops = new java.util.ArrayList<>();
         drops.add(new ItemStack(log.getType(), 1));
         if (species != null) {
             ThreadLocalRandom random = ThreadLocalRandom.current();
@@ -435,7 +435,7 @@ public final class MinionAiController {
         return null;
     }
 
-    private void plantSaplingFromZoneA(MinionData data, MinionHandler handler, Location origin, ListMinionStorage> pages) {
+    private void plantSaplingFromZoneA(MinionData data, MinionHandler handler, Location origin, List<MinionStorage> pages) {
         MinionStorage zoneAPage = pages.get(0);
         int saplingSlot = -1;
         Material saplingType = null;
@@ -460,7 +460,7 @@ public final class MinionAiController {
         if (species == null) {
             return;
         }
-        OptionalBlock> spot = findSpacedTreeSpot(data, origin, species);
+        Optional<Block> spot = findSpacedTreeSpot(data, origin, species);
         if (spot.isEmpty()) {
             return; // Revisi 3: tidak ada lokasi valid dan aman -> idle.
         }
@@ -476,7 +476,7 @@ public final class MinionAiController {
         animationHandler.playActionEffect(spot.get().getLocation());
     }
 
-    private OptionalBlock> findSpacedTreeSpot(MinionData data, Location origin, TreeSpeciesData species) {
+    private Optional<Block> findSpacedTreeSpot(MinionData data, Location origin, TreeSpeciesData species) {
         boolean arena = isArenaActive(data, null) || true; // lumberjack always allowed arena search for replanting
         int radius = data.getRadius();
         int spacing = minionsConfig.getTreeSpacingFor(species.logMaterial());
@@ -555,7 +555,7 @@ public final class MinionAiController {
         return true;
     }
 
-    private void addToZoneA(ListMinionStorage> pages, ItemStack item) {
+    private void addToZoneA(List<MinionStorage> pages, ItemStack item) {
         MinionStorage zoneAPage = pages.get(0);
         for (int i = 0; i ; i++) {
             ItemStack slot = zoneAPage.getSlot(i);
@@ -575,8 +575,8 @@ public final class MinionAiController {
     // FISHERMAN - weighted rarity catches (Revisi 8)
     // ------------------------------------------------------------------
 
-    private void handleFishing(MinionData data, MinionHandler handler, Entity entity, ListMinionStorage> pages) {
-        ListFishRarityTier> tiers = handler.getRarityTiers();
+    private void handleFishing(MinionData data, MinionHandler handler, Entity entity, List<MinionStorage> pages) {
+        List<FishRarityTier> tiers = handler.getRarityTiers();
         if (tiers.isEmpty()) {
             return;
         }
@@ -595,7 +595,7 @@ public final class MinionAiController {
         animationHandler.playActionEffect(entity.getLocation());
     }
 
-    private Material rollRarityCatch(ListFishRarityTier> tiers) {
+    private Material rollRarityCatch(List<FishRarityTier> tiers) {
         double totalWeight = tiers.stream().mapToDouble(FishRarityTier::weight).sum();
         if (totalWeight 0) {
             return null;
@@ -608,7 +608,7 @@ public final class MinionAiController {
                 return tier.pool().get(ThreadLocalRandom.current().nextInt(tier.pool().size()));
             }
         }
-        ListMaterial> lastPool = tiers.get(tiers.size() - 1).pool();
+        List<Material> lastPool = tiers.get(tiers.size() - 1).pool();
         return lastPool.isEmpty() ? null : lastPool.get(0);
     }
 
@@ -616,8 +616,8 @@ public final class MinionAiController {
     // MOB_KILLER - entity interact
     // ------------------------------------------------------------------
 
-    private void handleEntityInteract(MinionData data, MinionHandler handler, Entity entity, ListMinionStorage> pages) {
-        OptionalLivingEntity> targetOpt = findTargetEntity(data, handler, entity.getLocation());
+    private void handleEntityInteract(MinionData data, MinionHandler handler, Entity entity, List<MinionStorage> pages) {
+        Optional<LivingEntity> targetOpt = findTargetEntity(data, handler, entity.getLocation());
         if (targetOpt.isEmpty()) {
             return;
         }
@@ -645,9 +645,9 @@ public final class MinionAiController {
     // SMELTER - raw_iron -> iron_ingot style recipes (Revisi 5), input/output zones
     // ------------------------------------------------------------------
 
-    private void handleInternalSmelt(MinionData data, MinionHandler handler, Entity entity, ListMinionStorage> pages) {
+    private void handleInternalSmelt(MinionData data, MinionHandler handler, Entity entity, List<MinionStorage> pages) {
         MinionStorage inputPage = pages.get(0);
-        java.util.MapMaterial, Material> recipes = handler.getSmeltingRecipes();
+        java.util.Map<Material, Material> recipes = handler.getSmeltingRecipes();
         for (int i = 0; i ; i++) {
             ItemStack input = inputPage.getSlot(i);
             if (input == null || input.getAmount() 0) {
@@ -658,7 +658,7 @@ public final class MinionAiController {
                 continue;
             }
             ItemStack output = new ItemStack(outputMaterial, 1);
-            ListMinionStorage> outputPages = pages;
+            List<MinionStorage> outputPages = pages;
             if (!hasSpaceInAnyPage(outputPages, output)) {
                 return; // Revisi 11: output penuh -> idle, jangan duplikasi.
             }
@@ -679,7 +679,7 @@ public final class MinionAiController {
     // COLLECTOR - picks up ground item drops only (Revisi 9: no longer relays between minions)
     // ------------------------------------------------------------------
 
-    private void handleItemCollect(MinionData data, MinionHandler handler, Entity entity, ListMinionStorage> pages) {
+    private void handleItemCollect(MinionData data, MinionHandler handler, Entity entity, List<MinionStorage> pages) {
         Location origin = entity.getLocation();
         double radiusSq = (double) data.getRadius() * data.getRadius();
         for (org.bukkit.entity.Item groundItem : origin.getWorld().getEntitiesByClass(org.bukkit.entity.Item.class)) {
@@ -713,7 +713,7 @@ public final class MinionAiController {
     // SELL - handled by SellManager elsewhere; nothing per-tick beyond idling
     // ------------------------------------------------------------------
 
-    private void handleSellOnly(MinionData data, MinionHandler handler, Entity entity, ListMinionStorage> pages) {
+    private void handleSellOnly(MinionData data, MinionHandler handler, Entity entity, List<MinionStorage> pages) {
         // Auto-sell timing/economy interaction lives in SellManager, invoked
         // separately by a scheduled task rather than the per-tick AI pass.
     }
@@ -722,7 +722,7 @@ public final class MinionAiController {
     // Storage helpers - multi-page overflow (Revisi 11)
     // ------------------------------------------------------------------
 
-    private boolean hasSpaceInAnyPage(ListMinionStorage> pages, ItemStack item) {
+    private boolean hasSpaceInAnyPage(List<MinionStorage> pages, ItemStack item) {
         for (MinionStorage page : pages) {
             if (page.hasSpaceFor(item)) {
                 return true;
@@ -736,7 +736,7 @@ public final class MinionAiController {
      * order (Storage 1 -> 2 -> ... -> N) so overflow always fills the
      * lowest-numbered available page first (Revisi 11).
      */
-    private void addToPagesWithOverflow(ListMinionStorage> pages, ItemStack item) {
+    private void addToPagesWithOverflow(List<MinionStorage> pages, ItemStack item) {
         for (MinionStorage page : pages) {
             ItemStack[] contents = page.getContents();
             for (int i = 0; i .length; i++) {
@@ -770,16 +770,16 @@ public final class MinionAiController {
      * identically for transfer purposes once the link is validated -
      * the mode only affects max distance at connect-time).
      */
-    private void pushAlongConnections(MinionData data, ListMinionStorage> pages) {
+    private void pushAlongConnections(MinionData data, List<MinionStorage> pages) {
         if (minionManager == null) {
             return;
         }
-        ListLong> destinations = connectorManager.getOutgoingIds(data.getId());
+        List<Long> destinations = connectorManager.getOutgoingIds(data.getId());
         if (destinations.isEmpty()) {
             return;
         }
         for (long destinationId : destinations) {
-            ListMinionStorage> destinationPages = minionManager.getMinionPages(destinationId);
+            List<MinionStorage> destinationPages = minionManager.getMinionPages(destinationId);
             if (destinationPages == null) {
                 continue;
             }
@@ -787,7 +787,7 @@ public final class MinionAiController {
         }
     }
 
-    private void transferOneStack(ListMinionStorage> fromPages, ListMinionStorage> toPages) {
+    private void transferOneStack(List<MinionStorage> fromPages, List<MinionStorage> toPages) {
         for (MinionStorage fromPage : fromPages) {
             ItemStack[] contents = fromPage.getContents();
             for (int i = 0; i .length; i++) {

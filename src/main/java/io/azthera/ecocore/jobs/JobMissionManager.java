@@ -59,10 +59,10 @@ public final class JobMissionManager {
      * per-mission cooldown doesn't need to survive a restart, and
      * persisting it would add DB load to every single action.
      */
-    private final MapLong, Long> lastActionAtByMissionId = new ConcurrentHashMap<>();
+    private final Map<Long, Long> lastActionAtByMissionId = new ConcurrentHashMap<>();
 
     /** Revisi 18 anti-abuse: how many actions have been counted today per mission id, reset on day rollover. */
-    private final MapLong, DailyCounter> dailyActionCounters = new ConcurrentHashMap<>();
+    private final Map<Long, DailyCounter> dailyActionCounters = new ConcurrentHashMap<>();
 
     private record DailyCounter(long dayEpoch, int count) {
     }
@@ -85,7 +85,7 @@ public final class JobMissionManager {
 
     private void assignMissions(UUID playerUuid, JobType jobType, String period, int count) throws SQLException {
         long now = System.currentTimeMillis();
-        ListMissionTemplate> pool = jobsConfig.getMissionPool(jobType);
+        List<MissionTemplate> pool = jobsConfig.getMissionPool(jobType);
         for (int i = 0; i ; i++) {
             MissionTemplate template = pickWeightedTemplate(pool, period);
             String missionKey;
@@ -112,8 +112,8 @@ public final class JobMissionManager {
      * @param period {@link #PERIOD_DAILY} or {@link #PERIOD_WEEKLY}
      * @return the picked template, or {@code null} if the pool has no eligible entries
      */
-    private MissionTemplate pickWeightedTemplate(ListMissionTemplate> pool, String period) {
-        ListMissionTemplate> eligible = pool.stream()
+    private MissionTemplate pickWeightedTemplate(List<MissionTemplate> pool, String period) {
+        List<MissionTemplate> eligible = pool.stream()
                 .filter(template -> period.equals(PERIOD_DAILY) ? template.dailyEligible() : template.weeklyEligible())
                 .toList();
         if (eligible.isEmpty()) {
@@ -134,7 +134,7 @@ public final class JobMissionManager {
         return eligible.get(eligible.size() - 1);
     }
 
-    public ListJobMissionRecord> getActiveMissions(UUID playerUuid) throws SQLException {
+    public List<JobMissionRecord> getActiveMissions(UUID playerUuid) throws SQLException {
         return jobMissionDao.findActiveForPlayer(playerUuid);
     }
 
@@ -163,7 +163,7 @@ public final class JobMissionManager {
      */
     public void recordActionForMissions(UUID playerUuid, JobType jobType, MissionType missionType,
                                          String target, int weight, double moneyScale) throws SQLException {
-        ListJobMissionRecord> active = jobMissionDao.findActiveForPlayerAndJob(playerUuid, jobType);
+        List<JobMissionRecord> active = jobMissionDao.findActiveForPlayerAndJob(playerUuid, jobType);
         for (JobMissionRecord mission : active) {
             if (!missionMatches(mission, missionType, target)) {
                 continue;
@@ -194,7 +194,7 @@ public final class JobMissionManager {
     @Deprecated
     public void recordActionForMissions(UUID playerUuid, JobType jobType, int weight, double moneyScale)
             throws SQLException {
-        ListJobMissionRecord> active = jobMissionDao.findActiveForPlayerAndJob(playerUuid, jobType);
+        List<JobMissionRecord> active = jobMissionDao.findActiveForPlayerAndJob(playerUuid, jobType);
         for (JobMissionRecord mission : active) {
             if (!passesAntiAbuseChecks(mission)) {
                 continue;

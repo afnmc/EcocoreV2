@@ -34,7 +34,7 @@ public final class WorldGuardHook implements ClaimHook {
     private Method getOwnersMethod;
     private Method getMembersMethod;
     private Method containsMethod;
-    private Class?> bukkitAdapterClass;
+    private Class<?> bukkitAdapterClass;
     private Method adaptMethod;
     private boolean usable;
 
@@ -54,7 +54,7 @@ public final class WorldGuardHook implements ClaimHook {
             if (worldGuardPlugin == null) {
                 return false;
             }
-            Class?> worldGuardClass = Class.forName("com.sk89q.worldguard.WorldGuard");
+            Class<?> worldGuardClass = Class.forName("com.sk89q.worldguard.WorldGuard");
             Object worldGuardInstance = worldGuardClass.getMethod("getInstance").invoke(null);
             Object platform = worldGuardClass.getMethod("getPlatform").invoke(worldGuardInstance);
             Object regionContainer = platform.getClass().getMethod("getRegionContainer").invoke(platform);
@@ -63,23 +63,23 @@ public final class WorldGuardHook implements ClaimHook {
             bukkitAdapterClass = Class.forName("com.sk89q.worldedit.bukkit.BukkitAdapter");
             adaptMethod = bukkitAdapterClass.getMethod("adapt", org.bukkit.World.class);
 
-            Class?> worldClass = Class.forName("com.sk89q.worldedit.world.World");
+            Class<?> worldClass = Class.forName("com.sk89q.worldedit.world.World");
             getMethod = regionContainer.getClass().getMethod("get", worldClass);
 
-            Class?> regionManagerClass = Class.forName("com.sk89q.worldguard.protection.managers.RegionManager");
+            Class<?> regionManagerClass = Class.forName("com.sk89q.worldguard.protection.managers.RegionManager");
             getApplicableRegionsMethod = regionManagerClass.getMethod(
                     "getApplicableRegions", Class.forName("com.sk89q.worldedit.math.BlockVector3"));
 
-            Class?> applicableRegionSetClass = Class.forName(
+            Class<?> applicableRegionSetClass = Class.forName(
                     "com.sk89q.worldguard.protection.ApplicableRegionSet");
             getRegionsMethod = applicableRegionSetClass.getMethod("getRegions");
 
-            Class?> protectedRegionClass = Class.forName(
+            Class<?> protectedRegionClass = Class.forName(
                     "com.sk89q.worldguard.protection.regions.ProtectedRegion");
             getOwnersMethod = protectedRegionClass.getMethod("getOwners");
             getMembersMethod = protectedRegionClass.getMethod("getMembers");
 
-            Class?> domainClass = Class.forName("com.sk89q.worldguard.domains.DefaultDomain");
+            Class<?> domainClass = Class.forName("com.sk89q.worldguard.domains.DefaultDomain");
             containsMethod = domainClass.getMethod("contains", UUID.class);
 
             usable = true;
@@ -104,12 +104,12 @@ public final class WorldGuardHook implements ClaimHook {
             if (regionManager == null) {
                 return true; // WorldGuard has no region manager for this world - nothing to check
             }
-            Class?> blockVector3Class = Class.forName("com.sk89q.worldedit.math.BlockVector3");
+            Class<?> blockVector3Class = Class.forName("com.sk89q.worldedit.math.BlockVector3");
             Method atMethod = blockVector3Class.getMethod("at", double.class, double.class, double.class);
             Object blockVector = atMethod.invoke(null, location.getX(), location.getY(), location.getZ());
             Object applicableRegions = getApplicableRegionsMethod.invoke(regionManager, blockVector);
             @SuppressWarnings("unchecked")
-            java.util.SetObject> regions = (java.util.Set) getRegionsMethod.invoke(applicableRegions);
+            java.util.Set<Object> regions = (java.util.Set) getRegionsMethod.invoke(applicableRegions);
             if (regions.isEmpty()) {
                 return true; // no overlapping region - open ground
             }

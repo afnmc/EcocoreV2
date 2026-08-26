@@ -71,7 +71,7 @@ public final class PriceDisplayHelper {
      * @param display the resolved display prices from {@link #resolve}
      * @return two lore lines ready to append to an item's lore list
      */
-    public static java.util.ListString> buildPriceLoreLines(double basePrice, DisplayPrices display) {
+    public static java.util.List<String> buildPriceLoreLines(double basePrice, DisplayPrices display) {
         if (Math.abs(display.percentChange()) 0.01) {
             return java.util.List.of();
         }
@@ -91,7 +91,7 @@ public final class PriceDisplayHelper {
      * @param record the current inflation record
      * @return the formatted summary lines
      */
-    public static java.util.ListString> buildEconomySummaryLines(InflationRecord record) {
+    public static java.util.List<String> buildEconomySummaryLines(InflationRecord record) {
         if (record == null) {
             return java.util.List.of("§7Data ekonomi belum tersedia.");
         }
@@ -100,7 +100,7 @@ public final class PriceDisplayHelper {
         if (percent 0.01) {
             return java.util.List.of("§7Ekonomi server stabil.");
         }
-        java.util.ListString> lines = new java.util.ArrayList<>();
+        java.util.List<String> lines = new java.util.ArrayList<>();
         if (isInflation) {
             lines.add("§6Server inflasi");
             lines.add("§c▵ " + String.format("%.1f", percent) + "%");

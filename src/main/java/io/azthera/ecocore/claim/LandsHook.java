@@ -44,15 +44,15 @@ public final class LandsHook implements ClaimHook {
             if (landsPlugin == null) {
                 return false;
             }
-            Class?> landsIntegrationClass = Class.forName("me.angeschossen.lands.api.LandsIntegration");
-            Class?> javaPluginClass = Class.forName("org.bukkit.plugin.java.JavaPlugin");
+            Class<?> landsIntegrationClass = Class.forName("me.angeschossen.lands.api.LandsIntegration");
+            Class<?> javaPluginClass = Class.forName("org.bukkit.plugin.java.JavaPlugin");
             java.lang.reflect.Constructor?> constructor = landsIntegrationClass.getConstructor(javaPluginClass);
             landsIntegrationInstance = constructor.newInstance((Object) io.azthera.ecocore.EcoCorePlugin.getInstance());
 
             getAreaByLocMethod = landsIntegrationClass.getMethod("getAreaByLoc", Location.class);
-            Class?> areaClass = Class.forName("me.angeschossen.lands.api.land.Area");
+            Class<?> areaClass = Class.forName("me.angeschossen.lands.api.land.Area");
             getLandMethod = areaClass.getMethod("getLand");
-            Class?> landClass = Class.forName("me.angeschossen.lands.api.land.Land");
+            Class<?> landClass = Class.forName("me.angeschossen.lands.api.land.Land");
             isOwnerMethod = landClass.getMethod("isOwner", UUID.class);
             isTrustedMethod = landClass.getMethod("isTrusted", UUID.class);
 

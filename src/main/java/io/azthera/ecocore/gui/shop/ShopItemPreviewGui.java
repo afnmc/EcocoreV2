@@ -92,7 +92,7 @@ public final class ShopItemPreviewGui extends AbstractGui {
         ItemMeta meta = icon.getItemMeta();
         if (meta != null) {
             meta.setDisplayName("§f" + item.getId());
-            ListString> lore = new ArrayList<>();
+            List<String> lore = new ArrayList<>();
             lore.add("§7Kategori: §f" + item.getCategory());
             lore.add("§7Harga: §a" + String.format("%.2f", item.getCurrentPrice()));
             // Revisi 16: append the inflation/deflation explanation lines

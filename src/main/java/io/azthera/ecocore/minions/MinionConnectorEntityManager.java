@@ -94,7 +94,7 @@ public final class MinionConnectorEntityManager {
         }
     }
 
-    private final MapLong, ActiveConnector> activeConnectors = new ConcurrentHashMap<>();
+    private final Map<Long, ActiveConnector> activeConnectors = new ConcurrentHashMap<>();
 
     public MinionConnectorEntityManager(Logger logger, MinionConnectorEntityDao connectorEntityDao,
                                          MinionsConfig minionsConfig) {
@@ -105,7 +105,7 @@ public final class MinionConnectorEntityManager {
 
     public void loadAll() {
         try {
-            ListMinionConnectorEntityDao.ConnectorEntityRecord> all = connectorEntityDao.findAll();
+            List<MinionConnectorEntityDao.ConnectorEntityRecord> all = connectorEntityDao.findAll();
             for (MinionConnectorEntityDao.ConnectorEntityRecord record : all) {
                 ActiveConnector active = new ActiveConnector(record.id(), record.ownerUuid(), record.world(),
                         record.x(), record.y(), record.z(), record.rangeLevel(), null);
@@ -281,8 +281,8 @@ public final class MinionConnectorEntityManager {
         return true;
     }
 
-    public ListActiveConnector> getConnectorsOwnedBy(UUID ownerUuid) {
-        ListActiveConnector> results = new ArrayList<>();
+    public List<ActiveConnector> getConnectorsOwnedBy(UUID ownerUuid) {
+        List<ActiveConnector> results = new ArrayList<>();
         for (ActiveConnector connector : activeConnectors.values()) {
             if (connector.ownerUuid.equals(ownerUuid)) {
                 results.add(connector);

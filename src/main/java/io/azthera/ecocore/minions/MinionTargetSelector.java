@@ -37,7 +37,7 @@ public final class MinionTargetSelector {
      * @param handler the minion's handler, providing the target material set
      * @return the nearest matching block, or empty if none found
      */
-    public OptionalBlock> findNearestBlockInArena(Location origin, int radius, MinionHandler handler) {
+    public Optional<Block> findNearestBlockInArena(Location origin, int radius, MinionHandler handler) {
         if (handler.getTargetMaterials().isEmpty() || origin.getWorld() == null) {
             return Optional.empty();
         }
@@ -79,7 +79,7 @@ public final class MinionTargetSelector {
      * @param handler the minion's handler, providing the target material set
      * @return the nearest matching block in front of the minion, or empty if none found
      */
-    public OptionalBlock> findNearestBlockInFacingSlab(Location origin, BlockFace facing, int radius,
+    public Optional<Block> findNearestBlockInFacingSlab(Location origin, BlockFace facing, int radius,
                                                           MinionHandler handler) {
         if (handler.getTargetMaterials().isEmpty() || origin.getWorld() == null) {
             return Optional.empty();
@@ -120,12 +120,12 @@ public final class MinionTargetSelector {
      * @param handler the minion's handler, providing the target entity type set
      * @return the selected entity, or empty if none found
      */
-    public OptionalLivingEntity> findBestEntityInArena(Location origin, int radius, MinionHandler handler) {
+    public Optional<LivingEntity> findBestEntityInArena(Location origin, int radius, MinionHandler handler) {
         if (handler.getTargetEntities().isEmpty() || origin.getWorld() == null) {
             return Optional.empty();
         }
         BoundingBox box = BoundingBox.of(origin, radius, radius, radius);
-        ListEntity> nearby = origin.getWorld().getNearbyEntities(box).stream()
+        List<Entity> nearby = origin.getWorld().getNearbyEntities(box).stream()
                 .filter(entity -> entity instanceof LivingEntity)
                 .filter(entity -> handler.getTargetEntities().contains(entity.getType()))
                 .toList();
@@ -148,7 +148,7 @@ public final class MinionTargetSelector {
      * @param handler the minion's handler, providing the target entity type set
      * @return the selected entity, or empty if none found
      */
-    public OptionalLivingEntity> findBestEntityInFacingSlab(Location origin, BlockFace facing, int radius,
+    public Optional<LivingEntity> findBestEntityInFacingSlab(Location origin, BlockFace facing, int radius,
                                                                MinionHandler handler) {
         if (handler.getTargetEntities().isEmpty() || origin.getWorld() == null) {
             return Optional.empty();
@@ -156,7 +156,7 @@ public final class MinionTargetSelector {
         double halfWidth = radius;
         Location center = origin.clone().add(facing.getModX() * (radius / 2.0), 0, facing.getModZ() * (radius / 2.0));
         BoundingBox box = BoundingBox.of(center, halfWidth, Math.min(radius, 6), halfWidth);
-        ListEntity> nearby = origin.getWorld().getNearbyEntities(box).stream()
+        List<Entity> nearby = origin.getWorld().getNearbyEntities(box).stream()
                 .filter(entity -> entity instanceof LivingEntity)
                 .filter(entity -> handler.getTargetEntities().contains(entity.getType()))
                 .toList();

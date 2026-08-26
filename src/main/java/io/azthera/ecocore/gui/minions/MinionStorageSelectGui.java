@@ -80,7 +80,7 @@ public final class MinionStorageSelectGui extends AbstractGui {
         }
     }
 
-    private ItemStack namedItem(Material material, String name, ListString> lore) {
+    private ItemStack namedItem(Material material, String name, List<String> lore) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {

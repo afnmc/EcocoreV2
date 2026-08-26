@@ -50,7 +50,7 @@ public final class ClaimManager {
     }
 
     private void detectHook() {
-        ListClaimHook> candidates = List.of(
+        List<ClaimHook> candidates = List.of(
                 new GriefPreventionHook(logger),
                 new WorldGuardHook(logger),
                 new LandsHook(logger)

@@ -69,10 +69,10 @@ public final class RestockDecisionEngine {
 
     private RestockDecision evaluateRawTrigger(ShopItemRecord item, boolean isDailyTick, boolean isWeeklyTick) {
         double stockPercent = item.stockPercent();
-        if (stockPercent .getEmergencyRestockTriggerPercent()) {
+        if (stockPercent <= aiConfig.getEmergencyRestockTriggerPercent()) {
             return RestockDecision.EMERGENCY;
         }
-        if (stockPercent .getRestockTriggerPercent()) {
+        if (stockPercent <= aiConfig.getRestockTriggerPercent()) {
             return RestockDecision.SCHEDULED;
         }
         if (isDailyTick && aiConfig.isDailyRestockEnabled()) {
@@ -82,7 +82,7 @@ public final class RestockDecisionEngine {
             return RestockDecision.SCHEDULED;
         }
         double roll = ThreadLocalRandom.current().nextDouble(0, 100);
-        if (roll .getRandomRestockChancePercent()) {
+        if (roll < aiConfig.getRandomRestockChancePercent()) {
             return RestockDecision.RANDOM;
         }
         return RestockDecision.NONE;
@@ -97,7 +97,7 @@ public final class RestockDecisionEngine {
      * avoids ambiguity about which one "wins".
      */
     private boolean cooldownElapsed(ShopItemRecord item) {
-        if (item.getLastRestockAt() 0) {
+        if (item.getLastRestockAt() == 0) {
             return true; // never restocked before - nothing to wait on
         }
         double effectiveCooldownHours = Math.max(
@@ -132,7 +132,7 @@ public final class RestockDecisionEngine {
      */
     public int computeRestockAmount(ShopItemRecord item, RestockDecision decision) {
         int missing = item.getMaxStock() - item.getStock();
-        if (missing 0 || decision == RestockDecision.NONE) {
+        if (missing <= 0 || decision == RestockDecision.NONE) {
             return 0;
         }
         double fraction = switch (decision) {

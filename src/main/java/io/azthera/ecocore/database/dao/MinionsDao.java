@@ -157,9 +157,9 @@ public final class MinionsDao {
      * @return the player's minions
      * @throws SQLException if the query fails
      */
-    public ListMinionData> findByOwner(UUID ownerUuid) throws SQLException {
+    public List<MinionData> findByOwner(UUID ownerUuid) throws SQLException {
         String sql = "SELECT * FROM minions_data WHERE owner_uuid = ?";
-        ListMinionData> results = new ArrayList<>();
+        List<MinionData> results = new ArrayList<>();
         try (Connection connection = databaseManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, ownerUuid.toString());
@@ -180,9 +180,9 @@ public final class MinionsDao {
      * @return every persisted minion
      * @throws SQLException if the query fails
      */
-    public ListMinionData> findAll() throws SQLException {
+    public List<MinionData> findAll() throws SQLException {
         String sql = "SELECT * FROM minions_data";
-        ListMinionData> results = new ArrayList<>();
+        List<MinionData> results = new ArrayList<>();
         try (Connection connection = databaseManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql);
              ResultSet resultSet = statement.executeQuery()) {
