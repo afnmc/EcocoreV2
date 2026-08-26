@@ -30,7 +30,7 @@ import java.util.Map;
  * and refreshed on every click. If the player closes the screen with
  * items still sitting in the deposit area, those items are returned
  * to their inventory in {@link #handleClose} (dropping overflow on
- * the ground if full) - nothing is ever silently lost.
+ * the ground if full) - nothing is ever silently lost..
  */
 public final class SellMainGui extends AbstractGui {
 
