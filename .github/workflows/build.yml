@@ -5,6 +5,7 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -28,3 +29,4 @@ jobs:
         with:
           name: EcoCore-jar
           path: target/EcoCore-1.0.0.jar
+
