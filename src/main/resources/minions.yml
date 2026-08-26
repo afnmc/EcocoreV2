@@ -1,0 +1,312 @@
+# FILE: src/main/resources/minions.yml
+# ================================================================
+# EcoCore - Konfigurasi Minion
+# Semua nilai di sini bisa diubah tanpa perlu update plugin.
+# Material yang tidak dikenal akan dilewati dengan warning di
+# console, bukan bikin server crash (Revisi 12/20/21).
+# ================================================================
+
+global:
+  max-level: 50
+  # Revisi 11: jumlah maksimal storage page (54 slot per page) yang
+  # bisa di-upgrade untuk satu minion.
+  max-storage-pages: 10
+  base-radius: 6
+  radius-per-upgrade: 2
+  max-radius-upgrades: 5
+  base-speed-ticks: 20
+  speed-reduction-per-upgrade-ticks: 2
+  min-speed-ticks: 4
+  base-energy: 1000
+  energy-drain-per-action: 1
+  fuel-types:
+    - COAL
+    - COAL_BLOCK
+    - LAVA_BUCKET
+  auto-repair-enabled: true
+
+# ================================================================
+# Revisi 2: mode kerja per tipe minion.
+# FACING_ONLY  = kerja lurus ke arah minion menghadap (kayak piston)
+# ARENA_ONLY   = kerja di radius 360 derajat sekitar minion
+# BOTH         = bisa dua-duanya, player bisa toggle di menu upgrade
+# NONE         = minion gak kerja di dunia (storage/proses aja)
+# ================================================================
+work-mode:
+  miner: BOTH
+  quarry: BOTH
+  lumberjack: BOTH
+  farmer: BOTH
+  collector: BOTH
+  fisherman: ARENA_ONLY
+  mob_killer: ARENA_ONLY
+  smelter: NONE
+  sell: NONE
+  chest: NONE
+
+# ================================================================
+# Revisi 3: jarak tanam biar pohon/tanaman bisa tumbuh dengan baik.
+# ================================================================
+farming:
+  spacing:
+    enabled: true
+    default-tree-spacing: 2
+    default-canopy-clearance: 2
+    crop-spacing: 1
+    per-tree:
+      OAK: { spacing: 2, canopy-clearance: 2 }
+      SPRUCE: { spacing: 2, canopy-clearance: 2 }
+      BIRCH: { spacing: 2, canopy-clearance: 2 }
+      JUNGLE: { spacing: 2, canopy-clearance: 2 }
+      ACACIA: { spacing: 3, canopy-clearance: 2 }
+      DARK_OAK: { spacing: 2, canopy-clearance: 2, require-2x2: true }
+      MANGROVE: { spacing: 3, canopy-clearance: 3 }
+      CHERRY: { spacing: 3, canopy-clearance: 2 }
+
+# ================================================================
+# Revisi 12: daftar block yang bisa dihancurkan/diambil per tipe
+# minion. Tambah/hapus material di sini langsung berlaku tanpa
+# perlu ubah kode - misalnya tambah BEDROCK di targets.miner bikin
+# Miner bisa nambang bedrock.
+# ================================================================
+targets:
+  miner:
+    - STONE
+    - DEEPSLATE
+    - COBBLESTONE
+    - COAL_ORE
+    - DEEPSLATE_COAL_ORE
+    - IRON_ORE
+    - DEEPSLATE_IRON_ORE
+    - GOLD_ORE
+    - DEEPSLATE_GOLD_ORE
+    - DIAMOND_ORE
+    - DEEPSLATE_DIAMOND_ORE
+    - EMERALD_ORE
+    - DEEPSLATE_EMERALD_ORE
+    - REDSTONE_ORE
+    - DEEPSLATE_REDSTONE_ORE
+    - LAPIS_ORE
+    - DEEPSLATE_LAPIS_ORE
+    - COPPER_ORE
+    - DEEPSLATE_COPPER_ORE
+    - RAW_IRON_BLOCK
+    - RAW_GOLD_BLOCK
+    - RAW_COPPER_BLOCK
+  quarry:
+    - STONE
+    - DEEPSLATE
+    - COBBLESTONE
+    - ANDESITE
+    - DIORITE
+    - GRANITE
+    - TUFF
+    - DIRT
+    - GRAVEL
+    - SAND
+  farmer:
+    - WHEAT
+    - CARROTS
+    - POTATOES
+    - BEETROOTS
+    - NETHER_WART
+    - PUMPKIN
+    - MELON
+    - COCOA
+  lumberjack:
+    - OAK_LOG
+    - SPRUCE_LOG
+    - BIRCH_LOG
+    - JUNGLE_LOG
+    - ACACIA_LOG
+    - DARK_OAK_LOG
+    - MANGROVE_LOG
+    - CHERRY_LOG
+    - CRIMSON_STEM
+    - WARPED_STEM
+  mob_killer:
+    entities:
+      - ZOMBIE
+      - SKELETON
+      - SPIDER
+      - CREEPER
+      - ENDERMAN
+
+# ================================================================
+# Revisi 5: recipe smelter, format input -> output.
+# ================================================================
+smelter:
+  recipes:
+    RAW_IRON: IRON_INGOT
+    RAW_GOLD: GOLD_INGOT
+    RAW_COPPER: COPPER_INGOT
+    IRON_ORE: IRON_INGOT
+    GOLD_ORE: GOLD_INGOT
+    COPPER_ORE: COPPER_INGOT
+    SAND: GLASS
+    COBBLESTONE: STONE
+    NETHERRACK: NETHER_BRICK
+    CLAY_BALL: BRICK
+
+# ================================================================
+# Revisi 7: data per jenis pohon buat lumberjack - log, daun,
+# sapling, chance drop apple/stick.
+# ================================================================
+lumberjack:
+  tree-species:
+    OAK:
+      log: OAK_LOG
+      leaves: OAK_LEAVES
+      sapling: OAK_SAPLING
+      apple-chance: 0.005
+      stick-chance: 0.02
+    SPRUCE:
+      log: SPRUCE_LOG
+      leaves: SPRUCE_LEAVES
+      sapling: SPRUCE_SAPLING
+      apple-chance: 0.0
+      stick-chance: 0.02
+    BIRCH:
+      log: BIRCH_LOG
+      leaves: BIRCH_LEAVES
+      sapling: BIRCH_SAPLING
+      apple-chance: 0.0
+      stick-chance: 0.02
+    JUNGLE:
+      log: JUNGLE_LOG
+      leaves: JUNGLE_LEAVES
+      sapling: JUNGLE_SAPLING
+      apple-chance: 0.0
+      stick-chance: 0.02
+    ACACIA:
+      log: ACACIA_LOG
+      leaves: ACACIA_LEAVES
+      sapling: ACACIA_SAPLING
+      apple-chance: 0.0
+      stick-chance: 0.02
+    DARK_OAK:
+      log: DARK_OAK_LOG
+      leaves: DARK_OAK_LEAVES
+      sapling: DARK_OAK_SAPLING
+      apple-chance: 0.005
+      stick-chance: 0.02
+      require-2x2: true
+    MANGROVE:
+      log: MANGROVE_LOG
+      leaves: MANGROVE_LEAVES
+      sapling: MANGROVE_PROPAGULE
+      apple-chance: 0.0
+      stick-chance: 0.02
+    CHERRY:
+      log: CHERRY_LOG
+      leaves: CHERRY_LEAVES
+      sapling: CHERRY_SAPLING
+      apple-chance: 0.0
+      stick-chance: 0.02
+
+# ================================================================
+# Revisi 8: rarity tier hasil mancing fisherman. Weight relatif,
+# gak perlu total 100.
+# ================================================================
+fisherman:
+  rarity:
+    COMMON:
+      weight: 70
+      pool:
+        - COD
+        - SALMON
+    UNCOMMON:
+      weight: 20
+      pool:
+        - TROPICAL_FISH
+        - PUFFERFISH
+    RARE:
+      weight: 8
+      pool:
+        - NAUTILUS_SHELL
+    EPIC:
+      weight: 1.8
+      pool:
+        - HEART_OF_THE_SEA
+    LEGENDARY:
+      weight: 0.2
+      pool:
+        - DIAMOND
+        - EMERALD
+
+# ================================================================
+# Revisi 9: Connector Network - direct connection fixed 10 block
+# (lihat MinionConnectorManager.DIRECT_MAX_DISTANCE di kode, bukan
+# di sini karena memang gak bisa di-upgrade/diubah). Range di bawah
+# ini khusus buat MinionConnectorEntity (relay).
+# ================================================================
+connector:
+  base-range: 20.0
+  range-per-upgrade: 15.0
+  max-range-upgrades: 10
+  upgrade-base-cost: 750.0
+  upgrade-cost-growth: 1.4
+
+# ================================================================
+# Tampilan & harga beli tiap tipe minion.
+# ================================================================
+minions:
+  miner:
+    display-name: "§7Miner"
+    icon: IRON_PICKAXE
+    base-efficiency: 1.0
+  quarry:
+    display-name: "§7Quarry"
+    icon: STONE_PICKAXE
+    base-efficiency: 1.0
+  lumberjack:
+    display-name: "§2Lumberjack"
+    icon: IRON_AXE
+    base-efficiency: 1.0
+  farmer:
+    display-name: "§aFarmer"
+    icon: IRON_HOE
+    base-efficiency: 1.0
+  fisherman:
+    display-name: "§bFisherman"
+    icon: FISHING_ROD
+    base-efficiency: 1.0
+  collector:
+    display-name: "§eCollector"
+    icon: HOPPER
+    base-efficiency: 1.0
+  mob_killer:
+    display-name: "§cMob Killer"
+    icon: IRON_SWORD
+    base-efficiency: 1.0
+  smelter:
+    display-name: "§6Smelter"
+    icon: FURNACE
+    base-efficiency: 1.0
+  sell:
+    display-name: "§2Sell"
+    icon: EMERALD
+    base-efficiency: 1.0
+  chest:
+    display-name: "§eChest"
+    icon: CHEST
+    base-efficiency: 1.0
+
+purchase:
+  prices:
+    miner: 500.0
+    quarry: 750.0
+    lumberjack: 500.0
+    farmer: 450.0
+    fisherman: 600.0
+    collector: 300.0
+    mob_killer: 800.0
+    smelter: 650.0
+    sell: 400.0
+    chest: 200.0
+
+ai:
+  obstacle-avoidance-enabled: true
+  target-selection-strategy: NEAREST_HIGHEST_VALUE
+  pathfinding-max-nodes: 200
+  pathfinding-recalculate-ticks: 40

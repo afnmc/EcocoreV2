@@ -1,0 +1,487 @@
+// FILE: src/main/java/io/azthera/ecocore/config/MinionsConfig.java
+package io.azthera.ecocore.config;
+
+import io.azthera.ecocore.minions.types.FishRarityTier;
+import io.azthera.ecocore.minions.types.TreeSpeciesData;
+import io.azthera.ecocore.model.MinionType;
+import io.azthera.ecocore.model.MinionWorkMode;
+import org.bukkit.Material;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
+
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
+
+/**
+ * Parsed view of {@code minions.yml}: global minion progression/upgrade
+ * rules, per-type icon/efficiency/purchase-price definitions, the
+ * Revisi 9 connector network tuning, Revisi 3 planting spacing, and
+ * every per-type target/recipe/rarity list (Revisi 12: minion
+ * engines must read these from config, never hardcode them).
+ *
+ * Every list/map-returning getter here degrades gracefully: a
+ * missing or invalid {@code minions.yml} section falls back to a
+ * sane hardcoded default and logs a warning rather than crashing
+ * plugin startup (Revisi 12/13/20).
+ */
+public final class MinionsConfig {
+
+    public record MinionDefinition(String displayName, String icon, double baseEfficiency) {
+    }
+
+    private final Logger logger;
+
+    private final int maxLevel;
+    private final int maxStoragePages;
+    private final int baseRadius;
+    private final int radiusPerUpgrade;
+    private final int maxRadiusUpgrades;
+    private final int baseSpeedTicks;
+    private final int speedReductionPerUpgradeTicks;
+    private final int minSpeedTicks;
+    private final int baseEnergy;
+    private final int energyDrainPerAction;
+    private final ListString> fuelTypes;
+    private final boolean autoRepairEnabled;
+
+    // Revisi 3: tree/farming planting spacing.
+    private final boolean spacingEnabled;
+    private final int defaultTreeSpacing;
+    private final int defaultCanopyClearance;
+    private final int cropSpacing;
+    private final MapMaterial, Integer> perTreeSpacing = new HashMap<>();
+    private final MapMaterial, Integer> perTreeCanopyClearance = new HashMap<>();
+    private final SetMaterial> require2x2Species = new HashSet<>();
+
+    // Revisi 9: connector network tuning.
+    private final double connectorBaseRange;
+    private final double connectorRangePerUpgrade;
+    private final int connectorMaxRangeUpgrades;
+    private final double connectorUpgradeBaseCost;
+    private final double connectorUpgradeCostGrowth;
+
+    // Revisi 2: per-type work mode override.
+    private final MapMinionType, MinionWorkMode> workModeOverrides = new EnumMap<>(MinionType.class);
+
+    // Revisi 12: per-type target material/entity lists, all config-sourced.
+    private final MapMinionType, SetMaterial>> targetBlocks = new EnumMap<>(MinionType.class);
+    private final MapMaterial, Material> smeltingRecipes = new HashMap<>();
+    private final MapMaterial, TreeSpeciesData> treeSpeciesData = new HashMap<>();
+    private final ListFishRarityTier> fishRarityTiers = new ArrayList<>();
+
+    private final MapMinionType, MinionDefinition> minionDefinitions = new EnumMap<>(MinionType.class);
+    private final MapMinionType, Double> purchasePrices = new EnumMap<>(MinionType.class);
+
+    private final boolean obstacleAvoidanceEnabled;
+    private final String targetSelectionStrategy;
+    private final int pathfindingMaxNodes;
+    private final int pathfindingRecalculateTicks;
+
+    public MinionsConfig(Logger logger, FileConfiguration config) {
+        this.logger = logger;
+        this.maxLevel = config.getInt("global.max-level", 50);
+        this.maxStoragePages = config.getInt("global.max-storage-pages", 10);
+        this.baseRadius = config.getInt("global.base-radius", 6);
+        this.radiusPerUpgrade = config.getInt("global.radius-per-upgrade", 2);
+        this.maxRadiusUpgrades = config.getInt("global.max-radius-upgrades", 5);
+        this.baseSpeedTicks = config.getInt("global.base-speed-ticks", 20);
+        this.speedReductionPerUpgradeTicks = config.getInt("global.speed-reduction-per-upgrade-ticks", 2);
+        this.minSpeedTicks = config.getInt("global.min-speed-ticks", 4);
+        this.baseEnergy = config.getInt("global.base-energy", 1000);
+        this.energyDrainPerAction = config.getInt("global.energy-drain-per-action", 1);
+        this.fuelTypes = config.getStringList("global.fuel-types");
+        this.autoRepairEnabled = config.getBoolean("global.auto-repair-enabled", true);
+
+        ConfigurationSection farmingSection = config.getConfigurationSection("farming.spacing");
+        this.spacingEnabled = farmingSection != null && farmingSection.getBoolean("enabled", true);
+        this.defaultTreeSpacing = farmingSection != null ? farmingSection.getInt("default-tree-spacing", 2) : 2;
+        this.defaultCanopyClearance = farmingSection != null ? farmingSection.getInt("default-canopy-clearance", 2) : 2;
+        this.cropSpacing = farmingSection != null ? farmingSection.getInt("crop-spacing", 1) : 1;
+        loadPerTreeSpacing(farmingSection);
+
+        ConfigurationSection connectorSection = config.getConfigurationSection("connector");
+        this.connectorBaseRange = connectorSection != null ? connectorSection.getDouble("base-range", 20.0) : 20.0;
+        this.connectorRangePerUpgrade = connectorSection != null ? connectorSection.getDouble("range-per-upgrade", 15.0) : 15.0;
+        this.connectorMaxRangeUpgrades = connectorSection != null ? connectorSection.getInt("max-range-upgrades", 10) : 10;
+        this.connectorUpgradeBaseCost = connectorSection != null ? connectorSection.getDouble("upgrade-base-cost", 750.0) : 750.0;
+        this.connectorUpgradeCostGrowth = connectorSection != null ? connectorSection.getDouble("upgrade-cost-growth", 1.4) : 1.4;
+
+        loadWorkModeOverrides(config.getConfigurationSection("work-mode"));
+        loadTargetBlocks(config.getConfigurationSection("targets"));
+        loadSmeltingRecipes(config.getConfigurationSection("smelter.recipes"));
+        loadTreeSpecies(config.getConfigurationSection("lumberjack.tree-species"));
+        loadFishRarity(config.getConfigurationSection("fisherman.rarity"));
+
+        ConfigurationSection minionsSection = config.getConfigurationSection("minions");
+        if (minionsSection != null) {
+            for (String key : minionsSection.getKeys(false)) {
+                MinionType type = MinionType.fromConfigKey(key);
+                if (type == null) {
+                    continue;
+                }
+                ConfigurationSection section = minionsSection.getConfigurationSection(key);
+                if (section == null) {
+                    continue;
+                }
+                minionDefinitions.put(type, new MinionDefinition(
+                        section.getString("display-name", type.name()),
+                        section.getString("icon", "VILLAGER_SPAWN_EGG"),
+                        section.getDouble("base-efficiency", 1.0)
+                ));
+            }
+        }
+
+        ConfigurationSection purchaseSection = config.getConfigurationSection("purchase.prices");
+        if (purchaseSection != null) {
+            for (String key : purchaseSection.getKeys(false)) {
+                MinionType type = MinionType.fromConfigKey(key);
+                if (type != null) {
+                    purchasePrices.put(type, purchaseSection.getDouble(key, 500.0));
+                }
+            }
+        }
+
+        this.obstacleAvoidanceEnabled = config.getBoolean("ai.obstacle-avoidance-enabled", true);
+        this.targetSelectionStrategy = config.getString("ai.target-selection-strategy", "NEAREST_HIGHEST_VALUE");
+        this.pathfindingMaxNodes = config.getInt("ai.pathfinding-max-nodes", 200);
+        this.pathfindingRecalculateTicks = config.getInt("ai.pathfinding-recalculate-ticks", 40);
+    }
+
+    private void loadPerTreeSpacing(ConfigurationSection farmingSection) {
+        if (farmingSection == null) {
+            return;
+        }
+        ConfigurationSection perTreeSection = farmingSection.getConfigurationSection("per-tree");
+        if (perTreeSection == null) {
+            return;
+        }
+        for (String key : perTreeSection.getKeys(false)) {
+            Material material = safeMaterial(key);
+            if (material == null) {
+                continue;
+            }
+            ConfigurationSection entry = perTreeSection.getConfigurationSection(key);
+            if (entry == null) {
+                continue;
+            }
+            perTreeSpacing.put(material, entry.getInt("spacing", defaultTreeSpacing));
+            perTreeCanopyClearance.put(material, entry.getInt("canopy-clearance", defaultCanopyClearance));
+            if (entry.getBoolean("require-2x2", false)) {
+                require2x2Species.add(material);
+            }
+        }
+    }
+
+    private void loadWorkModeOverrides(ConfigurationSection section) {
+        if (section == null) {
+            return;
+        }
+        for (String key : section.getKeys(false)) {
+            MinionType type = MinionType.fromConfigKey(key);
+            MinionWorkMode mode = MinionWorkMode.fromConfigKey(section.getString(key));
+            if (type != null && mode != null) {
+                workModeOverrides.put(type, mode);
+            }
+        }
+    }
+
+    private void loadTargetBlocks(ConfigurationSection section) {
+        if (section == null) {
+            return;
+        }
+        for (String key : section.getKeys(false)) {
+            MinionType type = MinionType.fromConfigKey(key);
+            if (type == null) {
+                continue;
+            }
+            ListString> materialNames = section.getStringList(key);
+            SetMaterial> materials = new HashSet<>();
+            for (String name : materialNames) {
+                Material material = safeMaterial(name);
+                if (material != null) {
+                    materials.add(material);
+                }
+            }
+            targetBlocks.put(type, materials);
+        }
+    }
+
+    private void loadSmeltingRecipes(ConfigurationSection section) {
+        if (section == null) {
+            // Revisi 5 default fallback: raw ore + ore block -> ingot, plus a few extras.
+            putDefaultRecipe("RAW_IRON", "IRON_INGOT");
+            putDefaultRecipe("RAW_GOLD", "GOLD_INGOT");
+            putDefaultRecipe("RAW_COPPER", "COPPER_INGOT");
+            putDefaultRecipe("IRON_ORE", "IRON_INGOT");
+            putDefaultRecipe("GOLD_ORE", "GOLD_INGOT");
+            putDefaultRecipe("COPPER_ORE", "COPPER_INGOT");
+            putDefaultRecipe("SAND", "GLASS");
+            putDefaultRecipe("COBBLESTONE", "STONE");
+            return;
+        }
+        for (String key : section.getKeys(false)) {
+            Material input = safeMaterial(key);
+            Material output = safeMaterial(section.getString(key));
+            if (input != null && output != null) {
+                smeltingRecipes.put(input, output);
+            } else if (input == null) {
+                logger.warning("[EcoCore] minions.yml smelter.recipes: material tidak valid '" + key + "', dilewati.");
+            }
+        }
+    }
+
+    private void putDefaultRecipe(String inputName, String outputName) {
+        Material input = safeMaterial(inputName);
+        Material output = safeMaterial(outputName);
+        if (input != null && output != null) {
+            smeltingRecipes.put(input, output);
+        }
+    }
+
+    private void loadTreeSpecies(ConfigurationSection section) {
+        if (section == null) {
+            return;
+        }
+        for (String key : section.getKeys(false)) {
+            ConfigurationSection entry = section.getConfigurationSection(key);
+            if (entry == null) {
+                continue;
+            }
+            Material log = safeMaterial(entry.getString("log"));
+            Material leaves = safeMaterial(entry.getString("leaves"));
+            Material sapling = safeMaterial(entry.getString("sapling"));
+            if (log == null || leaves == null || sapling == null) {
+                logger.warning("[EcoCore] minions.yml lumberjack.tree-species entry '" + key + "' tidak lengkap, dilewati.");
+                continue;
+            }
+            double appleChance = entry.getDouble("apple-chance", 0.0);
+            double stickChance = entry.getDouble("stick-chance", 0.02);
+            boolean require2x2 = entry.getBoolean("require-2x2", require2x2Species.contains(log));
+            treeSpeciesData.put(log, new TreeSpeciesData(log, leaves, sapling, appleChance, stickChance, require2x2, List.of()));
+        }
+    }
+
+    private void loadFishRarity(ConfigurationSection section) {
+        if (section == null) {
+            // Revisi 8 default fallback.
+            fishRarityTiers.add(new FishRarityTier("COMMON", 70.0, safeMaterialList("COD", "SALMON")));
+            fishRarityTiers.add(new FishRarityTier("UNCOMMON", 20.0, safeMaterialList("TROPICAL_FISH", "PUFFERFISH")));
+            fishRarityTiers.add(new FishRarityTier("RARE", 8.0, safeMaterialList("NAUTILUS_SHELL")));
+            fishRarityTiers.add(new FishRarityTier("EPIC", 1.8, safeMaterialList("HEART_OF_THE_SEA")));
+            fishRarityTiers.add(new FishRarityTier("LEGENDARY", 0.2, safeMaterialList("DIAMOND", "EMERALD")));
+            return;
+        }
+        for (String key : section.getKeys(false)) {
+            ConfigurationSection entry = section.getConfigurationSection(key);
+            if (entry == null) {
+                continue;
+            }
+            double weight = entry.getDouble("weight", 1.0);
+            ListMaterial> pool = new ArrayList<>();
+            for (String materialName : entry.getStringList("pool")) {
+                Material material = safeMaterial(materialName);
+                if (material != null) {
+                    pool.add(material);
+                }
+            }
+            if (!pool.isEmpty()) {
+                fishRarityTiers.add(new FishRarityTier(key, weight, pool));
+            }
+        }
+    }
+
+    private ListMaterial> safeMaterialList(String... names) {
+        ListMaterial> result = new ArrayList<>();
+        for (String name : names) {
+            Material material = safeMaterial(name);
+            if (material != null) {
+                result.add(material);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Resolves a material name safely, logging a warning and
+     * returning {@code null} instead of throwing on an invalid name
+     * (Revisi 21/12: never crash on a bad config value).
+     */
+    private Material safeMaterial(String name) {
+        if (name == null || name.isBlank()) {
+            return null;
+        }
+        try {
+            return Material.valueOf(name.trim().toUpperCase());
+        } catch (IllegalArgumentException invalidMaterial) {
+            logger.warning("[EcoCore] minions.yml: material tidak dikenal '" + name + "', dilewati.");
+            return null;
+        }
+    }
+
+    public int getMaxLevel() {
+        return maxLevel;
+    }
+
+    public int getMaxStoragePages() {
+        return maxStoragePages;
+    }
+
+    public int getBaseRadius() {
+        return baseRadius;
+    }
+
+    public int getRadiusPerUpgrade() {
+        return radiusPerUpgrade;
+    }
+
+    public int getMaxRadiusUpgrades() {
+        return maxRadiusUpgrades;
+    }
+
+    public int getBaseSpeedTicks() {
+        return baseSpeedTicks;
+    }
+
+    public int getSpeedReductionPerUpgradeTicks() {
+        return speedReductionPerUpgradeTicks;
+    }
+
+    public int getMinSpeedTicks() {
+        return minSpeedTicks;
+    }
+
+    public int getBaseEnergy() {
+        return baseEnergy;
+    }
+
+    public int getEnergyDrainPerAction() {
+        return energyDrainPerAction;
+    }
+
+    public ListString> getFuelTypes() {
+        return fuelTypes;
+    }
+
+    public boolean isAutoRepairEnabled() {
+        return autoRepairEnabled;
+    }
+
+    /**
+     * Whether tree/crop planting spacing enforcement is active (Revisi 3).
+     *
+     * @return {@code true} if spacing checks should be applied
+     */
+    public boolean isSpacingEnabled() {
+        return spacingEnabled;
+    }
+
+    public int getCropSpacing() {
+        return cropSpacing;
+    }
+
+    /**
+     * The minimum distance a lumberjack must keep between saplings of
+     * the given species when replanting (Revisi 3), falling back to
+     * the global default if this species has no override.
+     *
+     * @param logMaterial the tree species' log material
+     * @return the configured spacing in blocks
+     */
+    public int getTreeSpacingFor(Material logMaterial) {
+        if (!spacingEnabled) {
+            return 0;
+        }
+        return perTreeSpacing.getOrDefault(logMaterial, defaultTreeSpacing);
+    }
+
+    public int getCanopyClearanceFor(Material logMaterial) {
+        return perTreeCanopyClearance.getOrDefault(logMaterial, defaultCanopyClearance);
+    }
+
+    public double getConnectorBaseRange() {
+        return connectorBaseRange;
+    }
+
+    public double getConnectorRangePerUpgrade() {
+        return connectorRangePerUpgrade;
+    }
+
+    public int getConnectorMaxRangeUpgrades() {
+        return connectorMaxRangeUpgrades;
+    }
+
+    public double getConnectorUpgradeBaseCost() {
+        return connectorUpgradeBaseCost;
+    }
+
+    public double getConnectorUpgradeCostGrowth() {
+        return connectorUpgradeCostGrowth;
+    }
+
+    /**
+     * The effective work mode for a minion type: a configured
+     * override from {@code minions.yml work-mode} if present,
+     * otherwise the type's hardcoded {@link MinionWorkMode#defaultFor}.
+     *
+     * @param type the minion type
+     * @return the effective work mode
+     */
+    public MinionWorkMode getWorkModeFor(MinionType type) {
+        return workModeOverrides.getOrDefault(type, MinionWorkMode.defaultFor(type));
+    }
+
+    /**
+     * The configured target/mineable block set for a minion type
+     * (Revisi 12: e.g. adding BEDROCK to {@code targets.miner} in
+     * minions.yml lets the Miner mine bedrock, no code change
+     * needed). Empty if unconfigured for that type.
+     *
+     * @param type the minion type
+     * @return the configured target material set
+     */
+    public SetMaterial> getTargetBlocksFor(MinionType type) {
+        return targetBlocks.getOrDefault(type, Set.of());
+    }
+
+    public MapMaterial, Material> getSmeltingRecipes() {
+        return smeltingRecipes;
+    }
+
+    public MapMaterial, TreeSpeciesData> getTreeSpeciesData() {
+        return treeSpeciesData;
+    }
+
+    public ListFishRarityTier> getFishRarityTiers() {
+        return fishRarityTiers;
+    }
+
+    public MinionDefinition getDefinition(MinionType type) {
+        return minionDefinitions.get(type);
+    }
+
+    public double getPurchasePrice(MinionType type) {
+        return purchasePrices.getOrDefault(type, 500.0);
+    }
+
+    public boolean isObstacleAvoidanceEnabled() {
+        return obstacleAvoidanceEnabled;
+    }
+
+    public String getTargetSelectionStrategy() {
+        return targetSelectionStrategy;
+    }
+
+    public int getPathfindingMaxNodes() {
+        return pathfindingMaxNodes;
+    }
+
+    public int getPathfindingRecalculateTicks() {
+        return pathfindingRecalculateTicks;
+    }
+}

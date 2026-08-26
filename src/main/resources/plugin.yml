@@ -1,0 +1,97 @@
+name: EcoCore
+version: '1.0.0'
+main: io.azthera.ecocore.EcoCorePlugin
+api-version: '1.21'
+author: Afn
+description: AI-driven economy engine for the Azthera network
+website: https://azthera.io
+softdepend: [PlaceholderAPI, Vault, ItemsAdder, Oraxen, MMOItems, Slimefun]
+load: POSTWORLD
+
+commands:
+  ecocore:
+    description: Admin command for EcoCore
+    usage: /ecocore <reload|debug|restock|inflation|ai|save|backup|market|graph>
+    permission: ecocore.admin
+  shop:
+    description: Open the EcoCore shop
+    usage: /shop
+    permission: ecocore.shop
+  sell:
+    description: Open the EcoCore sell menu
+    usage: /sell
+    permission: ecocore.sell
+  jobs:
+    description: Open the jobs menu
+    usage: /jobs
+    permission: ecocore.jobs
+  job:
+    description: View a specific job
+    usage: /job <name>
+    permission: ecocore.jobs
+  minions:
+    description: Open the minions menu
+    usage: /minions
+    permission: ecocore.minions
+  minion:
+    description: Manage a specific minion
+    usage: /minion <id>
+    permission: ecocore.minions
+  market:
+    description: View the current market state
+    usage: /market
+    permission: ecocore.market
+  prices:
+    description: View current item prices
+    usage: /prices
+    permission: ecocore.market
+  inflation:
+    description: View current inflation data
+    usage: /inflation
+    permission: ecocore.market
+  history:
+    description: View trade history
+    usage: /history
+    permission: ecocore.market
+  balance:
+    description: Check your (or another player's) EcoCore balance directly
+    usage: /balance [player]
+    permission: ecocore.balance
+  ecoitem:
+    description: Directly open a shop item's buy screen
+    usage: /ecoitem <id>
+    permission: ecocore.shop
+
+permissions:
+  ecocore.admin:
+    description: Full admin access to EcoCore
+    default: op
+  ecocore.shop:
+    description: Access to /shop
+    default: true
+  ecocore.sell:
+    description: Access to /sell
+    default: true
+  ecocore.jobs:
+    description: Access to /jobs and /job
+    default: true
+  ecocore.minions:
+    description: Access to /minions and /minion
+    default: true
+  ecocore.market:
+    description: Access to /market, /prices, /inflation, /history
+    default: true
+  ecocore.balance:
+    description: Access to /balance
+    default: true
+  ecocore.*:
+    description: All EcoCore permissions
+    default: op
+    children:
+      ecocore.admin: true
+      ecocore.shop: true
+      ecocore.sell: true
+      ecocore.jobs: true
+      ecocore.minions: true
+      ecocore.market: true
+      ecocore.balance: true

@@ -1,0 +1,387 @@
+# FILE: src/main/resources/shop-items.yml
+# ==========================================================
+# EcoCore - Katalog Item Shop
+# Revisi 21: material sudah diaudit untuk versi 26.1.2. Item
+# admin-only/unobtainable (command block, barrier, structure
+# block, jigsaw, debug stick, bedrock, dll) SENGAJA TIDAK
+# dimasukkan sebagai default aktif.
+# ==========================================================
+
+items:
+  # ---------- Blocks ----------
+  cobblestone:
+    category: "blocks"
+    material: COBBLESTONE
+    base-price: 1.0
+    max-stock: 6400
+    tradeable: true
+  stone:
+    category: "blocks"
+    material: STONE
+    base-price: 1.5
+    max-stock: 6400
+    tradeable: true
+  dirt:
+    category: "blocks"
+    material: DIRT
+    base-price: 0.5
+    max-stock: 6400
+    tradeable: true
+  sand:
+    category: "blocks"
+    material: SAND
+    base-price: 1.0
+    max-stock: 6400
+    tradeable: true
+  gravel:
+    category: "blocks"
+    material: GRAVEL
+    base-price: 1.0
+    max-stock: 6400
+    tradeable: true
+  oak_log:
+    category: "blocks"
+    material: OAK_LOG
+    base-price: 3.0
+    max-stock: 3200
+    tradeable: true
+  glass:
+    category: "blocks"
+    material: GLASS
+    base-price: 2.0
+    max-stock: 3200
+    tradeable: true
+  bricks:
+    category: "blocks"
+    material: BRICKS
+    base-price: 4.0
+    max-stock: 1600
+    tradeable: true
+  obsidian:
+    category: "blocks"
+    material: OBSIDIAN
+    base-price: 25.0
+    max-stock: 640
+    tradeable: true
+
+  # ---------- Ores & Ingots ----------
+  coal:
+    category: "ores"
+    material: COAL
+    base-price: 5.0
+    max-stock: 1600
+    tradeable: true
+  raw_iron:
+    category: "ores"
+    material: RAW_IRON
+    base-price: 12.0
+    max-stock: 1600
+    tradeable: true
+  iron_ingot:
+    category: "ores"
+    material: IRON_INGOT
+    base-price: 18.0
+    max-stock: 1600
+    tradeable: true
+  raw_gold:
+    category: "ores"
+    material: RAW_GOLD
+    base-price: 22.0
+    max-stock: 800
+    tradeable: true
+  gold_ingot:
+    category: "ores"
+    material: GOLD_INGOT
+    base-price: 30.0
+    max-stock: 800
+    tradeable: true
+  raw_copper:
+    category: "ores"
+    material: RAW_COPPER
+    base-price: 8.0
+    max-stock: 1600
+    tradeable: true
+  copper_ingot:
+    category: "ores"
+    material: COPPER_INGOT
+    base-price: 12.0
+    max-stock: 1600
+    tradeable: true
+  diamond:
+    category: "ores"
+    material: DIAMOND
+    base-price: 120.0
+    min-price: 60.0
+    max-price: 400.0
+    max-stock: 320
+    elasticity: 1.4
+    tradeable: true
+  emerald:
+    category: "ores"
+    material: EMERALD
+    base-price: 100.0
+    min-price: 50.0
+    max-price: 350.0
+    max-stock: 320
+    elasticity: 1.4
+    tradeable: true
+  netherite_scrap:
+    category: "ores"
+    material: NETHERITE_SCRAP
+    base-price: 600.0
+    min-price: 300.0
+    max-price: 2000.0
+    max-stock: 64
+    elasticity: 1.8
+    tradeable: true
+  redstone:
+    category: "ores"
+    material: REDSTONE
+    base-price: 6.0
+    max-stock: 1600
+    tradeable: true
+  lapis_lazuli:
+    category: "ores"
+    material: LAPIS_LAZULI
+    base-price: 5.0
+    max-stock: 1600
+    tradeable: true
+
+  # ---------- Food ----------
+  wheat:
+    category: "food"
+    material: WHEAT
+    base-price: 2.0
+    max-stock: 3200
+    tradeable: true
+  bread:
+    category: "food"
+    material: BREAD
+    base-price: 3.0
+    max-stock: 1600
+    tradeable: true
+  carrot:
+    category: "food"
+    material: CARROT
+    base-price: 1.5
+    max-stock: 3200
+    tradeable: true
+  potato:
+    category: "food"
+    material: POTATO
+    base-price: 1.5
+    max-stock: 3200
+    tradeable: true
+  cooked_beef:
+    category: "food"
+    material: COOKED_BEEF
+    base-price: 4.0
+    max-stock: 1600
+    tradeable: true
+  cooked_chicken:
+    category: "food"
+    material: COOKED_CHICKEN
+    base-price: 3.5
+    max-stock: 1600
+    tradeable: true
+  golden_apple:
+    category: "food"
+    material: GOLDEN_APPLE
+    base-price: 80.0
+    min-price: 40.0
+    max-price: 200.0
+    max-stock: 128
+    tradeable: true
+
+  # ---------- Farming ----------
+  wheat_seeds:
+    category: "farming"
+    material: WHEAT_SEEDS
+    base-price: 1.0
+    max-stock: 3200
+    tradeable: true
+  pumpkin:
+    category: "farming"
+    material: PUMPKIN
+    base-price: 3.0
+    max-stock: 1600
+    tradeable: true
+  melon:
+    category: "farming"
+    material: MELON
+    base-price: 2.0
+    max-stock: 1600
+    tradeable: true
+  sugar_cane:
+    category: "farming"
+    material: SUGAR_CANE
+    base-price: 1.5
+    max-stock: 3200
+    tradeable: true
+  cocoa_beans:
+    category: "farming"
+    material: COCOA_BEANS
+    base-price: 2.5
+    max-stock: 1600
+    tradeable: true
+  nether_wart:
+    category: "farming"
+    material: NETHER_WART
+    base-price: 4.0
+    max-stock: 1600
+    tradeable: true
+
+  # ---------- Redstone ----------
+  redstone_torch:
+    category: "redstone"
+    material: REDSTONE_TORCH
+    base-price: 3.0
+    max-stock: 1600
+    tradeable: true
+  piston:
+    category: "redstone"
+    material: PISTON
+    base-price: 8.0
+    max-stock: 800
+    tradeable: true
+  observer:
+    category: "redstone"
+    material: OBSERVER
+    base-price: 10.0
+    max-stock: 800
+    tradeable: true
+  hopper:
+    category: "redstone"
+    material: HOPPER
+    base-price: 15.0
+    max-stock: 640
+    tradeable: true
+  dispenser:
+    category: "redstone"
+    material: DISPENSER
+    base-price: 12.0
+    max-stock: 640
+    tradeable: true
+
+  # ---------- Tools ----------
+  iron_pickaxe:
+    category: "tools"
+    material: IRON_PICKAXE
+    base-price: 40.0
+    max-stock: 320
+    tradeable: true
+  diamond_pickaxe:
+    category: "tools"
+    material: DIAMOND_PICKAXE
+    base-price: 150.0
+    min-price: 80.0
+    max-price: 400.0
+    max-stock: 128
+    tradeable: true
+  iron_axe:
+    category: "tools"
+    material: IRON_AXE
+    base-price: 40.0
+    max-stock: 320
+    tradeable: true
+  iron_hoe:
+    category: "tools"
+    material: IRON_HOE
+    base-price: 25.0
+    max-stock: 320
+    tradeable: true
+  fishing_rod:
+    category: "tools"
+    material: FISHING_ROD
+    base-price: 20.0
+    max-stock: 320
+    tradeable: true
+
+  # ---------- Combat ----------
+  iron_sword:
+    category: "combat"
+    material: IRON_SWORD
+    base-price: 35.0
+    max-stock: 320
+    tradeable: true
+  diamond_sword:
+    category: "combat"
+    material: DIAMOND_SWORD
+    base-price: 140.0
+    min-price: 70.0
+    max-price: 380.0
+    max-stock: 128
+    tradeable: true
+  bow:
+    category: "combat"
+    material: BOW
+    base-price: 30.0
+    max-stock: 320
+    tradeable: true
+  arrow:
+    category: "combat"
+    material: ARROW
+    base-price: 0.5
+    max-stock: 6400
+    tradeable: true
+  shield:
+    category: "combat"
+    material: SHIELD
+    base-price: 25.0
+    max-stock: 320
+    tradeable: true
+
+  # ---------- Misc ----------
+  ender_pearl:
+    category: "misc"
+    material: ENDER_PEARL
+    base-price: 45.0
+    min-price: 20.0
+    max-price: 150.0
+    max-stock: 320
+    tradeable: true
+  blaze_rod:
+    category: "misc"
+    material: BLAZE_ROD
+    base-price: 20.0
+    max-stock: 640
+    tradeable: true
+  gunpowder:
+    category: "misc"
+    material: GUNPOWDER
+    base-price: 3.0
+    max-stock: 1600
+    tradeable: true
+  slime_ball:
+    category: "misc"
+    material: SLIME_BALL
+    base-price: 5.0
+    max-stock: 1600
+    tradeable: true
+  nautilus_shell:
+    category: "misc"
+    material: NAUTILUS_SHELL
+    base-price: 50.0
+    min-price: 25.0
+    max-price: 150.0
+    max-stock: 128
+    tradeable: true
+  heart_of_the_sea:
+    category: "misc"
+    material: HEART_OF_THE_SEA
+    base-price: 300.0
+    min-price: 150.0
+    max-price: 800.0
+    max-stock: 32
+    tradeable: true
+
+  # ---------------------------------------------------------------
+  # Revisi 21: item berikut SENGAJA TIDAK didaftarkan sebagai item
+  # default aktif karena admin-only/unobtainable di survival:
+  # COMMAND_BLOCK, CHAIN_COMMAND_BLOCK, REPEATING_COMMAND_BLOCK,
+  # BARRIER, STRUCTURE_BLOCK, STRUCTURE_VOID, JIGSAW, DEBUG_STICK,
+  # BEDROCK, KNOWLEDGE_BOOK, LIGHT (block), COMMAND_BLOCK_MINECART,
+  # SPAWNER (dari survival biasa gak legal didapat tanpa /give).
+  # Kalau admin mau aktifkan salah satunya secara sengaja, tambahkan
+  # manual di sini dengan tradeable: true dan max-stock kecil.
+  # ---------------------------------------------------------------

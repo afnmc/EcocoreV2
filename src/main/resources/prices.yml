@@ -1,0 +1,44 @@
+# FILE: src/main/resources/prices.yml
+# ==========================================================
+# EcoCore - Konfigurasi Batas Harga & Elastisitas AI
+# ==========================================================
+
+global:
+  min-price-multiplier: 0.10
+  max-price-multiplier: 5.00
+  base-elasticity: 1.0
+
+category-overrides:
+  ores:
+    elasticity: 1.4
+    max-price-multiplier: 6.0
+  combat:
+    elasticity: 1.2
+    max-price-multiplier: 4.0
+  tools:
+    elasticity: 1.1
+    max-price-multiplier: 4.0
+  misc:
+    elasticity: 1.3
+    max-price-multiplier: 5.0
+  blocks:
+    elasticity: 0.8
+    max-price-multiplier: 3.0
+  food:
+    elasticity: 0.9
+    max-price-multiplier: 3.0
+  farming:
+    elasticity: 0.9
+    max-price-multiplier: 3.0
+  redstone:
+    elasticity: 1.0
+    max-price-multiplier: 4.0
+
+rounding:
+  mode: "NEAREST"
+  step: 0.01
+
+buy-sell-spread:
+  default-spread-percent: 12.0
+  min-spread-percent: 5.0
+  max-spread-percent: 35.0

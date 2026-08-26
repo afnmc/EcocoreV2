@@ -1,0 +1,70 @@
+# FILE: src/main/resources/shop.yml
+# ==========================================================
+# EcoCore - Konfigurasi Shop
+# ==========================================================
+
+gui:
+  rows: 6
+  title: "&8Shop"
+  items-per-page: 45
+
+categories:
+  - id: "blocks"
+    display-name: "&7Blocks"
+    icon: STONE
+    slot: 10
+  - id: "ores"
+    display-name: "&bOres & Ingots"
+    icon: DIAMOND_ORE
+    slot: 11
+  - id: "food"
+    display-name: "&aFood"
+    icon: BREAD
+    slot: 12
+  - id: "farming"
+    display-name: "&2Farming"
+    icon: WHEAT
+    slot: 13
+  - id: "redstone"
+    display-name: "&cRedstone"
+    icon: REDSTONE
+    slot: 14
+  - id: "tools"
+    display-name: "&eTools & Weapons"
+    icon: DIAMOND_PICKAXE
+    slot: 15
+  - id: "combat"
+    display-name: "&4Combat"
+    icon: DIAMOND_SWORD
+    slot: 16
+  - id: "misc"
+    display-name: "&fMisc"
+    icon: CHEST
+    slot: 19
+
+features:
+  search-enabled: true
+  pagination-enabled: true
+  sorting-enabled: true
+  favorite-enabled: true
+  history-enabled: true
+  history-max-entries: 50
+  item-preview-enabled: true
+  stock-indicator-enabled: true
+  inflation-indicator-enabled: true
+  price-graph-enabled: true
+  price-graph-periods:
+    - "1h"
+    - "24h"
+    - "7d"
+
+buying:
+  require-confirmation-above: 1000.0
+  buy-max-enabled: true
+  buy-max-cap: 6400
+  sell-out-block-purchase: true
+
+stock:
+  default-max-stock: 6400
+  low-stock-threshold-percent: 20
+  critical-stock-threshold-percent: 5

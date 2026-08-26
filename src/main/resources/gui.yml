@@ -1,0 +1,60 @@
+# FILE: src/main/resources/gui.yml
+# ==========================================================
+# EcoCore - Konfigurasi Tampilan GUI
+# ==========================================================
+
+general:
+  animations-enabled: true
+  sounds-enabled: true
+  resource-pack-support: true
+
+sounds:
+  click: UI_BUTTON_CLICK
+  buy: ENTITY_EXPERIENCE_ORB_PICKUP
+  sell: ENTITY_PLAYER_LEVELUP
+  error: ENTITY_VILLAGER_NO
+  page-turn: ITEM_BOOK_PAGE_TURN
+  level-up: ENTITY_PLAYER_LEVELUP
+  close: BLOCK_CHEST_CLOSE
+  open: BLOCK_CHEST_OPEN
+
+buttons:
+  back:
+    material: ARROW
+    custom-model-data: 0
+  close:
+    material: BARRIER
+    custom-model-data: 0
+  next-page:
+    material: SPECTRAL_ARROW
+    custom-model-data: 0
+  prev-page:
+    material: SPECTRAL_ARROW
+    custom-model-data: 0
+  sort:
+    material: HOPPER
+    custom-model-data: 0
+  favorite-on:
+    material: NETHER_STAR
+    custom-model-data: 0
+  favorite-off:
+    material: GRAY_DYE
+    custom-model-data: 0
+  confirm:
+    material: LIME_DYE
+    custom-model-data: 0
+  cancel:
+    material: RED_DYE
+    custom-model-data: 0
+  search:
+    material: COMPASS
+    custom-model-data: 0
+  history:
+    material: BOOK
+    custom-model-data: 0
+
+layouts:
+  shop-main-rows: 6
+  sell-main-rows: 6
+  jobs-main-rows: 3
+  minions-main-rows: 4

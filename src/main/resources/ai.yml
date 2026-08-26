@@ -1,0 +1,46 @@
+# ==========================================================
+# EcoCore - AI Economy Engine Configuration
+# ==========================================================
+engine:
+  calculation-interval-seconds: 300
+  smoothing-factor: 0.25
+  learning-rate: 0.05
+  max-price-change-up-percent: 8.0
+  max-price-change-down-percent: 8.0
+
+weights:
+  supply: 0.15
+  demand: 0.15
+  transaction-volume: 0.10
+  player-count: 0.05
+  items-in: 0.10
+  items-out: 0.10
+  inflation: 0.10
+  deflation: 0.05
+  storage-level: 0.05
+  sold-volume: 0.05
+  bought-volume: 0.05
+  market-saturation: 0.05
+
+restock-decision:
+  stock-empty-threshold-percent: 0.0
+  restock-trigger-percent: 15.0
+  emergency-restock-trigger-percent: 3.0
+  random-restock-chance-percent: 5.0
+  daily-restock-enabled: true
+  weekly-restock-enabled: true
+
+trend-analysis:
+  daily-window-hours: 24
+  weekly-window-hours: 168
+  monthly-window-hours: 720
+
+learning-model:
+  enabled: true
+  history-samples-used: 200
+  retrain-interval-seconds: 3600
+
+notifications:
+  # Persentase perubahan harga minimum sebelum diumumkan ke
+  # chat/Discord. Naikin nilainya kalau berasa spam.
+  price-change-threshold-percent: 5.0

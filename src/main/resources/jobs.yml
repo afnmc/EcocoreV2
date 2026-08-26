@@ -1,0 +1,104 @@
+# ==========================================================
+# EcoCore - Jobs Configuration
+# ==========================================================
+global:
+  max-level: 100
+  xp-curve-base: 100
+  xp-curve-multiplier: 1.08
+  prestige-enabled: true
+  prestige-max: 10
+  prestige-xp-multiplier-bonus: 0.05
+  daily-mission-count: 3
+  weekly-mission-count: 5
+  leaderboard-top-size: 10
+  leaderboard-refresh-seconds: 300
+
+jobs:
+  miner:
+    display-name: "&7Miner"
+    icon: "IRON_PICKAXE"
+    base-money-per-action: 2.5
+    base-xp-per-action: 4
+  woodcutter:
+    display-name: "&6Woodcutter"
+    icon: "IRON_AXE"
+    base-money-per-action: 2.0
+    base-xp-per-action: 3
+  farmer:
+    display-name: "&2Farmer"
+    icon: "IRON_HOE"
+    base-money-per-action: 1.5
+    base-xp-per-action: 3
+  hunter:
+    display-name: "&cHunter"
+    icon: "BOW"
+    base-money-per-action: 3.0
+    base-xp-per-action: 5
+  fisherman:
+    display-name: "&bFisherman"
+    icon: "FISHING_ROD"
+    base-money-per-action: 2.2
+    base-xp-per-action: 4
+  excavator:
+    display-name: "&eExcavator"
+    icon: "IRON_SHOVEL"
+    base-money-per-action: 1.8
+    base-xp-per-action: 3
+  builder:
+    display-name: "&fBuilder"
+    icon: "BRICKS"
+    base-money-per-action: 1.2
+    base-xp-per-action: 2
+  crafter:
+    display-name: "&dCrafter"
+    icon: "CRAFTING_TABLE"
+    base-money-per-action: 1.5
+    base-xp-per-action: 3
+  explorer:
+    display-name: "&aExplorer"
+    icon: "MAP"
+    base-money-per-action: 2.0
+    base-xp-per-action: 4
+  breeder:
+    display-name: "&6Breeder"
+    icon: "WHEAT_SEEDS"
+    base-money-per-action: 1.8
+    base-xp-per-action: 3
+  cook:
+    display-name: "&6Cook"
+    icon: "FURNACE"
+    base-money-per-action: 1.6
+    base-xp-per-action: 3
+  blacksmith:
+    display-name: "&7Blacksmith"
+    icon: "ANVIL"
+    base-money-per-action: 2.5
+    base-xp-per-action: 4
+  enchanter:
+    display-name: "&5Enchanter"
+    icon: "ENCHANTING_TABLE"
+    base-money-per-action: 3.5
+    base-xp-per-action: 6
+  alchemy:
+    display-name: "&dAlchemy"
+    icon: "BREWING_STAND"
+    base-money-per-action: 3.0
+    base-xp-per-action: 5
+  merchant:
+    display-name: "&eMerchant"
+    icon: "EMERALD"
+    base-money-per-action: 2.0
+    base-xp-per-action: 4
+  quest_hunter:
+    display-name: "&6Quest Hunter"
+    icon: "WRITTEN_BOOK"
+    base-money-per-action: 4.0
+    base-xp-per-action: 7
+
+perks:
+  bonus-types: [ "money", "drop", "xp", "speed", "fortune", "luck" ]
+  perk-unlock-levels: [ 5, 10, 20, 35, 50, 75, 100 ]
+
+skill-tree:
+  points-per-level: 1
+  max-branches: 3

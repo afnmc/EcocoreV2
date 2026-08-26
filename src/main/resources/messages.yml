@@ -1,0 +1,75 @@
+# FILE: src/main/resources/messages.yml
+# ==========================================================
+# EcoCore - Pesan untuk Player
+# Semua kode warna pakai format &, contoh: &a untuk hijau.
+# Placeholder ditulis dengan {nama_placeholder}.
+# ==========================================================
+
+prefix: "&8[&aEcoCore&8] &r"
+
+general:
+  reload-success: "&aKonfigurasi berhasil di-reload."
+  no-permission: "&cLu gak punya izin buat ini."
+  player-only: "&cCommand ini cuma bisa dipakai player."
+  invalid-usage: "&cCara pakai yang benar: &f{usage}"
+  feature-disabled: "&cFitur ini lagi dimatiin sama admin."
+
+economy:
+  not-enough-money: "&cUang lu gak cukup. Butuh &f{amount}&c lagi."
+  received-money: "&aLu dapet &f{amount}&a."
+  paid-money: "&7Lu bayar &f{amount}&7."
+
+shop:
+  bought: "&aBerhasil beli &f{amount}x {item}&a seharga &f{price}&a."
+  sold-out: "&cItem ini lagi sell out, coba lagi nanti."
+  not-enough-stock: "&cStock gak cukup. Sisa: &f{stock}"
+  cannot-afford: "&cUang lu gak cukup buat beli ini."
+  item-not-tradeable: "&cItem ini gak bisa diperjualbelikan."
+  category-empty: "&7Kategori ini masih kosong."
+
+sell:
+  sold: "&aBerhasil jual &f{amount}x {item}&a seharga &f{price}&a."
+  nothing-to-sell: "&cGak ada barang yang bisa dijual."
+  item-not-sellable: "&cItem ini gak bisa dijual di sini."
+
+market:
+  rotated: "&d&lNight Market&r &7barunya udah muncul! Cek pake /market"
+  bought: "&aBerhasil beli &f{item}&a dari Night Market seharga &f{price}&a."
+  sold-out: "&cBarang Night Market ini udah habis, tunggu rotasi berikutnya."
+
+jobs:
+  joined: "&aLu sekarang jadi &f{job}&a!"
+  left: "&7Lu keluar dari job &f{job}&7."
+  level-up: "&6&lLevel Up! &7Job &f{job}&7 naik ke level &f{level}&7."
+  mission-complete: "&a&lMisi {period} Selesai! &7Dapet reward: &f{reward}"
+  mission-assigned: "&7Misi {period} baru buat job &f{job}&7 udah di-assign."
+  already-has-job: "&cLu udah punya job ini."
+  max-jobs-reached: "&cLu udah mencapai batas maksimal job."
+
+minions:
+  placed: "&aMinion &f{type}&a berhasil ditempatkan! Arah: &f{facing}"
+  removed: "&7Minion telah dihapus. Isi storage & Minion Egg-nya balik ke inventory lu."
+  max-minions-reached: "&cLu udah mencapai batas maksimal minion ({max})."
+  not-your-minion: "&cIni minion punya orang lain."
+  refueled: "&aBerhasil isi fuel! Sisa fuel: &f{seconds} detik."
+  out-of-fuel: "&cMinion ini kehabisan fuel."
+  upgrade-success: "&aBerhasil upgrade &f{upgrade-type}&a."
+  upgrade-max: "&cUpgrade ini udah mencapai level maksimal."
+  upgrade-cannot-afford: "&cUang lu gak cukup buat upgrade ini."
+  connect-success: "&bBerhasil connect: &f{source} &b-> &f{destination} {mode}"
+  connect-fail: "&cGak bisa bikin koneksi ini: &f{reason}"
+  connect-different-owner: "&cKedua minion harus punya pemilik yang sama."
+  connect-too-far: "&cTerlalu jauh buat koneksi ini."
+  claim-blocked: "&cMinion gak bisa kerja di sini karena masuk claim orang lain."
+
+inflation:
+  not-available: "&7Data ekonomi belum tersedia."
+  status-header: "&6===== Status Ekonomi Server ====="
+
+gui:
+  back: "&eKembali"
+  close: "&cTutup"
+  next-page: "&eHalaman Berikutnya"
+  prev-page: "&eHalaman Sebelumnya"
+  confirm: "&aKonfirmasi"
+  cancel: "&cBatal"
