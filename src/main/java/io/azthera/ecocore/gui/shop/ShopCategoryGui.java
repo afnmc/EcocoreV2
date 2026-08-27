@@ -112,6 +112,13 @@ public final class ShopCategoryGui extends AbstractGui {
 
             List<String> lore = new ArrayList<>();
             lore.add("§7Harga: §a" + String.format("%.2f", item.getCurrentPrice()));
+            // Revisi 16: show the inflation/deflation delta explanation on
+            // every item's shop-listing lore, not just the detail preview.
+            io.azthera.ecocore.model.InflationRecord latestInflation =
+                    io.azthera.ecocore.EcoCorePlugin.getInstance().getInflationEngine().getLatestRecord();
+            io.azthera.ecocore.inflation.PriceDisplayHelper.DisplayPrices display =
+                    io.azthera.ecocore.inflation.PriceDisplayHelper.resolve(item.getBasePrice(), latestInflation);
+            lore.addAll(io.azthera.ecocore.inflation.PriceDisplayHelper.buildPriceLoreLines(item.getBasePrice(), display));
             if (shopConfig.isStockIndicatorEnabled()) {
                 lore.add("§7Stock: §f" + item.getStock() + "/" + item.getMaxStock());
                 if (item.isSoldOut()) {

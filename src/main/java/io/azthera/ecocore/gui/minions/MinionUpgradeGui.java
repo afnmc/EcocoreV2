@@ -1,4 +1,3 @@
-// FILE: src/main/java/io/azthera/ecocore/gui/minions/MinionUpgradeGui.java
 package io.azthera.ecocore.gui.minions;
 
 import io.azthera.ecocore.EcoCorePlugin;
@@ -22,12 +21,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.List;
 
-/**
- * Minion upgrade/settings screen. Revisi 14 fix: every icon builder
- * here is now a total function over any minion state, including
- * fully maxed out - {@link #build()} can never throw and the screen
- * can never fail to open, regardless of upgrade level.
- */
 public final class MinionUpgradeGui extends AbstractGui {
 
     private static final int SUMMARY_SLOT = 4;
@@ -69,35 +62,33 @@ public final class MinionUpgradeGui extends AbstractGui {
 
     @Override
     public void build() {
-        inventory = Bukkit.createInventory(this, 54, "§8Upgrade Minion");
+        inventory = Bukkit.createInventory(this, 54, "\u00a78Upgrade Minion");
         render();
     }
 
     private void render() {
         MinionData data = minionManager.getMinion(minionId);
         if (data == null) {
-            // Revisi 14: never close abruptly without feedback - show an
-            // empty-but-valid inventory rather than viewer.closeInventory().
             inventory.clear();
-            inventory.setItem(SUMMARY_SLOT, namedItem(Material.BARRIER, "§cMinion tidak ditemukan", List.of()));
-            inventory.setItem(CLOSE_SLOT, guiManager.buildButtonIcon("close", "§cTutup"));
+            inventory.setItem(SUMMARY_SLOT, namedItem(Material.BARRIER, "\u00a7cMinion tidak ditemukan", List.of()));
+            inventory.setItem(CLOSE_SLOT, guiManager.buildButtonIcon("close", "\u00a7cTutup"));
             return;
         }
         inventory.clear();
         MinionUpgradeManager upgrades = resolveUpgradeManager();
         inventory.setItem(SUMMARY_SLOT, buildSummaryIcon(data));
         inventory.setItem(STORAGE_UPGRADE_SLOT, buildUpgradeIcon(
-                Material.CHEST, "§eUpgrade Storage", data, upgrades,
+                Material.CHEST, "\u00a7eUpgrade Storage", data, upgrades,
                 MinionUpgradeManager.UpgradeType.STORAGE_PAGE,
                 "Storage " + data.getStoragePageCount() + "/" + upgrades.getMaxStoragePages()));
         inventory.setItem(RADIUS_UPGRADE_SLOT, buildUpgradeIcon(
-                Material.SPYGLASS, "§bUpgrade Radius", data, upgrades,
+                Material.SPYGLASS, "\u00a7bUpgrade Radius", data, upgrades,
                 MinionUpgradeManager.UpgradeType.RADIUS, data.getRadius() + " block"));
         inventory.setItem(SPEED_UPGRADE_SLOT, buildUpgradeIcon(
-                Material.SUGAR, "§dUpgrade Speed", data, upgrades,
+                Material.SUGAR, "\u00a7dUpgrade Speed", data, upgrades,
                 MinionUpgradeManager.UpgradeType.SPEED, data.getSpeedTicks() + " tick/aksi"));
-        inventory.setItem(STORAGE_OPEN_SLOT, namedItem(Material.ENDER_CHEST, "§6Buka Storage",
-                List.of("§7Klik buat lihat isi storage minion ini.")));
+        inventory.setItem(STORAGE_OPEN_SLOT, namedItem(Material.ENDER_CHEST, "\u00a76Buka Storage",
+                List.of("\u00a77Klik buat lihat isi storage minion ini.")));
 
         MinionHandler handler = minionManager.getHandler(data.getType());
         if (handler != null && handler.getWorkMode() == MinionWorkMode.BOTH) {
@@ -105,32 +96,25 @@ public final class MinionUpgradeGui extends AbstractGui {
         }
         inventory.setItem(REMOVE_SLOT, buildRemoveIcon());
         inventory.setItem(CONNECTOR_SLOT, buildConnectorIcon());
-        inventory.setItem(BACK_SLOT, guiManager.buildButtonIcon("back", "§eKembali"));
-        inventory.setItem(CLOSE_SLOT, guiManager.buildButtonIcon("close", "§cTutup"));
+        inventory.setItem(BACK_SLOT, guiManager.buildButtonIcon("back", "\u00a7eKembali"));
+        inventory.setItem(CLOSE_SLOT, guiManager.buildButtonIcon("close", "\u00a7cTutup"));
     }
 
     private ItemStack buildSummaryIcon(MinionData data) {
         ItemStack icon = io.azthera.ecocore.utils.ItemUtils.buildMinionTypeIcon(data.getType(), minionsConfig);
         ItemMeta meta = icon.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName("§f" + data.getType().configKey() + " §7Lv." + data.getLevel());
+            meta.setDisplayName("\u00a7f" + data.getType().configKey() + " \u00a77Lv." + data.getLevel());
             meta.setLore(List.of(
-                    "§7Energi: §f" + data.getEnergy() + "/" + minionsConfig.getBaseEnergy(),
-                    "§7Fuel tersisa: §f" + (data.getFuelTicksRemaining() / 20) + " detik",
-                    "§7Arah: §f" + data.getFacing().name()
+                    "\u00a77Energi: \u00a7f" + data.getEnergy() + "/" + minionsConfig.getBaseEnergy(),
+                    "\u00a77Fuel tersisa: \u00a7f" + (data.getFuelTicksRemaining() / 20) + " detik",
+                    "\u00a77Arah: \u00a7f" + data.getFacing().name()
             ));
             icon.setItemMeta(meta);
         }
         return icon;
     }
 
-    /**
-     * Builds an upgrade button icon. Revisi 14 fix: {@code canUpgrade}
-     * and {@code computeUpgradeCost} are now both null-safe total
-     * functions (see {@link MinionUpgradeManager}), so this method
-     * can never throw regardless of the minion's current tier - the
-     * "Max Level" branch is always reachable and always renders cleanly.
-     */
     private ItemStack buildUpgradeIcon(Material material, String name, MinionData data,
                                         MinionUpgradeManager upgrades, MinionUpgradeManager.UpgradeType type,
                                         String currentValueLabel) {
@@ -142,12 +126,12 @@ public final class MinionUpgradeGui extends AbstractGui {
             if (canUpgrade) {
                 double cost = upgrades.computeUpgradeCost(data, type);
                 meta.setLore(List.of(
-                        "§7Saat ini: §f" + currentValueLabel,
-                        "§7Biaya: §a" + String.format("%.2f", cost),
-                        "§eKlik untuk upgrade"
+                        "\u00a77Saat ini: \u00a7f" + currentValueLabel,
+                        "\u00a77Biaya: \u00a7a" + String.format("%.2f", cost),
+                        "\u00a7eKlik untuk upgrade"
                 ));
             } else {
-                meta.setLore(List.of("§7Saat ini: §f" + currentValueLabel, "§c§lMax Level"));
+                meta.setLore(List.of("\u00a77Saat ini: \u00a7f" + currentValueLabel, "\u00a7c\u00a7lMax Level"));
             }
             icon.setItemMeta(meta);
         }
@@ -158,10 +142,10 @@ public final class MinionUpgradeGui extends AbstractGui {
         ItemStack icon = new ItemStack(arenaMode ? Material.COMPASS : Material.TARGET);
         ItemMeta meta = icon.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(arenaMode ? "§bMode: Arena" : "§bMode: Depan Muka");
+            meta.setDisplayName(arenaMode ? "\u00a7bMode: Arena" : "\u00a7bMode: Depan Muka");
             meta.setLore(List.of(
-                    arenaMode ? "§7Minion bekerja di radius sekitarnya (360°)." : "§7Minion bekerja lurus ke arah dia menghadap.",
-                    "§eKlik untuk ganti mode."
+                    arenaMode ? "\u00a77Minion bekerja di radius sekitarnya (360\u00b0)." : "\u00a77Minion bekerja lurus ke arah dia menghadap.",
+                    "\u00a7eKlik untuk ganti mode."
             ));
             icon.setItemMeta(meta);
         }
@@ -172,11 +156,11 @@ public final class MinionUpgradeGui extends AbstractGui {
         ItemStack icon = new ItemStack(Material.BLAZE_ROD);
         ItemMeta meta = icon.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName("§b§lConnector");
+            meta.setDisplayName("\u00a7b\u00a7lConnector");
             meta.setLore(List.of(
-                    "§7Hubungkan minion ini ke minion lain.",
-                    "§7Klik minion sumber, lalu klik minion tujuan.",
-                    "§eKlik untuk mulai."
+                    "\u00a77Hubungkan minion ini ke minion lain.",
+                    "\u00a77Klik minion sumber, lalu klik minion tujuan.",
+                    "\u00a7eKlik untuk mulai."
             ));
             icon.setItemMeta(meta);
         }
@@ -187,11 +171,11 @@ public final class MinionUpgradeGui extends AbstractGui {
         ItemStack icon = new ItemStack(Material.BARRIER);
         ItemMeta meta = icon.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName("§c§lHapus Minion");
+            meta.setDisplayName("\u00a7c\u00a7lHapus Minion");
             meta.setLore(List.of(
-                    "§7Entity minion bakal hilang dari dunia,",
-                    "§7isi storage-nya balik ke inventory lu,",
-                    "§7dan lu dapet Minion Egg buat naruh lagi."
+                    "\u00a77Entity minion bakal hilang dari dunia,",
+                    "\u00a77isi storage-nya balik ke inventory lu,",
+                    "\u00a77dan lu dapet Minion Egg buat naruh lagi."
             ));
             icon.setItemMeta(meta);
         }
@@ -279,17 +263,17 @@ public final class MinionUpgradeGui extends AbstractGui {
             MinionConnectorManager connectorManager = resolveConnectorManager();
             connectorManager.beginSelection(getViewer().getUniqueId(), minionId);
             getViewer().closeInventory();
-            getViewer().sendMessage("§bKlik minion §fsumber§b (biasanya minion ini), lalu klik minion §ftujuan§b buat connect.");
+            getViewer().sendMessage("\u00a7bKlik minion \u00a7fsumber\u00a7b (biasanya minion ini), lalu klik minion \u00a7ftujuan\u00a7b buat connect.");
             return;
         }
 
         if (slot == REMOVE_SLOT) {
             boolean removed = minionManager.removeAndRefund(minionId, getViewer());
             if (removed) {
-                getViewer().sendMessage("§7Minion telah dihapus. Isi storage & Minion Egg-nya balik ke inventory lu.");
+                getViewer().sendMessage("\u00a77Minion telah dihapus. Isi storage & Minion Egg-nya balik ke inventory lu.");
                 guiManager.playSound(getViewer(), "click");
             } else {
-                getViewer().sendMessage("§cGagal menghapus minion.");
+                getViewer().sendMessage("\u00a7cGagal menghapus minion.");
             }
             getViewer().closeInventory();
         }

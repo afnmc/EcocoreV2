@@ -1,4 +1,3 @@
-// FILE: src/main/java/io/azthera/ecocore/database/migrations/V11__MinionFacing.java
 package io.azthera.ecocore.database.migrations;
 
 import java.sql.Connection;
@@ -7,11 +6,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-/**
- * Adds a {@code facing} column to {@code minions_data}, storing the
- * cardinal direction (NORTH/SOUTH/EAST/WEST) locked in when the
- * minion was placed (Revisi 1). Defaults existing rows to SOUTH.
- */
 public final class V11__MinionFacing implements Migration {
 
     @Override

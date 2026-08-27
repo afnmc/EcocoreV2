@@ -99,11 +99,25 @@ public final class NightMarketGui extends AbstractGui {
         ItemMeta meta = icon.getItemMeta();
         if (meta != null) {
             meta.setDisplayName((offer.isSoldOut() ? "§c" : "§d") + offer.getId());
-            meta.setLore(List.of(
-                    "§7Harga: §a" + String.format("%.2f", offer.getPrice()),
-                    "§7Stock: §f" + offer.getStock() + "/" + offer.getMaxStock(),
-                    offer.isSoldOut() ? "§c§lSELL OUT - tunggu rotasi berikutnya" : "§eKlik buat beli"
-            ));
+            List<String> lore = new java.util.ArrayList<>();
+            lore.add("§7Harga: §a" + String.format("%.2f", offer.getPrice()));
+            // Revisi 16: night market prices are fixed for the rotation
+            // (no live restock), so instead of a delta-from-base line,
+            // show the current server-wide economic state as context.
+            io.azthera.ecocore.model.InflationRecord latestInflation =
+                    io.azthera.ecocore.EcoCorePlugin.getInstance().getInflationEngine().getLatestRecord();
+            if (latestInflation != null) {
+                boolean isInflation = latestInflation.inflationPercent() >= latestInflation.deflationPercent();
+                double percent = isInflation ? latestInflation.inflationPercent() : latestInflation.deflationPercent();
+                if (percent >= 0.01) {
+                    lore.add(isInflation
+                            ? "§7(Ekonomi server sedang inflasi §c" + String.format("%.1f", percent) + "%§7)"
+                            : "§7(Ekonomi server sedang deflasi §a" + String.format("%.1f", percent) + "%§7)");
+                }
+            }
+            lore.add("§7Stock: §f" + offer.getStock() + "/" + offer.getMaxStock());
+            lore.add(offer.isSoldOut() ? "§c§lSELL OUT - tunggu rotasi berikutnya" : "§eKlik buat beli");
+            meta.setLore(lore);
             icon.setItemMeta(meta);
         }
         return icon;

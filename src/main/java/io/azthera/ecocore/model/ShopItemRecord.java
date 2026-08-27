@@ -1,9 +1,8 @@
-// FILE: src/main/java/io/azthera/ecocore/model/ShopItemRecord.java
 package io.azthera.ecocore.model;
 
 /**
- * Mutable in-memory representation of a single shop catalog entry,
- * mirroring a row in the {@code shop_items} table.
+ * Represents a single tradeable item tracked by EcoCore's shop and
+ * AI economy engine. Mirrors a row in the {@code shop_items} table.
  */
 public final class ShopItemRecord {
 
@@ -38,22 +37,22 @@ public final class ShopItemRecord {
     /**
      * Creates a new shop item record.
      *
-     * @param id unique item id (usually matches config key)
-     * @param category shop category id from shop.yml
-     * @param material Bukkit Material name backing this item
+     * @param id            unique item id (usually matches config key)
+     * @param category      shop category id from shop.yml
+     * @param material      Bukkit Material name backing this item
      * @param namespacedKey optional namespaced key for custom items, may be {@code null}
-     * @param basePrice the reference price used when no market data exists yet
-     * @param currentPrice the current AI-computed live price
-     * @param minPrice the minimum allowed price (price floor)
-     * @param maxPrice the maximum allowed price (price ceiling)
-     * @param stock current stock count
-     * @param maxStock maximum stock capacity
-     * @param elasticity price elasticity coefficient used by the AI engine
-     * @param tradeable whether this item is currently allowed to be traded
-     * @param updatedAt epoch millis of the last price/stock update
+     * @param basePrice     the reference price used when no market data exists yet
+     * @param currentPrice  the current AI-computed live price
+     * @param minPrice      the minimum allowed price (price floor)
+     * @param maxPrice      the maximum allowed price (price ceiling)
+     * @param stock         current stock count
+     * @param maxStock      maximum stock capacity
+     * @param elasticity    price elasticity coefficient used by the AI engine
+     * @param tradeable     whether this item is currently allowed to be traded
+     * @param updatedAt     epoch millis of the last price/stock update
      * @param lastRestockAt epoch millis of the last non-admin restock, 0 if never restocked
      * @param restocksToday how many non-admin restocks landed in the current day bucket
-     * @param restockDayEpoch which day bucket {@code restocksToday} belongs to
+     * @param restockDayEpoch which day bucket restocksToday belongs to
      */
     public ShopItemRecord(String id, String category, String material, String namespacedKey,
                            double basePrice, double currentPrice, double minPrice, double maxPrice,
@@ -117,9 +116,15 @@ public final class ShopItemRecord {
         return currentPrice;
     }
 
-    public void setCurrentPrice(double currentPrice) {
-        this.currentPrice = currentPrice;
-        touch();
+    /**
+     * Updates the current live price, clamped between {@link #getMinPrice()}
+     * and {@link #getMaxPrice()}, and refreshes the updated-at timestamp.
+     *
+     * @param newPrice the newly computed price from the AI engine
+     */
+    public void setCurrentPrice(double newPrice) {
+        this.currentPrice = Math.max(minPrice, Math.min(maxPrice, newPrice));
+        this.updatedAt = System.currentTimeMillis();
     }
 
     public double getMinPrice() {
@@ -142,9 +147,19 @@ public final class ShopItemRecord {
         return stock;
     }
 
+    /**
+     * Adjusts stock by a delta (positive to restock, negative to consume).
+     * Clamped between 0 and {@link #getMaxStock()}.
+     *
+     * @param delta the amount to add (or subtract if negative)
+     */
     public void adjustStock(int delta) {
-        this.stock = Math.max(0, Math.min(maxStock, stock + delta));
-        touch();
+        this.stock = Math.max(0, Math.min(maxStock, this.stock + delta));
+        this.updatedAt = System.currentTimeMillis();
+    }
+
+    public void setStock(int stock) {
+        this.stock = Math.max(0, Math.min(maxStock, stock));
     }
 
     public int getMaxStock() {
@@ -153,6 +168,9 @@ public final class ShopItemRecord {
 
     public void setMaxStock(int maxStock) {
         this.maxStock = maxStock;
+        if (this.stock > maxStock) {
+            this.stock = maxStock;
+        }
     }
 
     public double getElasticity() {
@@ -171,16 +189,19 @@ public final class ShopItemRecord {
         this.tradeable = tradeable;
     }
 
-    public long getUpdatedAt() {
-        return updatedAt;
-    }
-
     public boolean isSoldOut() {
-        return stock 0;
+        return stock <= 0;
     }
 
     public double stockPercent() {
-        return maxStock > 0 ? (stock / (double) maxStock) * 100.0 : 0.0;
+        if (maxStock <= 0) {
+            return 0.0;
+        }
+        return (stock / (double) maxStock) * 100.0;
+    }
+
+    public long getUpdatedAt() {
+        return updatedAt;
     }
 
     public long getLastRestockAt() {
@@ -211,9 +232,5 @@ public final class ShopItemRecord {
         }
         restocksToday++;
         lastRestockAt = nowMillis;
-    }
-
-    private void touch() {
-        this.updatedAt = System.currentTimeMillis();
     }
 }

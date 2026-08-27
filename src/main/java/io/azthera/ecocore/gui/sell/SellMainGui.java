@@ -3,6 +3,7 @@ package io.azthera.ecocore.gui.sell;
 import io.azthera.ecocore.config.MessagesConfig;
 import io.azthera.ecocore.gui.AbstractGui;
 import io.azthera.ecocore.gui.GuiManager;
+import io.azthera.ecocore.model.InflationRecord;
 import io.azthera.ecocore.sell.SellManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -12,25 +13,27 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 /**
  * The {@code /sell} screen (Revisi 15): total size matches a player
  * inventory screen convention - 54 slots split into a 27-slot deposit
- * area (rows 1-3) and a 27-slot control/preview area (rows 4-6). The
- * deposit area accepts completely free interaction (regular click,
- * shift-click, number-key swap, drag-and-drop spread, double-click
- * collect, and offhand swap all work exactly like a normal chest) -
- * every one of those Bukkit interaction paths routes through {@link
- * InventoryClickEvent}/{@code InventoryDragEvent} and both are
- * explicitly un-cancelled for deposit slots here.
+ * area (rows 1-3, slots 0-26) and a control/preview area in rows 4-6.
+ * The deposit area accepts completely free interaction (regular
+ * click, shift-click, number-key swap, drag-and-drop spread,
+ * double-click collect, and offhand swap all work exactly like a
+ * normal chest).
  *
  * <p>A live preview of the deposit area's total sell value is shown
- * and refreshed on every click. If the player closes the screen with
- * items still sitting in the deposit area, those items are returned
- * to their inventory in {@link #handleClose} (dropping overflow on
- * the ground if full) - nothing is ever silently lost..
+ * and refreshed on every click, along with the current economic
+ * state's effect on sell prices (Revisi 16).
+ *
+ * <p>If the player closes the screen with items still sitting in the
+ * deposit area, those items are returned to their inventory in
+ * {@link #handleClose}, dropping any overflow on the ground if their
+ * inventory is full - nothing is ever lost silently.
  */
 public final class SellMainGui extends AbstractGui {
 
@@ -46,7 +49,8 @@ public final class SellMainGui extends AbstractGui {
     private final GuiManager guiManager;
     private final MessagesConfig messagesConfig;
 
-    public SellMainGui(Player viewer, SellManager sellManager, GuiManager guiManager, MessagesConfig messagesConfig) {
+    public SellMainGui(Player viewer, SellManager sellManager,
+                        GuiManager guiManager, MessagesConfig messagesConfig) {
         super(viewer);
         this.sellManager = sellManager;
         this.guiManager = guiManager;
@@ -59,47 +63,55 @@ public final class SellMainGui extends AbstractGui {
         render();
     }
 
-    /**
-     * Revisi 15: deposit slots accept every standard interaction path
-     * (click/shift-click/number-key/double-click/offhand are all
-     * covered by not cancelling {@link InventoryClickEvent} there;
-     * drag-and-drop spread across multiple deposit slots is covered
-     * by this returning {@code true} for the whole deposit range).
-     *
-     * @param rawSlot the raw slot index touched by the drag
-     * @return {@code true} if dragging into this slot is allowed
-     */
     @Override
     public boolean isFreeDragSlot(int rawSlot) {
         return (rawSlot >= DEPOSIT_START_SLOT && rawSlot <= DEPOSIT_END_SLOT) || super.isFreeDragSlot(rawSlot);
     }
 
-    /**
-     * Repopulates the control/preview slots in place. Deliberately
-     * never touches the deposit range so items placed there survive
-     * every re-render.
-     */
     private void render() {
-        inventory.setItem(INFO_SLOT, namedItem(Material.HOPPER, "§eCara Jual", List.of(
-                "§7Taruh barang di kotak deposit (baris atas).",
-                "§7Bisa drag & drop, shift-click, atau taruh manual.",
-                "§7Klik §a§lJUAL BARANG DI SINI §7buat jual semuanya.",
-                "§7Kalau nutup menu ini, barang yang belum",
-                "§7dijual otomatis balik ke inventory lu."
-        )));
+        ItemStack info = new ItemStack(Material.HOPPER);
+        ItemMeta infoMeta = info.getItemMeta();
+        if (infoMeta != null) {
+            infoMeta.setDisplayName("§eCara Jual");
+            infoMeta.setLore(List.of(
+                    "§7Taruh barang di kotak deposit (baris atas).",
+                    "§7Bisa drag & drop, shift-click, atau taruh manual.",
+                    "§7Klik §a§lJUAL BARANG DI SINI §7buat jual semuanya.",
+                    "§7Kalau nutup menu ini, barang yang belum",
+                    "§7dijual otomatis balik ke inventory lu."
+            ));
+            info.setItemMeta(infoMeta);
+        }
+        inventory.setItem(INFO_SLOT, info);
+
         inventory.setItem(PREVIEW_SLOT, buildPreviewIcon());
-        inventory.setItem(SELL_DEPOSITED_SLOT, namedItem(Material.EMERALD_BLOCK, "§a§lJUAL BARANG DI SINI",
-                List.of("§7Jual semua barang di kotak deposit.")));
-        inventory.setItem(SELL_INVENTORY_SLOT, namedItem(Material.CHEST, "§6Sell All (Seluruh Inventory)",
-                List.of("§7Jual semua barang yang bisa", "§7dijual di inventory lu.")));
+
+        ItemStack sellDeposited = new ItemStack(Material.EMERALD_BLOCK);
+        ItemMeta sellDepMeta = sellDeposited.getItemMeta();
+        if (sellDepMeta != null) {
+            sellDepMeta.setDisplayName("§a§lJUAL BARANG DI SINI");
+            sellDepMeta.setLore(List.of("§7Jual semua barang di kotak deposit."));
+            sellDeposited.setItemMeta(sellDepMeta);
+        }
+        inventory.setItem(SELL_DEPOSITED_SLOT, sellDeposited);
+
+        ItemStack sellInventory = new ItemStack(Material.CHEST);
+        ItemMeta sellInvMeta = sellInventory.getItemMeta();
+        if (sellInvMeta != null) {
+            sellInvMeta.setDisplayName("§6Sell All (Seluruh Inventory)");
+            sellInvMeta.setLore(List.of("§7Jual semua barang yang bisa", "§7dijual di inventory lu."));
+            sellInventory.setItemMeta(sellInvMeta);
+        }
+        inventory.setItem(SELL_INVENTORY_SLOT, sellInventory);
+
         inventory.setItem(CLOSE_SLOT, guiManager.buildButtonIcon("close", "§cTutup"));
     }
 
     /**
      * Computes and displays the live total sell value of everything
-     * currently sitting in the deposit area (Revisi 15/16: real-time
-     * preview, refreshed on every click so it always reflects the
-     * current deposit contents including current inflation-adjusted prices).
+     * currently sitting in the deposit area (Revisi 15), plus a
+     * context line about the current economic state's effect on sell
+     * prices (Revisi 16).
      */
     private ItemStack buildPreviewIcon() {
         double total = 0;
@@ -117,30 +129,34 @@ public final class SellMainGui extends AbstractGui {
                 }
             }
         }
-        return namedItem(Material.GOLD_NUGGET, "§6Total Preview Harga", List.of(
-                "§7Jumlah item: §f" + itemCount,
-                "§7Estimasi total: §a" + String.format("%.2f", total)
-        ));
-    }
-
-    private ItemStack namedItem(Material material, String name, List<String> lore) {
-        ItemStack item = new ItemStack(material);
-        ItemMeta meta = item.getItemMeta();
-        if (meta != null) {
-            meta.setDisplayName(name);
-            meta.setLore(lore);
-            item.setItemMeta(meta);
+        List<String> lore = new ArrayList<>();
+        lore.add("§7Jumlah item: §f" + itemCount);
+        lore.add("§7Estimasi total: §a" + String.format("%.2f", total));
+        InflationRecord latestInflation = io.azthera.ecocore.EcoCorePlugin.getInstance().getInflationEngine().getLatestRecord();
+        if (latestInflation != null) {
+            boolean isInflation = latestInflation.inflationPercent() >= latestInflation.deflationPercent();
+            double percent = isInflation ? latestInflation.inflationPercent() : latestInflation.deflationPercent();
+            if (percent >= 0.01) {
+                lore.add(isInflation
+                        ? "§7Harga jual turun §c" + String.format("%.1f", percent) + "%§7 karena inflasi"
+                        : "§7Harga jual naik §a" + String.format("%.1f", percent) + "%§7 karena deflasi");
+            }
         }
-        return item;
+        ItemStack icon = new ItemStack(Material.GOLD_NUGGET);
+        ItemMeta meta = icon.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName("§6Total Preview Harga");
+            meta.setLore(lore);
+            icon.setItemMeta(meta);
+        }
+        return icon;
     }
 
     @Override
     public void handleClick(InventoryClickEvent event) {
         int slot = event.getRawSlot();
+
         if (slot >= DEPOSIT_START_SLOT && slot <= DEPOSIT_END_SLOT) {
-            // Revisi 15: fully free vanilla interaction in the deposit area -
-            // explicitly un-cancel in case an earlier handler already flagged
-            // this event, then refresh the live price preview.
             event.setCancelled(false);
             Bukkit.getScheduler().runTask(io.azthera.ecocore.EcoCorePlugin.getInstance(), () -> {
                 if (inventory != null) {
@@ -149,20 +165,24 @@ public final class SellMainGui extends AbstractGui {
             });
             return;
         }
+
         event.setCancelled(true);
+
         if (slot == SELL_DEPOSITED_SLOT) {
             sellDepositedItems();
             return;
         }
+
         if (slot == SELL_INVENTORY_SLOT) {
             SellConfirmGui confirmGui = new SellConfirmGui(
-                    getViewer(), sellManager, guiManager, messagesConfig, SellConfirmGui.Mode.INVENTORY, null, this);
-            guiManager.register(getViewer(), confirmGui);
+                    viewer, sellManager, guiManager, messagesConfig, SellConfirmGui.Mode.INVENTORY, null, this);
+            guiManager.register(viewer, confirmGui);
             confirmGui.open();
             return;
         }
+
         if (slot == CLOSE_SLOT) {
-            getViewer().closeInventory();
+            viewer.closeInventory();
         }
     }
 
@@ -170,12 +190,14 @@ public final class SellMainGui extends AbstractGui {
         int totalAmount = 0;
         double totalPayout = 0;
         int skipped = 0;
+
         for (int slot = DEPOSIT_START_SLOT; slot <= DEPOSIT_END_SLOT; slot++) {
             ItemStack stack = inventory.getItem(slot);
             if (stack == null || stack.getType().isAir()) {
                 continue;
             }
-            SellManager.SellResult result = sellManager.sellSingle(getViewer().getUniqueId(), stack);
+
+            SellManager.SellResult result = sellManager.sellSingle(viewer.getUniqueId(), stack);
             if (result.success()) {
                 totalAmount += result.totalAmount();
                 totalPayout += result.totalPayout();
@@ -184,19 +206,22 @@ public final class SellMainGui extends AbstractGui {
                 skipped++;
             }
         }
+
         if (totalAmount > 0) {
-            getViewer().sendMessage(messagesConfig.getWithPrefix("sell.sold",
+            viewer.sendMessage(messagesConfig.getWithPrefix("sell.sold",
                     "amount", String.valueOf(totalAmount),
                     "item", "barang",
                     "price", String.format("%.2f", totalPayout)));
-            guiManager.playSound(getViewer(), "sell");
+            guiManager.playSound(viewer, "sell");
         } else {
-            getViewer().sendMessage(messagesConfig.getWithPrefix("sell.nothing-to-sell"));
-            guiManager.playSound(getViewer(), "error");
+            viewer.sendMessage(messagesConfig.getWithPrefix("sell.nothing-to-sell"));
+            guiManager.playSound(viewer, "error");
         }
+
         if (skipped > 0) {
-            getViewer().sendMessage("§7(" + skipped + " item dilewati karena gak bisa dijual.)");
+            viewer.sendMessage("§7(" + skipped + " item dilewati karena gak bisa dijual.)");
         }
+
         inventory.setItem(PREVIEW_SLOT, buildPreviewIcon());
     }
 
@@ -207,10 +232,12 @@ public final class SellMainGui extends AbstractGui {
             if (stack == null || stack.getType().isAir()) {
                 continue;
             }
-            Map<Integer, ItemStack> leftover = getViewer().getInventory().addItem(stack);
+
+            Map<Integer, ItemStack> leftover = viewer.getInventory().addItem(stack);
             for (ItemStack over : leftover.values()) {
-                getViewer().getWorld().dropItemNaturally(getViewer().getLocation(), over);
+                viewer.getWorld().dropItemNaturally(viewer.getLocation(), over);
             }
+
             inventory.setItem(slot, null);
         }
     }

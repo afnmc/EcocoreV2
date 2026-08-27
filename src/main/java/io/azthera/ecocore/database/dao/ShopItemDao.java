@@ -162,6 +162,31 @@ public final class ShopItemDao {
         }
     }
 
+    /**
+     * Updates the Revisi 17 restock-cooldown tracking columns for an
+     * item. Deliberately separate from {@link #upsert}, which never
+     * touches these columns - a catalog YAML reload must never reset
+     * an item's in-progress cooldown.
+     *
+     * @param id the item id
+     * @param lastRestockAt epoch millis of the most recent non-admin restock
+     * @param restocksToday how many non-admin restocks landed in the current day bucket
+     * @param restockDayEpoch which day bucket restocksToday belongs to
+     * @throws SQLException if the update fails
+     */
+    public void updateRestockTracking(String id, long lastRestockAt, int restocksToday, long restockDayEpoch)
+            throws SQLException {
+        String sql = "UPDATE shop_items SET last_restock_at = ?, restocks_today = ?, restock_day_epoch = ? WHERE id = ?";
+        try (Connection connection = databaseManager.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, lastRestockAt);
+            statement.setInt(2, restocksToday);
+            statement.setLong(3, restockDayEpoch);
+            statement.setString(4, id);
+            statement.executeUpdate();
+        }
+    }
+
     private ShopItemRecord mapRow(ResultSet resultSet) throws SQLException {
         return new ShopItemRecord(
                 resultSet.getString("id"),
@@ -176,7 +201,10 @@ public final class ShopItemDao {
                 resultSet.getInt("max_stock"),
                 resultSet.getDouble("elasticity"),
                 resultSet.getBoolean("tradeable"),
-                resultSet.getLong("updated_at")
+                resultSet.getLong("updated_at"),
+                resultSet.getLong("last_restock_at"),
+                resultSet.getInt("restocks_today"),
+                resultSet.getLong("restock_day_epoch")
         );
     }
-                }
+}

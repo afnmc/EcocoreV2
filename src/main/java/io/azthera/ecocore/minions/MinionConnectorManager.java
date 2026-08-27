@@ -1,8 +1,8 @@
-// FILE: src/main/java/io/azthera/ecocore/minions/MinionConnectorManager.java
 package io.azthera.ecocore.minions;
 
 import io.azthera.ecocore.database.dao.MinionConnectionDao;
 import io.azthera.ecocore.model.MinionData;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,23 +12,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
 
-/**
- * Manages the Connector Network (Revisi 9): directed links a player
- * draws between two of their own minions, in one of two modes:
- *
- * MODE 1 - DIRECT: no {@code MinionConnectorEntity} involved,
- * fixed max range of {@link #DIRECT_MAX_DISTANCE} blocks, free,
- * cannot be upgraded.
- *
- * MODE 2 - RELAY: routed through a {@code MinionConnectorEntity}
- * placed at (or very near) the source or destination, whose range is
- * upgradeable. Mode is auto-detected purely from whether a connector
- * entity exists at either endpoint when the link is created - the
- * player never explicitly picks a mode.
- */
 public final class MinionConnectorManager {
 
-    /** Fixed, non-upgradeable max distance for a DIRECT connection (Revisi 9). */
     public static final double DIRECT_MAX_DISTANCE = 10.0;
 
     private final Logger logger;
@@ -61,11 +46,6 @@ public final class MinionConnectorManager {
         }
     }
 
-    /**
-     * Starts a connect-flow selection: the player has just clicked
-     * their intended source minion. Cara connect sama untuk semua
-     * minion (Revisi 9) - click source, then click destination.
-     */
     public void beginSelection(UUID playerUuid, long minionId) {
         pendingSourceSelection.put(playerUuid, minionId);
     }
@@ -78,17 +58,6 @@ public final class MinionConnectorManager {
         pendingSourceSelection.remove(playerUuid);
     }
 
-    /**
-     * The outcome of resolving what kind of link a proposed source/
-     * destination pair would create, computed automatically by
-     * checking for a {@code MinionConnectorEntity} at either endpoint
-     * (Revisi 9) - never chosen explicitly by the player.
-     *
-     * @param linkMode DIRECT or RELAY
-     * @param relayConnectorId the relay connector's id, or {@code null} for DIRECT
-     * @param maxDistance the max distance allowed for this specific link
-     * @param rejectionReason a player-facing rejection reason, or {@code null} if valid
-     */
     public record ResolvedLink(MinionConnectionDao.LinkMode linkMode, Long relayConnectorId,
                                 double maxDistance, String rejectionReason) {
         public boolean isValid() {
@@ -96,21 +65,10 @@ public final class MinionConnectorManager {
         }
     }
 
-    /**
-     * Resolves and validates a proposed connection between two
-     * minions, auto-detecting DIRECT vs RELAY mode by checking
-     * whether a {@code MinionConnectorEntity} sits at either the
-     * source or the destination position (Revisi 9).
-     *
-     * @param source the proposed source minion
-     * @param destination the proposed destination minion
-     * @return the resolved link outcome, including a rejection reason if invalid
-     */
     public ResolvedLink resolveLink(MinionData source, MinionData destination) {
         if (source.getId() == destination.getId()) {
             return new ResolvedLink(null, null, 0, "Gak bisa connect minion ke dirinya sendiri.");
         }
-        // Revisi 19: connector antar minions milik owner berbeda TIDAK BOLEH.
         if (!source.getOwnerUuid().equals(destination.getOwnerUuid())) {
             return new ResolvedLink(null, null, 0,
                     "Kedua minion harus punya pemilik yang sama - gak bisa connect ke minion punya player lain.");
@@ -200,12 +158,6 @@ public final class MinionConnectorManager {
         }
     }
 
-    /**
-     * Removes every connection routed through a relay connector
-     * entity, called when that connector is removed from the world.
-     *
-     * @param connectorId the removed connector's database id
-     */
     public void removeAllUsingRelay(long connectorId) {
         try {
             connectionDao.deleteAllUsingRelay(connectorId);

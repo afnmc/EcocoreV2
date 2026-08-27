@@ -1,4 +1,3 @@
-// FILE: src/main/java/io/azthera/ecocore/claim/LandsHook.java
 package io.azthera.ecocore.claim;
 
 import org.bukkit.Bukkit;
@@ -9,15 +8,6 @@ import java.lang.reflect.Method;
 import java.util.UUID;
 import java.util.logging.Logger;
 
-/**
- * Reflective integration with the Lands plugin (Revisi 19). Lands
- * exposes its API singleton via {@code
- * me.angeschossen.lands.api.LandsIntegration}, whose {@code
- * getAreaByLoc(Location)} returns the claimed {@code Area} at a
- * location (or {@code null} if unclaimed); an {@code Area}'s {@code
- * getLand()} returns the owning {@code Land}, whose {@code
- * isOwner(UUID)} / {@code isTrusted(UUID)} determine membership.
- */
 public final class LandsHook implements ClaimHook {
 
     private final Logger logger;
@@ -46,7 +36,7 @@ public final class LandsHook implements ClaimHook {
             }
             Class<?> landsIntegrationClass = Class.forName("me.angeschossen.lands.api.LandsIntegration");
             Class<?> javaPluginClass = Class.forName("org.bukkit.plugin.java.JavaPlugin");
-            java.lang.reflect.Constructor?> constructor = landsIntegrationClass.getConstructor(javaPluginClass);
+            java.lang.reflect.Constructor<?> constructor = landsIntegrationClass.getConstructor(javaPluginClass);
             landsIntegrationInstance = constructor.newInstance((Object) io.azthera.ecocore.EcoCorePlugin.getInstance());
 
             getAreaByLocMethod = landsIntegrationClass.getMethod("getAreaByLoc", Location.class);
@@ -75,7 +65,7 @@ public final class LandsHook implements ClaimHook {
         try {
             Object area = getAreaByLocMethod.invoke(landsIntegrationInstance, location);
             if (area == null) {
-                return true; // unclaimed ground
+                return true;
             }
             Object land = getLandMethod.invoke(area);
             if (land == null) {

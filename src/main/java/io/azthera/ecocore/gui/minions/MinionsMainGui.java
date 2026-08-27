@@ -97,7 +97,7 @@ public final class MinionsMainGui extends AbstractGui {
                     "§7Energi: §f" + data.getEnergy() + "/" + minionsConfig.getBaseEnergy(),
                     "§7Fuel: " + (fueled ? "§a§lAktif" : "§c§lHabis"),
                     "§7Radius: §f" + data.getRadius(),
-                    "§7Storage: §f" + data.getStorageSlots() + " slot",
+                    "\u00a77Storage: \u00a7f" + data.getStoragePageCount() + " halaman",
                     "§8Klik: Upgrade §8| Shift-klik: Storage"
             ));
             icon.setItemMeta(meta);
@@ -128,9 +128,24 @@ public final class MinionsMainGui extends AbstractGui {
         }
 
         if (event.isShiftClick()) {
-            MinionStorageGui storageGui = new MinionStorageGui(viewer, minionManager, guiManager, minionId, this);
-            guiManager.register(viewer, storageGui);
-            storageGui.open();
+            io.azthera.ecocore.model.MinionData data = minionManager.getMinion(minionId);
+            if (data == null) {
+                return;
+            }
+            io.azthera.ecocore.model.MinionType minionType = data.getType();
+            boolean hasZones = minionType == io.azthera.ecocore.model.MinionType.SMELTER
+                    || minionType == io.azthera.ecocore.model.MinionType.LUMBERJACK
+                    || minionType == io.azthera.ecocore.model.MinionType.FARMER;
+            if (hasZones) {
+                MinionStorageSelectGui zoneGui = new MinionStorageSelectGui(viewer, minionManager, minionId, this);
+                guiManager.register(viewer, zoneGui);
+                zoneGui.open();
+            } else {
+                MinionStorageSelectionGui pageGui = new MinionStorageSelectionGui(
+                        viewer, minionManager, io.azthera.ecocore.EcoCorePlugin.getInstance().getMinionUpgradeManager(), minionId);
+                guiManager.register(viewer, pageGui);
+                pageGui.open();
+            }
             return;
         }
 

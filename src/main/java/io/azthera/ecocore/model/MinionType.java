@@ -1,4 +1,3 @@
-// FILE: src/main/java/io/azthera/ecocore/model/MinionType.java
 package io.azthera.ecocore.model;
 
 public enum MinionType {

@@ -1,16 +1,16 @@
-# FILE: src/main/resources/minions.yml
-# ================================================================
+# ==========================================================
 # EcoCore - Konfigurasi Minion
 # Semua nilai di sini bisa diubah tanpa perlu update plugin.
 # Material yang tidak dikenal akan dilewati dengan warning di
 # console, bukan bikin server crash (Revisi 12/20/21).
-# ================================================================
+# ==========================================================
 
 global:
   max-level: 50
   # Revisi 11: jumlah maksimal storage page (54 slot per page) yang
   # bisa di-upgrade untuk satu minion.
   max-storage-pages: 10
+  max-minions-per-player: 20
   base-radius: 6
   radius-per-upgrade: 2
   max-radius-upgrades: 5
@@ -19,10 +19,7 @@ global:
   min-speed-ticks: 4
   base-energy: 1000
   energy-drain-per-action: 1
-  fuel-types:
-    - COAL
-    - COAL_BLOCK
-    - LAVA_BUCKET
+  fuel-types: [ "COAL", "COAL_BLOCK", "LAVA_BUCKET" ]
   auto-repair-enabled: true
 
 # ================================================================
@@ -153,6 +150,8 @@ smelter:
 # sapling, chance drop apple/stick.
 # ================================================================
 lumberjack:
+  # Revisi 22: chance minion tebang daun jadi sapling replant stock.
+  sapling-harvest-chance: 0.15
   tree-species:
     OAK:
       log: OAK_LOG
@@ -212,27 +211,19 @@ fisherman:
   rarity:
     COMMON:
       weight: 70
-      pool:
-        - COD
-        - SALMON
+      pool: [ COD, SALMON ]
     UNCOMMON:
       weight: 20
-      pool:
-        - TROPICAL_FISH
-        - PUFFERFISH
+      pool: [ TROPICAL_FISH, PUFFERFISH ]
     RARE:
       weight: 8
-      pool:
-        - NAUTILUS_SHELL
+      pool: [ NAUTILUS_SHELL ]
     EPIC:
       weight: 1.8
-      pool:
-        - HEART_OF_THE_SEA
+      pool: [ HEART_OF_THE_SEA ]
     LEGENDARY:
       weight: 0.2
-      pool:
-        - DIAMOND
-        - EMERALD
+      pool: [ DIAMOND, EMERALD ]
 
 # ================================================================
 # Revisi 9: Connector Network - direct connection fixed 10 block
@@ -248,65 +239,78 @@ connector:
   upgrade-cost-growth: 1.4
 
 # ================================================================
+# Biaya dasar & pertumbuhan biaya upgrade minion (Revisi 20/22).
+# ================================================================
+upgrades:
+  storage-page-base-cost: 500.0
+  radius-base-cost: 400.0
+  speed-base-cost: 500.0
+  cost-growth-per-level: 1.35
+
+# ================================================================
 # Tampilan & harga beli tiap tipe minion.
 # ================================================================
 minions:
   miner:
-    display-name: "§7Miner"
-    icon: IRON_PICKAXE
+    display-name: "&7Miner Minion"
+    icon: "IRON_PICKAXE"
     base-efficiency: 1.0
   quarry:
-    display-name: "§7Quarry"
-    icon: STONE_PICKAXE
-    base-efficiency: 1.0
+    display-name: "&7Quarry Minion"
+    icon: "DIAMOND_PICKAXE"
+    base-efficiency: 1.3
   lumberjack:
-    display-name: "§2Lumberjack"
-    icon: IRON_AXE
+    display-name: "&2Lumberjack Minion"
+    icon: "IRON_AXE"
     base-efficiency: 1.0
   farmer:
-    display-name: "§aFarmer"
-    icon: IRON_HOE
+    display-name: "&aFarmer Minion"
+    icon: "IRON_HOE"
     base-efficiency: 1.0
   fisherman:
-    display-name: "§bFisherman"
-    icon: FISHING_ROD
-    base-efficiency: 1.0
+    display-name: "&bFisherman Minion"
+    icon: "FISHING_ROD"
+    base-efficiency: 0.8
   collector:
-    display-name: "§eCollector"
-    icon: HOPPER
-    base-efficiency: 1.0
+    display-name: "&eCollector Minion"
+    icon: "HOPPER"
+    base-efficiency: 1.2
   mob_killer:
-    display-name: "§cMob Killer"
-    icon: IRON_SWORD
-    base-efficiency: 1.0
+    display-name: "&cMob Killer Minion"
+    icon: "IRON_SWORD"
+    base-efficiency: 0.9
   smelter:
-    display-name: "§6Smelter"
-    icon: FURNACE
+    display-name: "&6Smelter Minion"
+    icon: "FURNACE"
     base-efficiency: 1.0
   sell:
-    display-name: "§2Sell"
-    icon: EMERALD
+    display-name: "&2Sell Minion"
+    icon: "EMERALD"
     base-efficiency: 1.0
   chest:
-    display-name: "§eChest"
-    icon: CHEST
+    display-name: "&6Chest Minion"
+    icon: "BARREL"
     base-efficiency: 1.0
 
 purchase:
   prices:
     miner: 500.0
-    quarry: 750.0
-    lumberjack: 500.0
-    farmer: 450.0
-    fisherman: 600.0
-    collector: 300.0
-    mob_killer: 800.0
-    smelter: 650.0
-    sell: 400.0
+    quarry: 700.0
+    lumberjack: 450.0
+    farmer: 400.0
+    fisherman: 400.0
+    collector: 350.0
+    mob_killer: 600.0
+    smelter: 500.0
+    sell: 550.0
     chest: 200.0
 
 ai:
+  # Sudah gak dipakai lagi untuk pathfinding - minion sekarang selalu
+  # diam di tempat dan kerja instan dalam radius-nya, gak ada lagi
+  # jalan/garis pandang. Dibiarin di sini biar gak error kalau ada
+  # tooling lama yang baca ini.
   obstacle-avoidance-enabled: true
-  target-selection-strategy: NEAREST_HIGHEST_VALUE
+  target-selection-strategy: "NEAREST_HIGHEST_VALUE"
   pathfinding-max-nodes: 200
   pathfinding-recalculate-ticks: 40

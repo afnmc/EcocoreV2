@@ -1,4 +1,3 @@
-// FILE: src/main/java/io/azthera/ecocore/commands/InflationCommand.java
 package io.azthera.ecocore.commands;
 
 import io.azthera.ecocore.config.InflationConfig;
@@ -13,17 +12,11 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
 import java.sql.SQLException;
-import java.util.List;
 
 /**
  * {@code /inflation} - prints the server's current macro-economic
  * state (Revisi 16): status, inflation/deflation percent, the effect
- * on buy/sell prices, total money supply, and average balance. Every
- * line goes through {@code messages.yml} where a translation exists;
- * the dynamic economy summary block itself is built via {@link
- * PriceDisplayHelper#buildEconomySummaryLines} since its content
- * (which direction, which percent) is inherently data-driven rather
- * than a fixed template.
+ * on buy/sell prices, total money supply, and average balance.
  */
 public final class InflationCommand implements CommandExecutor {
 

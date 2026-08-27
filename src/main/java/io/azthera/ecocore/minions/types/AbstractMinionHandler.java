@@ -1,4 +1,3 @@
-// FILE: src/main/java/io/azthera/ecocore/minions/types/AbstractMinionHandler.java
 package io.azthera.ecocore.minions.types;
 
 import io.azthera.ecocore.config.MinionsConfig;
@@ -16,18 +15,8 @@ import java.util.Set;
  * Base implementation of {@link MinionHandler} that delegates every
  * config-driven list/map to a live {@link MinionsConfig} reference
  * rather than a snapshot captured at construction time (Revisi 12).
- * This means a {@code /ecocore reload} that re-parses {@code
- * minions.yml} takes effect immediately for every handler without
- * needing to reconstruct the handler objects themselves - a fresh
- * call to {@link #getTargetMaterials()} etc. always reflects
- * whatever {@link MinionsConfig} instance is currently wired in via
- * {@link io.azthera.ecocore.EcoCorePlugin#getMinionsConfig()}.
- *
- * Only the parts of a handler that are NOT reasonably
- * config-driven (its {@link MinionType}, its {@link
- * MinionProcessingType}, and its entity-interaction/seed/plant
- * mappings, which are structural rather than tunable) stay as
- * constructor-supplied fixed values.
+ * A {@code /ecocore reload} that re-parses {@code minions.yml} takes
+ * effect immediately for every handler.
  */
 public abstract class AbstractMinionHandler implements MinionHandler {
 
@@ -37,15 +26,6 @@ public abstract class AbstractMinionHandler implements MinionHandler {
     private final Material seedItem;
     private final Material plantResult;
 
-    /**
-     * Creates a minion handler.
-     *
-     * @param type the minion type this handler implements
-     * @param processingType how this minion type performs its work
-     * @param entityResults target entity type to output material mapping (structural, not yml-driven)
-     * @param seedItem consumed seed/input material, may be {@code null}
-     * @param plantResult planting cycle output material, may be {@code null}
-     */
     protected AbstractMinionHandler(MinionType type, MinionProcessingType processingType,
                                      Map<EntityType, Material> entityResults,
                                      Material seedItem, Material plantResult) {
@@ -56,11 +36,6 @@ public abstract class AbstractMinionHandler implements MinionHandler {
         this.plantResult = plantResult;
     }
 
-    /**
-     * Resolves the live {@link MinionsConfig} instance. Package-visible
-     * indirection point so a future test harness could substitute a
-     * fixed config without touching every concrete handler.
-     */
     private MinionsConfig config() {
         return io.azthera.ecocore.EcoCorePlugin.getInstance().getMinionsConfig();
     }
@@ -85,11 +60,6 @@ public abstract class AbstractMinionHandler implements MinionHandler {
         return config().getEnergyDrainPerAction();
     }
 
-    /**
-     * Revisi 12: reads live from {@code minions.yml targets.} -
-     * e.g. adding BEDROCK there makes the Miner able to mine bedrock
-     * with no code change, and removing it takes that ability away.
-     */
     @Override
     public Set<Material> getTargetMaterials() {
         return config().getTargetBlocksFor(type);
@@ -97,11 +67,6 @@ public abstract class AbstractMinionHandler implements MinionHandler {
 
     @Override
     public Material resultFor(Material target) {
-        // For SMELTER, "target" is the smelting input and the smelting
-        // recipe map is the authority; for block-break types, breaking a
-        // configured target block simply yields itself (no transformation
-        // table needed - Revisi 12's targets list already declares exactly
-        // what's mineable, and mined blocks drop as themselves).
         if (type == MinionType.SMELTER) {
             return config().getSmeltingRecipes().getOrDefault(target, target);
         }

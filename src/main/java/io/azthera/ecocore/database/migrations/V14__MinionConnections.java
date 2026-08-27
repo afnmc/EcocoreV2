@@ -1,19 +1,9 @@
-// FILE: src/main/java/io/azthera/ecocore/database/migrations/V14__MinionConnections.java
 package io.azthera.ecocore.database.migrations;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-/**
- * Creates the new {@code minion_link_connections} table for Revisi
- * 9's rebuilt connector system, replacing {@code minion_connections}
- * (kept intact for backward compatibility / historical data, but no
- * longer written to). Unlike the old table, each row also records
- * whether the link is DIRECT (max 10 blocks, free) or RELAY (routed
- * through a {@code minion_connector_entities} row, upgradeable
- * range), and the relay connector id when applicable.
- */
 public final class V14__MinionConnections implements Migration {
 
     @Override

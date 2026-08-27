@@ -29,6 +29,13 @@ restock-decision:
   random-restock-chance-percent: 5.0
   daily-restock-enabled: true
   weekly-restock-enabled: true
+  # Revisi 17: throttle restock supaya gak restock tiap menit. Item
+  # yang baru aja di-restock harus tunggu cooldown ini sebelum bisa
+  # di-restock lagi (kecuali EMERGENCY yang bypass cooldown tapi
+  # tetap kena batas harian).
+  min-restock-interval-hours: 1.0
+  max-restock-per-item-per-day: 6
+  restock-cooldown-hours: 2.0
 
 trend-analysis:
   daily-window-hours: 24

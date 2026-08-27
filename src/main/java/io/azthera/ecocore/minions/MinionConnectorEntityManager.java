@@ -1,4 +1,3 @@
-// FILE: src/main/java/io/azthera/ecocore/minions/MinionConnectorEntityManager.java
 package io.azthera.ecocore.minions;
 
 import io.azthera.ecocore.EcoCorePlugin;
@@ -21,12 +20,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
-/**
- * Manages {@code MinionConnectorEntity} instances (Revisi 9): standalone
- * placeable relay points that are NOT minions themselves, used to extend
- * a connection's reachable distance beyond the fixed 10-block direct
- * range. Visually represented as a small floating ArmorStand marker.
- */
 public final class MinionConnectorEntityManager {
 
     private static final String CONNECTOR_ID_KEY = "minion_connector_id";
@@ -35,9 +28,6 @@ public final class MinionConnectorEntityManager {
     private final MinionConnectorEntityDao connectorEntityDao;
     private final MinionsConfig minionsConfig;
 
-    /**
-     * A live, in-memory connector entity.
-     */
     public static final class ActiveConnector {
         private final long id;
         private final UUID ownerUuid;
@@ -153,13 +143,6 @@ public final class MinionConnectorEntityManager {
         active.entity = entity;
     }
 
-    /**
-     * Places a new connector entity at the given location.
-     *
-     * @param player the placing player
-     * @param location the placement location
-     * @return the newly placed connector, or {@code null} if placement failed
-     */
     public ActiveConnector place(Player player, Location location) {
         try {
             long id = connectorEntityDao.insert(player.getUniqueId(),
@@ -190,22 +173,13 @@ public final class MinionConnectorEntityManager {
         marker.setInvulnerable(true);
         marker.setPersistent(true);
         marker.setCustomNameVisible(true);
-        marker.setCustomName("§bMinion Connector");
+        marker.setCustomName("\u00a7bMinion Connector");
         marker.setSmall(true);
         NamespacedKey key = new NamespacedKey(EcoCorePlugin.getInstance(), CONNECTOR_ID_KEY);
         marker.getPersistentDataContainer().set(key, PersistentDataType.LONG, connectorId);
         return marker;
     }
 
-    /**
-     * Whether a connector entity exists at (or very near, within one
-     * block) the given location - used by
-     * {@code MinionConnectorManager} to auto-detect direct-vs-relay
-     * mode when the player clicks source/destination minions.
-     *
-     * @param location the location to check
-     * @return the connector at that location, or {@code null} if none
-     */
     public ActiveConnector findConnectorNear(Location location) {
         if (location.getWorld() == null) {
             return null;
@@ -218,7 +192,7 @@ public final class MinionConnectorEntityManager {
             double dx = connector.x - location.getX();
             double dy = connector.y - location.getY();
             double dz = connector.z - location.getZ();
-            if ((dx * dx + dy * dy + dz * dz) 4.0) {
+            if ((dx * dx + dy * dy + dz * dz) <= 4.0) {
                 return connector;
             }
         }
@@ -229,20 +203,13 @@ public final class MinionConnectorEntityManager {
         return activeConnectors.get(id);
     }
 
-    /**
-     * The max distance a relay connection may span through this
-     * connector, based on its current range upgrade level.
-     *
-     * @param connector the connector entity
-     * @return the max relay distance in blocks
-     */
     public double getMaxRelayDistance(ActiveConnector connector) {
         return minionsConfig.getConnectorBaseRange()
                 + (connector.rangeLevel * minionsConfig.getConnectorRangePerUpgrade());
     }
 
     public boolean canUpgradeRange(ActiveConnector connector) {
-        return connector.rangeLevel .getConnectorMaxRangeUpgrades();
+        return connector.rangeLevel < minionsConfig.getConnectorMaxRangeUpgrades();
     }
 
     public double computeUpgradeCost(ActiveConnector connector) {
@@ -250,12 +217,6 @@ public final class MinionConnectorEntityManager {
                 * Math.pow(minionsConfig.getConnectorUpgradeCostGrowth(), connector.rangeLevel);
     }
 
-    /**
-     * Applies a range upgrade to a connector, assuming payment has
-     * already been validated/charged by the caller.
-     *
-     * @param connector the connector to upgrade
-     */
     public void applyRangeUpgrade(ActiveConnector connector) {
         connector.rangeLevel++;
         try {

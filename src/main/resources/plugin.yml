@@ -5,7 +5,7 @@ api-version: '1.21'
 author: Afn
 description: AI-driven economy engine for the Azthera network
 website: https://azthera.io
-softdepend: [PlaceholderAPI, Vault, ItemsAdder, Oraxen, MMOItems, Slimefun]
+softdepend: [PlaceholderAPI, Vault, ItemsAdder, Oraxen, MMOItems, Slimefun, GriefPrevention, WorldGuard, Lands]
 load: POSTWORLD
 
 commands:

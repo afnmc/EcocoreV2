@@ -15,7 +15,7 @@ import java.util.Optional;
 /**
  * Finds the nearest matching block or entity for a STATIONARY
  * minion's next action, either within a full 360-degree radius
- * (ARENA mode) or along a single straight line in its locked facing
+ * (ARENA mode) or along a directional slab in its locked facing
  * direction (FACING mode - Revisi 1/2). Minions never move from
  * where they were placed and never use pathfinding of any kind.
  *
@@ -27,15 +27,6 @@ import java.util.Optional;
  */
 public final class MinionTargetSelector {
 
-    /**
-     * Finds the nearest block within a 360-degree radius matching the
-     * handler's target materials (ARENA mode).
-     *
-     * @param origin the minion's (fixed) location
-     * @param radius the effective work radius to search within
-     * @param handler the minion's handler, providing the target material set
-     * @return the nearest matching block, or empty if none found
-     */
     public Optional<Block> findNearestBlockInArena(Location origin, int radius, MinionHandler handler) {
         if (handler.getTargetMaterials().isEmpty() || origin.getWorld() == null) {
             return Optional.empty();
@@ -66,17 +57,9 @@ public final class MinionTargetSelector {
     /**
      * Finds the nearest matching block within a rectangular slab
      * extending outward from the minion in its locked facing
-     * direction (FACING mode - Revisi 1/2), rather than scanning a
-     * full sphere. The slab is {@code radius} blocks deep along the
-     * facing axis and {@code radius} blocks wide/tall perpendicular
-     * to it, so a Miner facing east tunnels a wide east-facing shaft
-     * instead of a single one-block-wide line.
-     *
-     * @param origin the minion's (fixed) location
-     * @param facing the locked cardinal direction to search in front of
-     * @param radius how deep/wide the search slab extends
-     * @param handler the minion's handler, providing the target material set
-     * @return the nearest matching block in front of the minion, or empty if none found
+     * direction (FACING mode - Revisi 1/2), rather than a single
+     * one-block-wide line, so a Miner facing east tunnels a wide
+     * east-facing shaft instead of a pencil-thin line.
      */
     public Optional<Block> findNearestBlockInFacingSlab(Location origin, BlockFace facing, int radius,
                                                           MinionHandler handler) {
@@ -110,15 +93,6 @@ public final class MinionTargetSelector {
         return Optional.ofNullable(nearest);
     }
 
-    /**
-     * Finds the nearest living entity within a 360-degree radius
-     * matching the handler's target entity types (ARENA mode).
-     *
-     * @param origin the minion's (fixed) location
-     * @param radius the effective work radius to search within
-     * @param handler the minion's handler, providing the target entity type set
-     * @return the selected entity, or empty if none found
-     */
     public Optional<LivingEntity> findBestEntityInArena(Location origin, int radius, MinionHandler handler) {
         if (handler.getTargetEntities().isEmpty() || origin.getWorld() == null) {
             return Optional.empty();
@@ -136,17 +110,6 @@ public final class MinionTargetSelector {
                 .map(entity -> (LivingEntity) entity);
     }
 
-    /**
-     * Finds the nearest living entity within a facing-direction slab
-     * (FACING mode), using the same slab shape as
-     * {@link #findNearestBlockInFacingSlab}.
-     *
-     * @param origin the minion's (fixed) location
-     * @param facing the locked cardinal direction to search in front of
-     * @param radius how deep/wide the search slab extends
-     * @param handler the minion's handler, providing the target entity type set
-     * @return the selected entity, or empty if none found
-     */
     public Optional<LivingEntity> findBestEntityInFacingSlab(Location origin, BlockFace facing, int radius,
                                                                MinionHandler handler) {
         if (handler.getTargetEntities().isEmpty() || origin.getWorld() == null) {

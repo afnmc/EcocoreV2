@@ -1,46 +1,56 @@
-# FILE: src/main/resources/shop.yml
 # ==========================================================
-# EcoCore - Konfigurasi Shop
+# EcoCore - Shop Configuration
 # ==========================================================
-
 gui:
   rows: 6
-  title: "&8Shop"
+  title: "&8&lEcoCore &7» &fShop"
   items-per-page: 45
 
 categories:
   - id: "blocks"
-    display-name: "&7Blocks"
-    icon: STONE
+    display-name: "&aBlocks"
+    icon: "GRASS_BLOCK"
     slot: 10
   - id: "ores"
-    display-name: "&bOres & Ingots"
-    icon: DIAMOND_ORE
+    display-name: "&7Ores & Minerals"
+    icon: "IRON_ORE"
     slot: 11
   - id: "food"
-    display-name: "&aFood"
-    icon: BREAD
+    display-name: "&6Food"
+    icon: "COOKED_BEEF"
     slot: 12
   - id: "farming"
     display-name: "&2Farming"
-    icon: WHEAT
+    icon: "WHEAT"
     slot: 13
-  - id: "redstone"
-    display-name: "&cRedstone"
-    icon: REDSTONE
+  - id: "mob-drops"
+    display-name: "&cMob Drops"
+    icon: "ROTTEN_FLESH"
     slot: 14
-  - id: "tools"
-    display-name: "&eTools & Weapons"
-    icon: DIAMOND_PICKAXE
+  - id: "fishing"
+    display-name: "&bFishing"
+    icon: "FISHING_ROD"
     slot: 15
-  - id: "combat"
-    display-name: "&4Combat"
-    icon: DIAMOND_SWORD
+  - id: "wood"
+    display-name: "&6Wood"
+    icon: "OAK_LOG"
     slot: 16
-  - id: "misc"
-    display-name: "&fMisc"
-    icon: CHEST
+  - id: "redstone"
+    display-name: "&4Redstone"
+    icon: "REDSTONE"
     slot: 19
+  - id: "building"
+    display-name: "&fBuilding"
+    icon: "BRICKS"
+    slot: 20
+  - id: "brewing"
+    display-name: "&5Brewing"
+    icon: "BREWING_STAND"
+    slot: 21
+  - id: "misc"
+    display-name: "&7Misc"
+    icon: "CHEST"
+    slot: 22
 
 features:
   search-enabled: true
@@ -53,18 +63,18 @@ features:
   stock-indicator-enabled: true
   inflation-indicator-enabled: true
   price-graph-enabled: true
-  price-graph-periods:
-    - "1h"
-    - "24h"
-    - "7d"
+  price-graph-periods: [ "24h", "7d", "30d", "90d" ]
 
 buying:
   require-confirmation-above: 1000.0
   buy-max-enabled: true
-  buy-max-cap: 6400
+  buy-max-cap: 640
   sell-out-block-purchase: true
 
 stock:
-  default-max-stock: 6400
+  # Diturunin dari 6400 -> 640 biar perubahan stock jelas keliatan
+  # tiap kali ada yang beli/jual. Barang langka override ini lewat
+  # max-stock per item di shop-items.yml.
+  default-max-stock: 640
   low-stock-threshold-percent: 20
   critical-stock-threshold-percent: 5

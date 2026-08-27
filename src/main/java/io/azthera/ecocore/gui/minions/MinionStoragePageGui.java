@@ -1,4 +1,3 @@
-// FILE: src/main/java/io/azthera/ecocore/gui/minions/MinionStoragePageGui.java
 package io.azthera.ecocore.gui.minions;
 
 import io.azthera.ecocore.gui.AbstractGui;
@@ -11,11 +10,6 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 
 import java.util.List;
 
-/**
- * A single 54-slot storage page's raw contents, directly editable by
- * the player (Revisi 11). Changes write straight back into the live
- * {@link MinionStorage} object shared with {@code MinionAiController}.
- */
 public final class MinionStoragePageGui extends AbstractGui {
 
     private final MinionManager minionManager;
@@ -33,26 +27,21 @@ public final class MinionStoragePageGui extends AbstractGui {
     public void build() {
         List<MinionStorage> pages = minionManager.getMinionPages(minionId);
         if (pages == null || pageIndex >= pages.size()) {
-            inventory = Bukkit.createInventory(this, 54, "§8Storage tidak ditemukan");
+            inventory = Bukkit.createInventory(this, 54, "\u00a78Storage tidak ditemukan");
             return;
         }
         MinionStorage page = pages.get(pageIndex);
-        inventory = Bukkit.createInventory(this, 54, "§8Storage " + (pageIndex + 1));
+        inventory = Bukkit.createInventory(this, 54, "\u00a78Storage " + (pageIndex + 1));
         inventory.setContents(page.getContents().clone());
     }
 
     @Override
     public void handleClick(InventoryClickEvent event) {
-        // Free interaction within the storage page itself - only clicks that
-        // would move items out into the player's own inventory or vice versa
-        // need no special handling since both sides are ordinary slots here.
-        // Nothing to cancel; vanilla click behavior is correct for a plain
-        // player-editable container.
+        // Free interaction within the storage page itself.
     }
 
     @Override
     public boolean isFreeDragSlot(int rawSlot) {
-        // The whole storage page allows free drag placement, plus the player's own inventory.
         return true;
     }
 
@@ -63,9 +52,8 @@ public final class MinionStoragePageGui extends AbstractGui {
             return;
         }
         MinionStorage page = pages.get(pageIndex);
-        page.getContents();
         var contents = inventory.getContents();
-        for (int i = 0; i .min(contents.length, MinionStorage.SLOTS_PER_PAGE); i++) {
+        for (int i = 0; i < Math.min(contents.length, MinionStorage.SLOTS_PER_PAGE); i++) {
             page.setSlot(i, contents[i]);
         }
     }

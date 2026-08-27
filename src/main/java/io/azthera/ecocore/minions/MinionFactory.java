@@ -1,4 +1,3 @@
-// FILE: src/main/java/io/azthera/ecocore/minions/MinionFactory.java
 package io.azthera.ecocore.minions;
 
 import io.azthera.ecocore.config.MinionsConfig;
@@ -17,21 +16,12 @@ public final class MinionFactory {
 
     private final MinionsConfig minionsConfig;
 
-    /**
-     * Creates a minion factory.
-     *
-     * @param minionsConfig resolved minions.yml configuration (base stats)
-     */
     public MinionFactory(MinionsConfig minionsConfig) {
         this.minionsConfig = minionsConfig;
     }
 
     /**
-     * Builds the initial persistent data for a newly placed minion at
-     * level 1 with full starting energy, no fuel, empty storage, and
-     * no entity uuid yet (assigned once the caller actually spawns
-     * its visual entity). The returned instance has id {@code -1}
-     * until persisted by the caller.
+     * Builds the initial persistent data for a newly placed minion.
      *
      * @param ownerUuid the placing player's uuid
      * @param type the minion type being placed

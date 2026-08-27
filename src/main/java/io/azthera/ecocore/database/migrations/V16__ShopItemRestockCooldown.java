@@ -1,4 +1,3 @@
-// FILE: src/main/java/io/azthera/ecocore/database/migrations/V16__ShopItemRestockCooldown.java
 package io.azthera.ecocore.database.migrations;
 
 import java.sql.Connection;
@@ -7,15 +6,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-/**
- * Adds restock-cooldown tracking columns to {@code shop_items}
- * (Revisi 17): {@code last_restock_at} (epoch millis of the most
- * recent non-admin restock), {@code restocks_today} (count of
- * restocks applied within the current day window), and {@code
- * restock_day_epoch} (which day-bucket {@code restocks_today} is
- * counting for, so the counter resets cleanly across day
- * boundaries without a separate scheduled reset job).
- */
 public final class V16__ShopItemRestockCooldown implements Migration {
 
     @Override

@@ -1,53 +1,27 @@
-# FILE: src/main/resources/night-market.yml
 # ==========================================================
-# EcoCore - Konfigurasi Night Market
+# EcoCore - Night Market Configuration
+# Shop terpisah dari shop-items.yml, isinya barang mahal &
+# langka. Gak restock sampai rotasi berikutnya - habis ya
+# habis, tunggu jadwal rotasi.
 # ==========================================================
-
 rotation:
   interval-hours: 6
   slots: 5
   stock-per-item: 5
   price-multiplier: 1.4
 
-# Revisi 13: pool item Night Market lengkap - item langka/OP dengan
-# harga tinggi, tidak restock sampai rotasi berikutnya.
 pool:
-  netherite_ingot_offer:
-    material: NETHERITE_INGOT
-    base-price: 900.0
-  enchanted_golden_apple_offer:
-    material: ENCHANTED_GOLDEN_APPLE
-    base-price: 500.0
-  elytra_offer:
-    material: ELYTRA
-    base-price: 1200.0
-  totem_of_undying_offer:
-    material: TOTEM_OF_UNDYING
-    base-price: 600.0
-  trident_offer:
-    material: TRIDENT
-    base-price: 400.0
-  diamond_block_offer:
-    material: DIAMOND_BLOCK
-    base-price: 1000.0
-  netherite_block_offer:
-    material: NETHERITE_BLOCK
-    base-price: 8000.0
-  dragon_egg_offer:
-    material: DRAGON_EGG
-    base-price: 5000.0
-  heart_of_the_sea_offer:
-    material: HEART_OF_THE_SEA
-    base-price: 350.0
-  nether_star_offer:
-    material: NETHER_STAR
-    base-price: 700.0
-  saddle_offer:
-    material: SADDLE
-    base-price: 80.0
-  music_disc_pigstep_offer:
-    material: MUSIC_DISC_PIGSTEP
-    base-price: 250.0
-  turtle_helmet_offer:
-    material: TURTLE_HELMET
-    base-price: 120.0
+  netherite_ingot: { material: NETHERITE_INGOT, base-price: 450.0 }
+  totem_of_undying: { material: TOTEM_OF_UNDYING, base-price: 320.0 }
+  elytra: { material: ELYTRA, base-price: 480.0 }
+  nether_star: { material: NETHER_STAR, base-price: 380.0 }
+  dragon_breath: { material: DRAGON_BREATH, base-price: 55.0 }
+  shulker_shell: { material: SHULKER_SHELL, base-price: 85.0 }
+  wither_skeleton_skull: { material: WITHER_SKELETON_SKULL, base-price: 140.0 }
+  heart_of_the_sea: { material: HEART_OF_THE_SEA, base-price: 190.0 }
+  enchanted_golden_apple: { material: ENCHANTED_GOLDEN_APPLE, base-price: 260.0 }
+  music_disc_pigstep: { material: MUSIC_DISC_PIGSTEP, base-price: 90.0 }
+  saddle: { material: SADDLE, base-price: 45.0 }
+  name_tag: { material: NAME_TAG, base-price: 35.0 }
+  end_crystal: { material: END_CRYSTAL, base-price: 120.0 }
+  conduit: { material: CONDUIT, base-price: 150.0 }

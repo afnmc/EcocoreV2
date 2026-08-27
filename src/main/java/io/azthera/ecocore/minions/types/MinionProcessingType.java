@@ -1,10 +1,9 @@
-// FILE: src/main/java/io/azthera/ecocore/minions/types/MinionProcessingType.java
 package io.azthera.ecocore.minions.types;
 
 /**
- * Categorizes how a minion type performs its work, so {@code
- * MinionAiController} knows which behavior branch to run for a given
- * {@link io.azthera.ecocore.model.MinionType}.
+ * Categorizes how a minion type performs its work, so
+ * {@code MinionAiController} knows which behavior branch to run for
+ * a given {@link io.azthera.ecocore.model.MinionType}.
  */
 public enum MinionProcessingType {
 
@@ -19,8 +18,9 @@ public enum MinionProcessingType {
 
     /**
      * Picks up nearby dropped item entities within radius (Collector).
-     * Revisi 9: no longer also pulls from other minions' storage - that
-     * cross-minion movement is exclusively the Connector Network's job now.
+     * Revisi 9: no longer also pulls from other minions' storage -
+     * that cross-minion movement is exclusively the Connector
+     * Network's job now.
      */
     ITEM_COLLECT,
 

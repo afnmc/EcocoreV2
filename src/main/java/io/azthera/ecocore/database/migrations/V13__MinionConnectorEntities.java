@@ -1,16 +1,9 @@
-// FILE: src/main/java/io/azthera/ecocore/database/migrations/V13__MinionConnectorEntities.java
 package io.azthera.ecocore.database.migrations;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-/**
- * Creates the {@code minion_connector_entities} table backing
- * Revisi 9's relay connectors: standalone placeable entities (NOT
- * minions themselves) that extend the max distance a connection can
- * span, with an upgradeable range level.
- */
 public final class V13__MinionConnectorEntities implements Migration {
 
     @Override

@@ -96,6 +96,41 @@ public final class MinionFuelManager {
     }
 
     /**
+     * Multi-page overload of {@link #tryRefuel(MinionData, ItemStack[])}
+     * for Revisi 11's storage-page model. Only ever consumes from
+     * page 0's Zone A slots (the same slots used for seed/input on
+     * dual-zone types), since fuel is conceptually an input resource.
+     *
+     * @param data the minion's persistent data
+     * @param pages the minion's live storage pages
+     * @return {@code true} if a fuel item was consumed and fuel was added
+     */
+    public boolean tryConsumeFuelFromStorage(MinionData data, java.util.List<io.azthera.ecocore.model.MinionStorage> pages) {
+        if (isFueled(data) || pages.isEmpty()) {
+            return false;
+        }
+        io.azthera.ecocore.model.MinionStorage firstPage = pages.get(0);
+        ItemStack[] contents = firstPage.getContents();
+        for (int i = 0; i < contents.length; i++) {
+            ItemStack slot = contents[i];
+            if (slot == null) {
+                continue;
+            }
+            Integer fuelValue = FUEL_VALUES.get(slot.getType());
+            if (fuelValue == null || !minionsConfig.getFuelTypes().contains(slot.getType().name())) {
+                continue;
+            }
+            slot.setAmount(slot.getAmount() - 1);
+            if (slot.getAmount() <= 0) {
+                firstPage.setSlot(i, null);
+            }
+            data.setFuelTicksRemaining(data.getFuelTicksRemaining() + fuelValue);
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Refuels a minion directly from a fuel item, used when a player
      * right-clicks the minion's entity in the world while holding
      * coal/coal block/lava bucket. Consumes one unit from the given

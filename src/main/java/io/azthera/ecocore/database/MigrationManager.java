@@ -11,6 +11,12 @@ import io.azthera.ecocore.database.migrations.V7__DiscordLogs;
 import io.azthera.ecocore.database.migrations.V8__NightMarket;
 import io.azthera.ecocore.database.migrations.V9__MinionEntityUuid;
 import io.azthera.ecocore.database.migrations.V10__MinionConnectors;
+import io.azthera.ecocore.database.migrations.V11__MinionFacing;
+import io.azthera.ecocore.database.migrations.V12__MinionWorkMode;
+import io.azthera.ecocore.database.migrations.V13__MinionConnectorEntities;
+import io.azthera.ecocore.database.migrations.V14__MinionConnections;
+import io.azthera.ecocore.database.migrations.V15__MinionStorageSlots;
+import io.azthera.ecocore.database.migrations.V16__ShopItemRestockCooldown;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -50,6 +56,12 @@ public final class MigrationManager {
         register(new V8__NightMarket());
         register(new V9__MinionEntityUuid());
         register(new V10__MinionConnectors());
+        register(new V11__MinionFacing());
+        register(new V12__MinionWorkMode());
+        register(new V13__MinionConnectorEntities());
+        register(new V14__MinionConnections());
+        register(new V15__MinionStorageSlots());
+        register(new V16__ShopItemRestockCooldown());
     }
 
     /**

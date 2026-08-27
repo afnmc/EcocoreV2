@@ -25,6 +25,9 @@ public final class AiConfig {
     private final double restockTriggerPercent;
     private final double emergencyRestockTriggerPercent;
     private final double randomRestockChancePercent;
+    private final double minRestockIntervalHours;
+    private final int maxRestockPerItemPerDay;
+    private final double restockCooldownHours;
     private final boolean dailyRestockEnabled;
     private final boolean weeklyRestockEnabled;
 
@@ -61,6 +64,9 @@ public final class AiConfig {
         this.restockTriggerPercent = config.getDouble("restock-decision.restock-trigger-percent", 15.0);
         this.emergencyRestockTriggerPercent = config.getDouble("restock-decision.emergency-restock-trigger-percent", 3.0);
         this.randomRestockChancePercent = config.getDouble("restock-decision.random-restock-chance-percent", 5.0);
+        this.minRestockIntervalHours = config.getDouble("restock-decision.min-restock-interval-hours", 1.0);
+        this.maxRestockPerItemPerDay = config.getInt("restock-decision.max-restock-per-item-per-day", 6);
+        this.restockCooldownHours = config.getDouble("restock-decision.restock-cooldown-hours", 2.0);
         this.dailyRestockEnabled = config.getBoolean("restock-decision.daily-restock-enabled", true);
         this.weeklyRestockEnabled = config.getBoolean("restock-decision.weekly-restock-enabled", true);
 
@@ -117,6 +123,18 @@ public final class AiConfig {
 
     public double getRandomRestockChancePercent() {
         return randomRestockChancePercent;
+    }
+
+    public double getMinRestockIntervalHours() {
+        return minRestockIntervalHours;
+    }
+
+    public int getMaxRestockPerItemPerDay() {
+        return maxRestockPerItemPerDay;
+    }
+
+    public double getRestockCooldownHours() {
+        return restockCooldownHours;
     }
 
     public boolean isDailyRestockEnabled() {

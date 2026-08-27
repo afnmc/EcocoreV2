@@ -2,25 +2,32 @@ package io.azthera.ecocore.minions;
 
 import io.azthera.ecocore.claim.ClaimManager;
 import io.azthera.ecocore.config.MinionsConfig;
+import io.azthera.ecocore.economy.EconomyEngine;
+import io.azthera.ecocore.economy.TransactionLogger;
 import io.azthera.ecocore.minions.types.FishRarityTier;
 import io.azthera.ecocore.minions.types.MinionHandler;
-import io.azthera.ecocore.minions.types.MinionProcessingType;
 import io.azthera.ecocore.minions.types.TreeSpeciesData;
 import io.azthera.ecocore.model.MinionData;
 import io.azthera.ecocore.model.MinionStorage;
 import io.azthera.ecocore.model.MinionType;
 import io.azthera.ecocore.model.MinionWorkMode;
+import io.azthera.ecocore.model.ShopItemRecord;
+import io.azthera.ecocore.sell.SellManager;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.Container;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.ThreadLocalRandom;
+import java.util.logging.Logger;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Executes a single work action for a stationary minion each time
@@ -36,50 +43,42 @@ public final class MinionAiController {
     /** How many of a storage page's 54 slots are reserved as Zone A (seed/input) for dual-zone types. */
     public static final int ZONE_A_SLOTS = 9;
 
+    private static final BlockFace[] ADJACENT_FACES = {
+            BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN
+    };
+
+    private final Logger logger;
     private final MinionsConfig minionsConfig;
     private final MinionTargetSelector targetSelector;
     private final MinionFuelManager fuelManager;
     private final MinionAnimationHandler animationHandler;
     private final MinionConnectorManager connectorManager;
     private final ClaimManager claimManager;
+    private final SellManager sellManager;
+    private final EconomyEngine economyEngine;
     private MinionManager minionManager;
 
-    public MinionAiController(MinionsConfig minionsConfig, MinionTargetSelector targetSelector,
+    public MinionAiController(Logger logger, MinionsConfig minionsConfig, MinionTargetSelector targetSelector,
                                MinionFuelManager fuelManager, MinionAnimationHandler animationHandler,
-                               MinionConnectorManager connectorManager, ClaimManager claimManager) {
+                               MinionConnectorManager connectorManager, ClaimManager claimManager,
+                               SellManager sellManager, EconomyEngine economyEngine) {
+        this.logger = logger;
         this.minionsConfig = minionsConfig;
         this.targetSelector = targetSelector;
         this.fuelManager = fuelManager;
         this.animationHandler = animationHandler;
         this.connectorManager = connectorManager;
         this.claimManager = claimManager;
+        this.sellManager = sellManager;
+        this.economyEngine = economyEngine;
     }
 
-    /**
-     * Late-binds the owning {@link MinionManager}, since the two
-     * classes are mutually dependent (the manager ticks the
-     * controller, the controller pushes items to other minions via
-     * the manager). Called once during plugin startup wiring.
-     *
-     * @param minionManager the minion manager instance
-     */
     public void setMinionManager(MinionManager minionManager) {
         this.minionManager = minionManager;
     }
 
-    /**
-     * Runs one work action for a minion, if it currently has one
-     * available (fuel, energy, a valid target, and free storage all
-     * permitting). Called by {@code MinionManager.tickAll} at a rate
-     * controlled by the minion's configured speed.
-     *
-     * @param data the minion's persistent state
-     * @param handler the minion type's behavior definition
-     * @param entity the minion's live visual entity (never moved)
-     * @param pages the minion's live storage pages
-     */
     public void tick(MinionData data, MinionHandler handler, Entity entity, List<MinionStorage> pages) {
-        if (handler.getWorkMode() != MinionWorkMode.NONE) {
+        if (handler.getWorkMode() != MinionWorkMode.NONE || handler.getProcessingType() == io.azthera.ecocore.minions.types.MinionProcessingType.SELL_ONLY) {
             if (!fuelManager.isFueled(data)) {
                 fuelManager.tryConsumeFuelFromStorage(data, pages);
                 if (!fuelManager.isFueled(data)) {
@@ -104,8 +103,8 @@ public final class MinionAiController {
             case ENTITY_INTERACT -> handleEntityInteract(data, handler, entity, pages);
             case INTERNAL_SMELT -> handleInternalSmelt(data, handler, entity, pages);
             case ITEM_COLLECT -> handleItemCollect(data, handler, entity, pages);
-            case CHEST_DETECT -> handleChestDetect(data, handler, entity);
-            case SELL_ONLY -> handleSellOnly(data, handler, entity, pages);
+            case CHEST_DETECT -> { /* detection happens at placement, nothing per-tick */ }
+            case SELL_ONLY -> handleSellOnly(data, entity, pages);
             case NONE -> { /* pure storage type, nothing to do */ }
         }
 
@@ -114,16 +113,6 @@ public final class MinionAiController {
         }
     }
 
-    // ------------------------------------------------------------------
-    // Targeting helpers - facing vs arena branching (Revisi 1/2)
-    // ------------------------------------------------------------------
-
-    /**
-     * Whether this specific placed minion is currently operating in
-     * arena (360-degree) mode rather than facing-only, resolving the
-     * handler's work mode together with the minion's per-instance
-     * toggle for BOTH-mode types.
-     */
     private boolean isArenaActive(MinionData data, MinionHandler handler) {
         return switch (handler.getWorkMode()) {
             case ARENA_ONLY -> true;
@@ -147,24 +136,19 @@ public final class MinionAiController {
         return targetSelector.findBestEntityInFacingSlab(origin, data.getFacing(), data.getRadius(), handler);
     }
 
-    // ------------------------------------------------------------------
-    // MINER / QUARRY - block breaking (Revisi 12: reads target set live from handler/config)
-    // ------------------------------------------------------------------
-
     private void handleBlockBreak(MinionData data, MinionHandler handler, Entity entity, List<MinionStorage> pages) {
         Optional<Block> targetOpt = findTargetBlock(data, handler, entity.getLocation());
         if (targetOpt.isEmpty()) {
             return;
         }
         Block target = targetOpt.get();
-        // Revisi 19: cek claim land sebelum minion melakukan break.
         if (!claimManager.isAllowed(data.getOwnerUuid(), target.getLocation())) {
             return;
         }
         Material resultMaterial = handler.resultFor(target.getType());
         ItemStack drop = new ItemStack(resultMaterial != null ? resultMaterial : target.getType());
         if (!hasSpaceInAnyPage(pages, drop)) {
-            return; // Revisi 11: semua storage penuh -> minion idle, jangan duplikasi item.
+            return;
         }
         if (!data.consumeEnergy(handler.getEnergyCostPerAction())) {
             return;
@@ -174,19 +158,13 @@ public final class MinionAiController {
         animationHandler.playActionEffect(target.getLocation());
     }
 
-    // ------------------------------------------------------------------
-    // FARMER - dual zone plant/harvest/replant with spacing (Revisi 3/4/12)
-    // ------------------------------------------------------------------
-
     private void handleFarmCycle(MinionData data, MinionHandler handler, Entity entity, List<MinionStorage> pages) {
         Location origin = entity.getLocation();
-        // First priority: harvest anything mature within range.
         Optional<Block> matureCrop = findMatureCropInRange(data, handler, origin);
         if (matureCrop.isPresent()) {
             harvestCrop(data, handler, matureCrop.get(), pages);
             return;
         }
-        // Second priority: plant a seed from Zone A storage into a valid, correctly-spaced spot.
         plantFromSeedZone(data, handler, origin, pages);
     }
 
@@ -226,19 +204,16 @@ public final class MinionAiController {
         if (block.getBlockData() instanceof org.bukkit.block.data.Ageable ageable) {
             return ageable.getAge() >= ageable.getMaximumAge();
         }
-        // Pumpkin/melon stems produce adjacent fruit blocks directly, which count as always "mature" once formed.
         return block.getType() == Material.PUMPKIN || block.getType() == Material.MELON;
     }
 
     private void harvestCrop(MinionData data, MinionHandler handler, Block crop, List<MinionStorage> pages) {
-        // Revisi 19: cek claim land sebelum minion melakukan break/harvest.
         if (!claimManager.isAllowed(data.getOwnerUuid(), crop.getLocation())) {
             return;
         }
         Material produceMaterial = handler.resultFor(crop.getType());
         ItemStack produce = new ItemStack(produceMaterial != null ? produceMaterial : crop.getType());
-        List<MinionStorage> outputPages = zoneOutputPages(pages);
-        if (!hasSpaceInAnyPage(outputPages, produce)) {
+        if (!hasSpaceInAnyPage(pages, produce)) {
             return;
         }
         if (!data.consumeEnergy(handler.getEnergyCostPerAction())) {
@@ -251,16 +226,10 @@ public final class MinionAiController {
             ageable.setAge(0);
             crop.setBlockData(ageable);
         }
-        addToPagesWithOverflow(outputPages, produce);
+        addToPagesWithOverflow(pages, produce);
         animationHandler.playActionEffect(crop.getLocation());
     }
 
-    /**
-     * Attempts to plant one seed from the minion's Zone A (seed)
-     * storage into a valid, sufficiently-spaced location (Revisi 3):
-     * if no safely-spaced spot exists nearby, the minion idles rather
-     * than planting anyway.
-     */
     private void plantFromSeedZone(MinionData data, MinionHandler handler, Location origin, List<MinionStorage> pages) {
         if (handler.getSeedItem() == null) {
             return;
@@ -275,11 +244,11 @@ public final class MinionAiController {
             }
         }
         if (seedSlot == -1) {
-            return; // Revisi 4: seed habis -> idle.
+            return;
         }
         Optional<Block> plantSpot = findSpacedPlantingSpot(data, handler, origin);
         if (plantSpot.isEmpty()) {
-            return; // Revisi 3: tidak ada lokasi valid -> idle, jangan memaksa.
+            return;
         }
         if (!data.consumeEnergy(handler.getEnergyCostPerAction())) {
             return;
@@ -311,12 +280,6 @@ public final class MinionAiController {
         };
     }
 
-    /**
-     * Finds a nearby farmland/valid spot for planting that respects
-     * the configured crop spacing (Revisi 3) - won't plant directly
-     * adjacent to another crop of the same kind if spacing requires
-     * distance between them.
-     */
     private Optional<Block> findSpacedPlantingSpot(MinionData data, MinionHandler handler, Location origin) {
         boolean arena = isArenaActive(data, handler);
         int radius = data.getRadius();
@@ -364,22 +327,6 @@ public final class MinionAiController {
         return false;
     }
 
-    /** Zone B (output) pages: the rest of page 0's slots beyond Zone A, plus every overflow page. */
-    private List<MinionStorage> zoneOutputPages(List<MinionStorage> pages) {
-        return pages; // addToPagesWithOverflow already skips Zone A slots on page 0 for dual-zone types via zone-aware overload
-    }
-
-    // ------------------------------------------------------------------
-    // LUMBERJACK - tree chopping with spacing + per-species drops (Revisi 3/7/12)
-    // ------------------------------------------------------------------
-    // Lumberjack reuses BLOCK_BREAK generically for chopping logs, but with
-    // richer per-species drop resolution and a replant step using its own
-    // Zone A (sapling) storage - both handled by dedicated methods called
-    // from the type-specific branch below rather than the generic path,
-    // since AbstractMinionHandler flags Lumberjack as FARM_CYCLE-equivalent
-    // for planting purposes. See handleLumberChop, invoked from handleFarmCycle
-    // when handler.getType() == LUMBERJACK.
-
     private void handleLumberChop(MinionData data, MinionHandler handler, Entity entity, List<MinionStorage> pages) {
         Location origin = entity.getLocation();
         Optional<Block> logTarget = findTargetBlock(data, handler, origin);
@@ -395,7 +342,7 @@ public final class MinionAiController {
             return;
         }
         TreeSpeciesData species = handler.getTreeSpeciesData().get(log.getType());
-        List<ItemStack> drops = new java.util.ArrayList<>();
+        java.util.List<ItemStack> drops = new java.util.ArrayList<>();
         drops.add(new ItemStack(log.getType(), 1));
         if (species != null) {
             ThreadLocalRandom random = ThreadLocalRandom.current();
@@ -418,10 +365,9 @@ public final class MinionAiController {
         for (ItemStack drop : drops) {
             addToPagesWithOverflow(pages, drop);
         }
-        // Chance to also chop an adjacent leaf block into a sapling for the Zone A replant stock.
         if (species != null) {
             Block leaf = findAdjacentLeaf(log, species.leavesMaterial());
-            if (leaf != null && ThreadLocalRandom.current().nextDouble() < 0.15) {
+            if (leaf != null && ThreadLocalRandom.current().nextDouble() < minionsConfig.getLumberjackSaplingHarvestChance()) {
                 ItemStack sapling = new ItemStack(species.saplingMaterial(), 1);
                 addToZoneA(pages, sapling);
                 leaf.setType(Material.AIR);
@@ -467,7 +413,7 @@ public final class MinionAiController {
         }
         Optional<Block> spot = findSpacedTreeSpot(data, origin, species);
         if (spot.isEmpty()) {
-            return; // Revisi 3: tidak ada lokasi valid dan aman -> idle.
+            return;
         }
         if (!data.consumeEnergy(handler.getEnergyCostPerAction())) {
             return;
@@ -482,7 +428,6 @@ public final class MinionAiController {
     }
 
     private Optional<Block> findSpacedTreeSpot(MinionData data, Location origin, TreeSpeciesData species) {
-        boolean arena = isArenaActive(data, null) || true; // lumberjack always allowed arena search for replanting
         int radius = data.getRadius();
         int spacing = minionsConfig.getTreeSpacingFor(species.logMaterial());
         int canopyClearance = minionsConfig.getCanopyClearanceFor(species.logMaterial());
@@ -573,12 +518,7 @@ public final class MinionAiController {
                 return;
             }
         }
-        // Zone A full: silently drop the extra sapling rather than duplicating or crashing.
     }
-
-    // ------------------------------------------------------------------
-    // FISHERMAN - weighted rarity catches (Revisi 8)
-    // ------------------------------------------------------------------
 
     private void handleFishing(MinionData data, MinionHandler handler, Entity entity, List<MinionStorage> pages) {
         List<FishRarityTier> tiers = handler.getRarityTiers();
@@ -617,10 +557,6 @@ public final class MinionAiController {
         return lastPool.isEmpty() ? null : lastPool.get(0);
     }
 
-    // ------------------------------------------------------------------
-    // MOB_KILLER - entity interact
-    // ------------------------------------------------------------------
-
     private void handleEntityInteract(MinionData data, MinionHandler handler, Entity entity, List<MinionStorage> pages) {
         Optional<LivingEntity> targetOpt = findTargetEntity(data, handler, entity.getLocation());
         if (targetOpt.isEmpty()) {
@@ -646,13 +582,9 @@ public final class MinionAiController {
         animationHandler.playActionEffect(target.getLocation());
     }
 
-    // ------------------------------------------------------------------
-    // SMELTER - raw_iron -> iron_ingot style recipes (Revisi 5), input/output zones
-    // ------------------------------------------------------------------
-
     private void handleInternalSmelt(MinionData data, MinionHandler handler, Entity entity, List<MinionStorage> pages) {
         MinionStorage inputPage = pages.get(0);
-        java.util.Map<Material, Material> recipes = handler.getSmeltingRecipes();
+        Map<Material, Material> recipes = handler.getSmeltingRecipes();
         for (int i = 0; i < ZONE_A_SLOTS; i++) {
             ItemStack input = inputPage.getSlot(i);
             if (input == null || input.getAmount() <= 0) {
@@ -663,9 +595,8 @@ public final class MinionAiController {
                 continue;
             }
             ItemStack output = new ItemStack(outputMaterial, 1);
-            List<MinionStorage> outputPages = pages;
-            if (!hasSpaceInAnyPage(outputPages, output)) {
-                return; // Revisi 11: output penuh -> idle, jangan duplikasi.
+            if (!hasSpaceInAnyPage(pages, output)) {
+                return;
             }
             if (!data.consumeEnergy(handler.getEnergyCostPerAction())) {
                 return;
@@ -674,15 +605,11 @@ public final class MinionAiController {
             if (input.getAmount() <= 0) {
                 inputPage.setSlot(i, null);
             }
-            addToPagesWithOverflow(outputPages, output);
+            addToPagesWithOverflow(pages, output);
             animationHandler.playActionEffect(entity.getLocation());
             return;
         }
     }
-
-    // ------------------------------------------------------------------
-    // COLLECTOR - picks up ground item drops only (Revisi 9: no longer relays between minions)
-    // ------------------------------------------------------------------
 
     private void handleItemCollect(MinionData data, MinionHandler handler, Entity entity, List<MinionStorage> pages) {
         Location origin = entity.getLocation();
@@ -705,27 +632,60 @@ public final class MinionAiController {
         }
     }
 
-    // ------------------------------------------------------------------
-    // CHEST - detects adjacent single/double chest (Revisi 2)
-    // ------------------------------------------------------------------
+    /**
+     * SELL type: pulls sellable items from an adjacent real chest/
+     * container into its own storage (preserving the baseline's
+     * behavior), then sells everything sellable currently in its
+     * storage directly to the owner's balance via {@link SellManager}.
+     */
+    private void handleSellOnly(MinionData data, Entity entity, List<MinionStorage> pages) {
+        pullSellableFromAdjacentContainer(entity, pages);
 
-    private void handleChestDetect(MinionData data, MinionHandler handler, Entity entity) {
-        // Detection happens once at placement time (see MinionEggListener);
-        // nothing to do per-tick for this type beyond staying idle.
+        double totalPayout = 0.0;
+        for (MinionStorage page : pages) {
+            ItemStack[] contents = page.getContents();
+            for (int i = 0; i < contents.length; i++) {
+                ItemStack slot = contents[i];
+                if (slot == null || !sellManager.isSellable(slot)) {
+                    continue;
+                }
+                ShopItemRecord catalogItem = sellManager.resolveCatalogItem(slot);
+                if (catalogItem == null) {
+                    continue;
+                }
+                double unitPrice = sellManager.getProfitCalculator().computeUnitSellPrice(catalogItem);
+                totalPayout += unitPrice * slot.getAmount();
+                page.setSlot(i, null);
+            }
+        }
+        if (totalPayout > 0) {
+            economyEngine.deposit(data.getOwnerUuid(), totalPayout, TransactionLogger.REASON_MINION_AUTOSELL);
+        }
     }
 
-    // ------------------------------------------------------------------
-    // SELL - handled by SellManager elsewhere; nothing per-tick beyond idling
-    // ------------------------------------------------------------------
-
-    private void handleSellOnly(MinionData data, MinionHandler handler, Entity entity, List<MinionStorage> pages) {
-        // Auto-sell timing/economy interaction lives in SellManager, invoked
-        // separately by a scheduled task rather than the per-tick AI pass.
+    private void pullSellableFromAdjacentContainer(Entity entity, List<MinionStorage> pages) {
+        Block center = entity.getLocation().getBlock();
+        for (BlockFace face : ADJACENT_FACES) {
+            Block adjacent = center.getRelative(face);
+            if (!(adjacent.getState() instanceof Container container)) {
+                continue;
+            }
+            Inventory sourceInventory = container.getInventory();
+            for (int i = 0; i < sourceInventory.getSize(); i++) {
+                ItemStack slot = sourceInventory.getItem(i);
+                if (slot == null || slot.getType().isAir() || !sellManager.isSellable(slot)) {
+                    continue;
+                }
+                if (!hasSpaceInAnyPage(pages, slot)) {
+                    continue;
+                }
+                ItemStack moved = slot.clone();
+                addToPagesWithOverflow(pages, moved);
+                sourceInventory.setItem(i, null);
+            }
+            return;
+        }
     }
-
-    // ------------------------------------------------------------------
-    // Storage helpers - multi-page overflow (Revisi 11)
-    // ------------------------------------------------------------------
 
     private boolean hasSpaceInAnyPage(List<MinionStorage> pages, ItemStack item) {
         for (MinionStorage page : pages) {
@@ -736,11 +696,6 @@ public final class MinionAiController {
         return false;
     }
 
-    /**
-     * Adds an item to the first page with room, checking pages in
-     * order (Storage 1 -> 2 -> ... -> N) so overflow always fills the
-     * lowest-numbered available page first (Revisi 11).
-     */
     private void addToPagesWithOverflow(List<MinionStorage> pages, ItemStack item) {
         for (MinionStorage page : pages) {
             ItemStack[] contents = page.getContents();
@@ -765,16 +720,6 @@ public final class MinionAiController {
         }
     }
 
-    // ------------------------------------------------------------------
-    // Connector network - pushes items along outgoing connections (Revisi 9)
-    // ------------------------------------------------------------------
-
-    /**
-     * Pushes items from this minion's output storage into any minion
-     * it has an outgoing connection to (DIRECT or RELAY, both behave
-     * identically for transfer purposes once the link is validated -
-     * the mode only affects max distance at connect-time).
-     */
     private void pushAlongConnections(MinionData data, List<MinionStorage> pages) {
         if (minionManager == null) {
             return;

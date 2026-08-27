@@ -194,6 +194,26 @@ public final class SellManager {
         return profitCalculator;
     }
 
+    /**
+     * Computes the total sell value a stack would currently fetch,
+     * without actually selling it - used by the Sell GUI (Revisi 15)
+     * to show a live running total of the deposit area's contents.
+     *
+     * @param stack the stack to preview, may be {@code null}
+     * @return the total payout this stack would currently yield, or 0 if unsellable
+     */
+    public double previewSellValue(ItemStack stack) {
+        if (stack == null || !isSellable(stack)) {
+            return 0.0;
+        }
+        ShopItemRecord catalogItem = resolveCatalogItem(stack);
+        if (catalogItem == null) {
+            return 0.0;
+        }
+        double unitPrice = profitCalculator.computeUnitSellPrice(catalogItem);
+        return unitPrice * stack.getAmount();
+    }
+
     public SellBlacklistManager getBlacklistManager() {
         return blacklistManager;
     }

@@ -1,4 +1,3 @@
-// FILE: src/main/java/io/azthera/ecocore/config/MinionsConfig.java
 package io.azthera.ecocore.config;
 
 import io.azthera.ecocore.minions.types.FishRarityTier;
@@ -24,11 +23,6 @@ import java.util.logging.Logger;
  * Revisi 9 connector network tuning, Revisi 3 planting spacing, and
  * every per-type target/recipe/rarity list (Revisi 12: minion
  * engines must read these from config, never hardcode them).
- *
- * Every list/map-returning getter here degrades gracefully: a
- * missing or invalid {@code minions.yml} section falls back to a
- * sane hardcoded default and logs a warning rather than crashing
- * plugin startup (Revisi 12/13/20).
  */
 public final class MinionsConfig {
 
@@ -39,6 +33,7 @@ public final class MinionsConfig {
 
     private final int maxLevel;
     private final int maxStoragePages;
+    private final int maxMinionsPerPlayer;
     private final int baseRadius;
     private final int radiusPerUpgrade;
     private final int maxRadiusUpgrades;
@@ -50,7 +45,6 @@ public final class MinionsConfig {
     private final List<String> fuelTypes;
     private final boolean autoRepairEnabled;
 
-    // Revisi 3: tree/farming planting spacing.
     private final boolean spacingEnabled;
     private final int defaultTreeSpacing;
     private final int defaultCanopyClearance;
@@ -58,18 +52,20 @@ public final class MinionsConfig {
     private final Map<Material, Integer> perTreeSpacing = new HashMap<>();
     private final Map<Material, Integer> perTreeCanopyClearance = new HashMap<>();
     private final Set<Material> require2x2Species = new HashSet<>();
+    private final double lumberjackSaplingHarvestChance;
 
-    // Revisi 9: connector network tuning.
     private final double connectorBaseRange;
     private final double connectorRangePerUpgrade;
     private final int connectorMaxRangeUpgrades;
     private final double connectorUpgradeBaseCost;
     private final double connectorUpgradeCostGrowth;
 
-    // Revisi 2: per-type work mode override.
-    private final Map<MinionType, MinionWorkMode> workModeOverrides = new EnumMap<>(MinionType.class);
+    private final double storagePageUpgradeBaseCost;
+    private final double radiusUpgradeBaseCost;
+    private final double speedUpgradeBaseCost;
+    private final double upgradeCostGrowthPerLevel;
 
-    // Revisi 12: per-type target material/entity lists, all config-sourced.
+    private final Map<MinionType, MinionWorkMode> workModeOverrides = new EnumMap<>(MinionType.class);
     private final Map<MinionType, Set<Material>> targetBlocks = new EnumMap<>(MinionType.class);
     private final Map<Material, Material> smeltingRecipes = new HashMap<>();
     private final Map<Material, TreeSpeciesData> treeSpeciesData = new HashMap<>();
@@ -87,6 +83,7 @@ public final class MinionsConfig {
         this.logger = logger;
         this.maxLevel = config.getInt("global.max-level", 50);
         this.maxStoragePages = config.getInt("global.max-storage-pages", 10);
+        this.maxMinionsPerPlayer = config.getInt("global.max-minions-per-player", 20);
         this.baseRadius = config.getInt("global.base-radius", 6);
         this.radiusPerUpgrade = config.getInt("global.radius-per-upgrade", 2);
         this.maxRadiusUpgrades = config.getInt("global.max-radius-upgrades", 5);
@@ -99,11 +96,15 @@ public final class MinionsConfig {
         this.autoRepairEnabled = config.getBoolean("global.auto-repair-enabled", true);
 
         ConfigurationSection farmingSection = config.getConfigurationSection("farming.spacing");
-        this.spacingEnabled = farmingSection != null && farmingSection.getBoolean("enabled", true);
+        this.spacingEnabled = farmingSection == null || farmingSection.getBoolean("enabled", true);
         this.defaultTreeSpacing = farmingSection != null ? farmingSection.getInt("default-tree-spacing", 2) : 2;
         this.defaultCanopyClearance = farmingSection != null ? farmingSection.getInt("default-canopy-clearance", 2) : 2;
         this.cropSpacing = farmingSection != null ? farmingSection.getInt("crop-spacing", 1) : 1;
         loadPerTreeSpacing(farmingSection);
+
+        ConfigurationSection lumberjackSection = config.getConfigurationSection("lumberjack");
+        this.lumberjackSaplingHarvestChance = lumberjackSection != null
+                ? lumberjackSection.getDouble("sapling-harvest-chance", 0.15) : 0.15;
 
         ConfigurationSection connectorSection = config.getConfigurationSection("connector");
         this.connectorBaseRange = connectorSection != null ? connectorSection.getDouble("base-range", 20.0) : 20.0;
@@ -111,6 +112,12 @@ public final class MinionsConfig {
         this.connectorMaxRangeUpgrades = connectorSection != null ? connectorSection.getInt("max-range-upgrades", 10) : 10;
         this.connectorUpgradeBaseCost = connectorSection != null ? connectorSection.getDouble("upgrade-base-cost", 750.0) : 750.0;
         this.connectorUpgradeCostGrowth = connectorSection != null ? connectorSection.getDouble("upgrade-cost-growth", 1.4) : 1.4;
+
+        ConfigurationSection upgradesSection = config.getConfigurationSection("upgrades");
+        this.storagePageUpgradeBaseCost = upgradesSection != null ? upgradesSection.getDouble("storage-page-base-cost", 500.0) : 500.0;
+        this.radiusUpgradeBaseCost = upgradesSection != null ? upgradesSection.getDouble("radius-base-cost", 400.0) : 400.0;
+        this.speedUpgradeBaseCost = upgradesSection != null ? upgradesSection.getDouble("speed-base-cost", 500.0) : 500.0;
+        this.upgradeCostGrowthPerLevel = upgradesSection != null ? upgradesSection.getDouble("cost-growth-per-level", 1.35) : 1.35;
 
         loadWorkModeOverrides(config.getConfigurationSection("work-mode"));
         loadTargetBlocks(config.getConfigurationSection("targets"));
@@ -214,7 +221,6 @@ public final class MinionsConfig {
 
     private void loadSmeltingRecipes(ConfigurationSection section) {
         if (section == null) {
-            // Revisi 5 default fallback: raw ore + ore block -> ingot, plus a few extras.
             putDefaultRecipe("RAW_IRON", "IRON_INGOT");
             putDefaultRecipe("RAW_GOLD", "GOLD_INGOT");
             putDefaultRecipe("RAW_COPPER", "COPPER_INGOT");
@@ -269,7 +275,6 @@ public final class MinionsConfig {
 
     private void loadFishRarity(ConfigurationSection section) {
         if (section == null) {
-            // Revisi 8 default fallback.
             fishRarityTiers.add(new FishRarityTier("COMMON", 70.0, safeMaterialList("COD", "SALMON")));
             fishRarityTiers.add(new FishRarityTier("UNCOMMON", 20.0, safeMaterialList("TROPICAL_FISH", "PUFFERFISH")));
             fishRarityTiers.add(new FishRarityTier("RARE", 8.0, safeMaterialList("NAUTILUS_SHELL")));
@@ -307,11 +312,6 @@ public final class MinionsConfig {
         return result;
     }
 
-    /**
-     * Resolves a material name safely, logging a warning and
-     * returning {@code null} instead of throwing on an invalid name
-     * (Revisi 21/12: never crash on a bad config value).
-     */
     private Material safeMaterial(String name) {
         if (name == null || name.isBlank()) {
             return null;
@@ -330,6 +330,10 @@ public final class MinionsConfig {
 
     public int getMaxStoragePages() {
         return maxStoragePages;
+    }
+
+    public int getMaxMinionsPerPlayer() {
+        return maxMinionsPerPlayer;
     }
 
     public int getBaseRadius() {
@@ -372,11 +376,6 @@ public final class MinionsConfig {
         return autoRepairEnabled;
     }
 
-    /**
-     * Whether tree/crop planting spacing enforcement is active (Revisi 3).
-     *
-     * @return {@code true} if spacing checks should be applied
-     */
     public boolean isSpacingEnabled() {
         return spacingEnabled;
     }
@@ -385,14 +384,6 @@ public final class MinionsConfig {
         return cropSpacing;
     }
 
-    /**
-     * The minimum distance a lumberjack must keep between saplings of
-     * the given species when replanting (Revisi 3), falling back to
-     * the global default if this species has no override.
-     *
-     * @param logMaterial the tree species' log material
-     * @return the configured spacing in blocks
-     */
     public int getTreeSpacingFor(Material logMaterial) {
         if (!spacingEnabled) {
             return 0;
@@ -402,6 +393,10 @@ public final class MinionsConfig {
 
     public int getCanopyClearanceFor(Material logMaterial) {
         return perTreeCanopyClearance.getOrDefault(logMaterial, defaultCanopyClearance);
+    }
+
+    public double getLumberjackSaplingHarvestChance() {
+        return lumberjackSaplingHarvestChance;
     }
 
     public double getConnectorBaseRange() {
@@ -424,27 +419,26 @@ public final class MinionsConfig {
         return connectorUpgradeCostGrowth;
     }
 
-    /**
-     * The effective work mode for a minion type: a configured
-     * override from {@code minions.yml work-mode} if present,
-     * otherwise the type's hardcoded {@link MinionWorkMode#defaultFor}.
-     *
-     * @param type the minion type
-     * @return the effective work mode
-     */
+    public double getStoragePageUpgradeBaseCost() {
+        return storagePageUpgradeBaseCost;
+    }
+
+    public double getRadiusUpgradeBaseCost() {
+        return radiusUpgradeBaseCost;
+    }
+
+    public double getSpeedUpgradeBaseCost() {
+        return speedUpgradeBaseCost;
+    }
+
+    public double getUpgradeCostGrowthPerLevel() {
+        return upgradeCostGrowthPerLevel;
+    }
+
     public MinionWorkMode getWorkModeFor(MinionType type) {
         return workModeOverrides.getOrDefault(type, MinionWorkMode.defaultFor(type));
     }
 
-    /**
-     * The configured target/mineable block set for a minion type
-     * (Revisi 12: e.g. adding BEDROCK to {@code targets.miner} in
-     * minions.yml lets the Miner mine bedrock, no code change
-     * needed). Empty if unconfigured for that type.
-     *
-     * @param type the minion type
-     * @return the configured target material set
-     */
     public Set<Material> getTargetBlocksFor(MinionType type) {
         return targetBlocks.getOrDefault(type, Set.of());
     }

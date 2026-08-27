@@ -1,4 +1,3 @@
-// FILE: src/main/java/io/azthera/ecocore/database/dao/MinionConnectorEntityDao.java
 package io.azthera.ecocore.database.dao;
 
 import io.azthera.ecocore.database.DatabaseManager;
@@ -12,26 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Data access object for the {@code minion_connector_entities} table
- * (Revisi 9): standalone placeable relay entities that are NOT
- * minions, used to extend a connection's max distance beyond the
- * fixed 10-block direct range.
- */
 public final class MinionConnectorEntityDao {
 
-    /**
-     * A single persisted connector entity.
-     *
-     * @param id the connector's own database id
-     * @param ownerUuid the owning player
-     * @param world the world the connector is placed in
-     * @param x x coordinate
-     * @param y y coordinate
-     * @param z z coordinate
-     * @param rangeLevel the current upgrade tier of this connector's range
-     * @param entityUuid the tagged visual entity uuid, may be {@code null} if never spawned
-     */
     public record ConnectorEntityRecord(long id, UUID ownerUuid, String world,
                                          double x, double y, double z,
                                          int rangeLevel, UUID entityUuid) {
@@ -43,17 +24,6 @@ public final class MinionConnectorEntityDao {
         this.databaseManager = databaseManager;
     }
 
-    /**
-     * Inserts a newly placed connector entity.
-     *
-     * @param ownerUuid the placing player's uuid
-     * @param world the world name
-     * @param x x coordinate
-     * @param y y coordinate
-     * @param z z coordinate
-     * @return the generated row id
-     * @throws SQLException if the insert fails
-     */
     public long insert(UUID ownerUuid, String world, double x, double y, double z) throws SQLException {
         String sql = """
             INSERT INTO minion_connector_entities

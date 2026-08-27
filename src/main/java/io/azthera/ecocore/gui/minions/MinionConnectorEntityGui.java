@@ -1,4 +1,3 @@
-// FILE: src/main/java/io/azthera/ecocore/gui/minions/MinionConnectorEntityGui.java
 package io.azthera.ecocore.gui.minions;
 
 import io.azthera.ecocore.gui.AbstractGui;
@@ -13,10 +12,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.List;
 
-/**
- * Range upgrade screen for a {@code MinionConnectorEntity} (Revisi
- * 9). Same max-level-safety convention as {@link MinionUpgradeGui}.
- */
 public final class MinionConnectorEntityGui extends AbstractGui {
 
     private static final int SUMMARY_SLOT = 4;
@@ -37,7 +32,7 @@ public final class MinionConnectorEntityGui extends AbstractGui {
 
     @Override
     public void build() {
-        inventory = Bukkit.createInventory(this, 36, "§8Minion Connector");
+        inventory = Bukkit.createInventory(this, 36, "\u00a78Minion Connector");
         render();
     }
 
@@ -45,33 +40,33 @@ public final class MinionConnectorEntityGui extends AbstractGui {
         inventory.clear();
         MinionConnectorEntityManager.ActiveConnector connector = connectorEntityManager.getConnector(connectorId);
         if (connector == null) {
-            inventory.setItem(SUMMARY_SLOT, namedItem(Material.BARRIER, "§cConnector tidak ditemukan", List.of()));
-            inventory.setItem(CLOSE_SLOT, guiManager.buildButtonIcon("close", "§cTutup"));
+            inventory.setItem(SUMMARY_SLOT, namedItem(Material.BARRIER, "\u00a7cConnector tidak ditemukan", List.of()));
+            inventory.setItem(CLOSE_SLOT, guiManager.buildButtonIcon("close", "\u00a7cTutup"));
             return;
         }
         double maxDistance = connectorEntityManager.getMaxRelayDistance(connector);
-        inventory.setItem(SUMMARY_SLOT, namedItem(Material.BLAZE_ROD, "§b§lMinion Connector",
-                List.of("§7Range saat ini: §f" + (int) maxDistance + " block",
-                        "§7Level upgrade: §f" + connector.getRangeLevel())));
+        inventory.setItem(SUMMARY_SLOT, namedItem(Material.BLAZE_ROD, "\u00a7b\u00a7lMinion Connector",
+                List.of("\u00a77Range saat ini: \u00a7f" + (int) maxDistance + " block",
+                        "\u00a77Level upgrade: \u00a7f" + connector.getRangeLevel())));
         boolean canUpgrade = connectorEntityManager.canUpgradeRange(connector);
         ItemStack upgradeIcon = new ItemStack(Material.NETHER_STAR);
         ItemMeta meta = upgradeIcon.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName("§eUpgrade Range");
+            meta.setDisplayName("\u00a7eUpgrade Range");
             if (canUpgrade) {
                 double cost = connectorEntityManager.computeUpgradeCost(connector);
                 meta.setLore(List.of(
-                        "§7Range saat ini: §f" + (int) maxDistance + " block",
-                        "§7Biaya: §a" + String.format("%.2f", cost),
-                        "§eKlik untuk upgrade"
+                        "\u00a77Range saat ini: \u00a7f" + (int) maxDistance + " block",
+                        "\u00a77Biaya: \u00a7a" + String.format("%.2f", cost),
+                        "\u00a7eKlik untuk upgrade"
                 ));
             } else {
-                meta.setLore(List.of("§7Range saat ini: §f" + (int) maxDistance + " block", "§c§lMax Level"));
+                meta.setLore(List.of("\u00a77Range saat ini: \u00a7f" + (int) maxDistance + " block", "\u00a7c\u00a7lMax Level"));
             }
             upgradeIcon.setItemMeta(meta);
         }
         inventory.setItem(UPGRADE_SLOT, upgradeIcon);
-        inventory.setItem(CLOSE_SLOT, guiManager.buildButtonIcon("close", "§cTutup"));
+        inventory.setItem(CLOSE_SLOT, guiManager.buildButtonIcon("close", "\u00a7cTutup"));
     }
 
     private ItemStack namedItem(Material material, String name, List<String> lore) {
@@ -102,7 +97,7 @@ public final class MinionConnectorEntityGui extends AbstractGui {
             double cost = connectorEntityManager.computeUpgradeCost(connector);
             io.azthera.ecocore.economy.EconomyEngine economyEngine = io.azthera.ecocore.EcoCorePlugin.getInstance().getEconomyEngine();
             if (!economyEngine.has(getViewer().getUniqueId(), cost)) {
-                getViewer().sendMessage("§cUang lu gak cukup.");
+                getViewer().sendMessage("\u00a7cUang lu gak cukup.");
                 guiManager.playSound(getViewer(), "error");
                 return;
             }

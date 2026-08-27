@@ -17,7 +17,6 @@ import io.azthera.ecocore.minions.types.SmelterMinion;
 import io.azthera.ecocore.model.MinionData;
 import io.azthera.ecocore.model.MinionStorage;
 import io.azthera.ecocore.model.MinionType;
-import io.azthera.ecocore.model.MinionWorkMode;
 import io.azthera.ecocore.utils.ItemUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -44,7 +43,6 @@ import java.util.stream.Collectors;
 
 public final class MinionManager {
 
-    public static final int DEFAULT_MAX_MINIONS_PER_PLAYER = 20;
     private static final String MINION_ID_KEY = "minion_id";
     private static final int MAX_CATCH_UP_ACTIONS_PER_PASS = 50;
     private static final String PAGE_DELIMITER = "\u0000PAGE\u0000";
@@ -57,15 +55,6 @@ public final class MinionManager {
     private final MinionConnectorManager connectorManager;
     private final Map<MinionType, MinionHandler> handlers = new EnumMap<>(MinionType.class);
 
-    /**
-     * A read-only snapshot of a nearby owned minion, used by
-     * {@code MinionAiController} for pulling/pushing between minions
-     * without holding a direct reference to internal state.
-     *
-     * @param id the minion's database id
-     * @param type the minion's type
-     * @param pages the minion's live storage pages (index 0 first)
-     */
     public record NearbyMinionView(long id, MinionType type, List<MinionStorage> pages) {
     }
 
@@ -145,12 +134,6 @@ public final class MinionManager {
         }
     }
 
-    /**
-     * Loads a minion's storage pages, preferring the new multi-page
-     * JSON format and falling back to migrating the legacy
-     * single-page format forward (one-time, transparent) if the new
-     * column is still empty for this row.
-     */
     private List<MinionStorage> loadPagesForMinion(MinionData data) {
         String pagesJson;
         try {
@@ -161,7 +144,6 @@ public final class MinionManager {
         if (pagesJson != null && !pagesJson.isBlank()) {
             return deserializePages(data.getStoragePageCount(), pagesJson);
         }
-        // Legacy fallback: migrate the old single flat storage array into page 0.
         List<MinionStorage> pages = new ArrayList<>();
         String legacyJson;
         try {
@@ -228,9 +210,6 @@ public final class MinionManager {
             villager.setProfession(Villager.Profession.NONE);
         } catch (Throwable ignored) {
         }
-        // Revisi 1: the entity's visual yaw always matches the minion's
-        // stored facing, not free-look. This is set once at spawn and
-        // never touched again - the AI controller must never rotate it.
         Location facingLocation = location.clone();
         facingLocation.setYaw(facingToYaw(data.getFacing()));
         facingLocation.setPitch(0f);
@@ -240,13 +219,6 @@ public final class MinionManager {
         return villager;
     }
 
-    /**
-     * Converts a cardinal {@link BlockFace} into the yaw value that
-     * makes an entity visually face that direction.
-     *
-     * @param facing a cardinal direction (NORTH/SOUTH/EAST/WEST)
-     * @return the corresponding yaw
-     */
     public static float facingToYaw(BlockFace facing) {
         return switch (facing) {
             case SOUTH -> 0f;
@@ -257,14 +229,6 @@ public final class MinionManager {
         };
     }
 
-    /**
-     * Snaps a raw player yaw to the nearest cardinal {@link BlockFace}
-     * (Revisi 1) - the same 4-way snap a piston or dispenser uses,
-     * never a free 360-degree direction.
-     *
-     * @param yaw the raw yaw to snap
-     * @return the nearest cardinal direction
-     */
     public static BlockFace snapYawToCardinal(float yaw) {
         float normalizedYaw = yaw % 360;
         if (normalizedYaw < 0) {
@@ -326,18 +290,8 @@ public final class MinionManager {
                 .count();
     }
 
-    /**
-     * Places a new minion, locking its facing to the nearest cardinal
-     * direction from the placing player's look yaw (Revisi 1). The
-     * minion never moves or re-orients after this point.
-     *
-     * @param player the placing player
-     * @param type the minion type to place
-     * @param location the placement location (its yaw is read and snapped, then discarded)
-     * @return the newly placed minion's data, or {@code null} if placement failed
-     */
     public MinionData placeMinion(Player player, MinionType type, Location location) {
-        if (countOwnedBy(player.getUniqueId()) >= DEFAULT_MAX_MINIONS_PER_PLAYER) {
+        if (countOwnedBy(player.getUniqueId()) >= minionsConfig.getMaxMinionsPerPlayer()) {
             return null;
         }
         BlockFace facing = snapYawToCardinal(location.getYaw());
@@ -428,23 +382,11 @@ public final class MinionManager {
         }
     }
 
-    /**
-     * Returns the minion's storage pages (index 0 first). Never
-     * returns {@code null} for a known minion - always at least one page.
-     */
     public List<MinionStorage> getMinionPages(long minionId) {
         ActiveMinion active = activeMinions.get(minionId);
         return active != null ? active.pages : null;
     }
 
-    /**
-     * Unlocks one additional storage page for a minion (Revisi 11),
-     * up to the configured max. No-op if already at max.
-     *
-     * @param minionId the minion to grant a page to
-     * @param maxPages the configured maximum page count
-     * @return {@code true} if a new page was added
-     */
     public boolean addStoragePage(long minionId, int maxPages) {
         ActiveMinion active = activeMinions.get(minionId);
         if (active == null || active.pages.size() >= maxPages) {
@@ -460,10 +402,6 @@ public final class MinionManager {
         return active != null ? resolveLiveEntity(active) : null;
     }
 
-    /**
-     * Finds owned minions within radius of an origin point, excluding
-     * one minion id (typically the caller itself).
-     */
     public List<NearbyMinionView> getNearbyOwnedMinions(Location origin, double radius, UUID ownerUuid, long excludeId) {
         List<NearbyMinionView> results = new ArrayList<>();
         if (origin.getWorld() == null) {

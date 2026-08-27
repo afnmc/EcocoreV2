@@ -1,4 +1,3 @@
-// FILE: src/main/java/io/azthera/ecocore/gui/minions/MinionStorageSelectionGui.java
 package io.azthera.ecocore.gui.minions;
 
 import io.azthera.ecocore.gui.AbstractGui;
@@ -9,22 +8,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.List;
 
-/**
- * Sit+click storage page picker (Revisi 11): shows one button per
- * unlocked storage page (Storage 1 up to however many pages the
- * minion has purchased, max 10), each opening that page's full
- * 54-slot inventory. This is the entry point for minion types with
- * only one storage concept (Miner, Fisherman, Collector, Quarry,
- * Mob Killer) - types with a real input/output split (Smelter,
- * Lumberjack, Farmer) go through {@link MinionStorageSelectGui}
- * first instead (Revisi 10).
- */
 public final class MinionStorageSelectionGui extends AbstractGui {
 
     private final MinionManager minionManager;
@@ -43,18 +31,18 @@ public final class MinionStorageSelectionGui extends AbstractGui {
     public void build() {
         MinionData data = minionManager.getMinion(minionId);
         if (data == null) {
-            inventory = Bukkit.createInventory(this, 27, "§8Storage tidak ditemukan");
+            inventory = Bukkit.createInventory(this, 27, "\u00a78Storage tidak ditemukan");
             return;
         }
-        inventory = Bukkit.createInventory(this, 27, "§8Pilih Storage - " + data.getType().configKey());
+        inventory = Bukkit.createInventory(this, 27, "\u00a78Pilih Storage - " + data.getType().configKey());
         int pageCount = data.getStoragePageCount();
         int maxPages = upgradeManager.getMaxStoragePages();
-        for (int i = 0; i 10; i++) {
-            boolean unlocked = i ;
+        for (int i = 0; i < maxPages && i < 10; i++) {
+            boolean unlocked = i < pageCount;
             ItemStack icon = unlocked
-                    ? namedItem(Material.CHEST, "§aStorage " + (i + 1), List.of("§7Klik buat buka storage ini"))
-                    : namedItem(Material.BARRIER, "§7Storage " + (i + 1) + " §8(Terkunci)",
-                            List.of("§7Upgrade minion buat membuka storage ini"));
+                    ? namedItem(Material.CHEST, "\u00a7aStorage " + (i + 1), List.of("\u00a77Klik buat buka storage ini"))
+                    : namedItem(Material.BARRIER, "\u00a77Storage " + (i + 1) + " \u00a78(Terkunci)",
+                            List.of("\u00a77Upgrade minion buat membuka storage ini"));
             inventory.setItem(i, icon);
         }
     }
@@ -63,7 +51,7 @@ public final class MinionStorageSelectionGui extends AbstractGui {
     public void handleClick(InventoryClickEvent event) {
         event.setCancelled(true);
         int slot = event.getRawSlot();
-        if (slot 0 || slot >= 10) {
+        if (slot < 0 || slot >= 10) {
             return;
         }
         MinionData data = minionManager.getMinion(minionId);

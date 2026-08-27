@@ -129,6 +129,7 @@ public final class EcoCorePlugin extends JavaPlugin {
     private JobMissionDao jobMissionDao;
     private MinionsDao minionsDao;
     private MinionConnectionDao minionConnectionDao;
+    private io.azthera.ecocore.database.dao.MinionConnectorEntityDao minionConnectorEntityDao;
     private AiLearningDao aiLearningDao;
     private DiscordLogDao discordLogDao;
     private NightMarketDao nightMarketDao;
@@ -149,6 +150,8 @@ public final class EcoCorePlugin extends JavaPlugin {
     private JobsManager jobsManager;
     private MinionManager minionManager;
     private MinionConnectorManager minionConnectorManager;
+    private io.azthera.ecocore.minions.MinionConnectorEntityManager minionConnectorEntityManager;
+    private io.azthera.ecocore.claim.ClaimManager claimManager;
     private MinionUpgradeManager minionUpgradeManager;
     private MinionFuelManager minionFuelManager;
 
@@ -259,6 +262,7 @@ public final class EcoCorePlugin extends JavaPlugin {
         jobMissionDao = new JobMissionDao(databaseManager);
         minionsDao = new MinionsDao(databaseManager);
         minionConnectionDao = new MinionConnectionDao(databaseManager);
+        minionConnectorEntityDao = new io.azthera.ecocore.database.dao.MinionConnectorEntityDao(databaseManager);
         aiLearningDao = new AiLearningDao(databaseManager);
         discordLogDao = new DiscordLogDao(databaseManager);
         nightMarketDao = new NightMarketDao(databaseManager);
@@ -339,25 +343,31 @@ public final class EcoCorePlugin extends JavaPlugin {
         MinionTargetSelector targetSelector = new MinionTargetSelector();
         MinionAnimationHandler animationHandler = new MinionAnimationHandler(configManager.getGuiConfig());
 
-        minionConnectorManager = new MinionConnectorManager(getLogger(), minionConnectionDao);
+        minionConnectorEntityManager = new io.azthera.ecocore.minions.MinionConnectorEntityManager(
+                getLogger(), minionConnectorEntityDao, configManager.getMinionsConfig());
+        minionConnectorManager = new MinionConnectorManager(getLogger(), minionConnectionDao, minionConnectorEntityManager);
+
+        claimManager = new io.azthera.ecocore.claim.ClaimManager(
+                getLogger(), configManager.getMainConfig().getBoolean("claim-protection-enabled", true));
 
         MinionAiController aiController = new MinionAiController(getLogger(), configManager.getMinionsConfig(),
-                minionFuelManager, targetSelector, animationHandler, sellManager, economyEngine,
-                minionConnectorManager);
+                targetSelector, minionFuelManager, animationHandler, minionConnectorManager, claimManager,
+                sellManager, economyEngine);
 
         MinionFactory minionFactory = new MinionFactory(configManager.getMinionsConfig());
 
         minionManager = new MinionManager(getLogger(), minionsDao, configManager.getMinionsConfig(),
                 minionFactory, aiController, minionConnectorManager);
 
-        // Late-bind: MinionAiController needs to enumerate other active
-        // minions (for the Collector's cross-minion pulling) but MinionManager
-        // is the one that owns/constructs the controller, so this can't be
-        // done via constructor injection without a cycle.
+        // Late-bind: MinionAiController needs to push items along the
+        // connector network (for the Connector Manager's outgoing links)
+        // but MinionManager is the one that owns/constructs the controller,
+        // so this can't be done via constructor injection without a cycle.
         aiController.setMinionManager(minionManager);
 
         minionManager.loadAll();
         minionConnectorManager.loadAll();
+        minionConnectorEntityManager.loadAll();
 
         minionUpgradeManager = new MinionUpgradeManager(configManager.getMinionsConfig(), economyEngine);
     }
@@ -437,7 +447,7 @@ public final class EcoCorePlugin extends JavaPlugin {
 
         pluginManager.registerEvents(new MinionInteractListener(
                 minionManager, minionFuelManager, configManager.getMinionsConfig(), guiManager,
-                configManager.getGuiConfig(), minionConnectorManager), this);
+                configManager.getGuiConfig(), minionConnectorManager, minionConnectorEntityManager), this);
         pluginManager.registerEvents(new MinionEggListener(minionManager), this);
         pluginManager.registerEvents(new MinionChunkListener(minionManager), this);
     }
@@ -453,7 +463,8 @@ public final class EcoCorePlugin extends JavaPlugin {
         setExecutor("minion", new MinionCommand(minionManager, configManager, guiManager, guiConfig));
         setExecutor("market", new MarketCommand(nightMarketManager, guiManager, configManager));
         setExecutor("prices", new PricesCommand(shopManager, economyEngine.getFormatter()));
-        setExecutor("inflation", new InflationCommand(inflationEngine));
+        setExecutor("inflation", new InflationCommand(inflationEngine, configManager.getInflationConfig(),
+                playerDao, configManager.getMessagesConfig()));
         setExecutor("history", new HistoryCommand(shopManager, guiManager));
         setExecutor("balance", new BalanceCommand(economyEngine));
         setExecutor("ecoitem", new ItemViewCommand(shopManager, configManager, guiManager, guiConfig));
@@ -547,6 +558,18 @@ public final class EcoCorePlugin extends JavaPlugin {
 
     public MinionUpgradeManager getMinionUpgradeManager() {
         return minionUpgradeManager;
+    }
+
+    public io.azthera.ecocore.config.MinionsConfig getMinionsConfig() {
+        return configManager.getMinionsConfig();
+    }
+
+    public io.azthera.ecocore.minions.MinionConnectorEntityManager getMinionConnectorEntityManager() {
+        return minionConnectorEntityManager;
+    }
+
+    public io.azthera.ecocore.claim.ClaimManager getClaimManager() {
+        return claimManager;
     }
 
     public GuiManager getGuiManager() {

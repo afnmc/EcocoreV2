@@ -1,4 +1,3 @@
-// FILE: src/main/java/io/azthera/ecocore/database/dao/MinionsDao.java
 package io.azthera.ecocore.database.dao;
 
 import io.azthera.ecocore.database.DatabaseManager;
@@ -15,33 +14,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Data access object for the {@code minions_data} table.
- * Storage page contents are persisted separately as a serialized
- * JSON blob ({@code storage_pages_json}); this DAO treats it as an
- * opaque string.
- */
 public final class MinionsDao {
 
     private final DatabaseManager databaseManager;
 
-    /**
-     * Creates a minions DAO.
-     *
-     * @param databaseManager the initialized database manager to pull connections from
-     */
     public MinionsDao(DatabaseManager databaseManager) {
         this.databaseManager = databaseManager;
     }
 
-    /**
-     * Inserts a newly placed minion and returns its generated database id.
-     *
-     * @param data the minion data to persist (its id field is ignored)
-     * @param storagePagesJson serialized multi-page inventory contents, may be {@code null} for empty storage
-     * @return the generated row id
-     * @throws SQLException if the insert fails
-     */
     public long insert(MinionData data, String storagePagesJson) throws SQLException {
         String sql = """
             INSERT INTO minions_data
@@ -60,13 +40,6 @@ public final class MinionsDao {
         }
     }
 
-    /**
-     * Updates an existing minion's full persistent state.
-     *
-     * @param data the minion data to persist, must have a valid {@link MinionData#getId()}
-     * @param storagePagesJson serialized multi-page inventory contents, may be {@code null} for empty storage
-     * @throws SQLException if the update fails
-     */
     public void update(MinionData data, String storagePagesJson) throws SQLException {
         String sql = """
             UPDATE minions_data SET
@@ -99,14 +72,6 @@ public final class MinionsDao {
         }
     }
 
-    /**
-     * Persists just the entity uuid for a minion, called right after
-     * its visual entity is (re)spawned.
-     *
-     * @param id the minion's database id
-     * @param entityUuid the entity uuid to store, may be {@code null}
-     * @throws SQLException if the update fails
-     */
     public void updateEntityUuid(long id, UUID entityUuid) throws SQLException {
         String sql = "UPDATE minions_data SET entity_uuid = ? WHERE id = ?";
         try (Connection connection = databaseManager.getConnection();
@@ -117,12 +82,6 @@ public final class MinionsDao {
         }
     }
 
-    /**
-     * Deletes a minion permanently.
-     *
-     * @param id the minion's database id
-     * @throws SQLException if the delete fails
-     */
     public void delete(long id) throws SQLException {
         String sql = "DELETE FROM minions_data WHERE id = ?";
         try (Connection connection = databaseManager.getConnection();
@@ -132,13 +91,6 @@ public final class MinionsDao {
         }
     }
 
-    /**
-     * Finds a single minion by its database id.
-     *
-     * @param id the minion's database id
-     * @return the minion, or {@code null} if it doesn't exist
-     * @throws SQLException if the query fails
-     */
     public MinionData findById(long id) throws SQLException {
         String sql = "SELECT * FROM minions_data WHERE id = ?";
         try (Connection connection = databaseManager.getConnection();
@@ -150,13 +102,6 @@ public final class MinionsDao {
         }
     }
 
-    /**
-     * Finds every minion owned by a player.
-     *
-     * @param ownerUuid the owning player's uuid
-     * @return the player's minions
-     * @throws SQLException if the query fails
-     */
     public List<MinionData> findByOwner(UUID ownerUuid) throws SQLException {
         String sql = "SELECT * FROM minions_data WHERE owner_uuid = ?";
         List<MinionData> results = new ArrayList<>();
@@ -172,14 +117,6 @@ public final class MinionsDao {
         return results;
     }
 
-    /**
-     * Loads every minion in the database, used at startup by
-     * {@code MinionManager} to load minion state (their live entity
-     * is re-attached lazily via chunk load events, not spawned here).
-     *
-     * @return every persisted minion
-     * @throws SQLException if the query fails
-     */
     public List<MinionData> findAll() throws SQLException {
         String sql = "SELECT * FROM minions_data";
         List<MinionData> results = new ArrayList<>();
@@ -193,13 +130,6 @@ public final class MinionsDao {
         return results;
     }
 
-    /**
-     * Reads the raw serialized multi-page storage contents for a minion.
-     *
-     * @param id the minion's database id
-     * @return the serialized storage pages JSON, or {@code null} if empty/not found
-     * @throws SQLException if the query fails
-     */
     public String findStoragePagesJson(long id) throws SQLException {
         String sql = "SELECT storage_pages_json FROM minions_data WHERE id = ?";
         try (Connection connection = databaseManager.getConnection();
@@ -211,17 +141,6 @@ public final class MinionsDao {
         }
     }
 
-    /**
-     * Reads the legacy single-page {@code storage_json} column, used
-     * only as a one-time fallback by {@code MinionManager.loadAll}
-     * when a row predates the multi-page migration (its {@code
-     * storage_pages_json} is still null but it may hold old data
-     * under the original column name).
-     *
-     * @param id the minion's database id
-     * @return the legacy serialized storage JSON, or {@code null} if empty/not found/column absent
-     * @throws SQLException if the query fails
-     */
     public String findLegacyStorageJson(long id) throws SQLException {
         String sql = "SELECT storage_json FROM minions_data WHERE id = ?";
         try (Connection connection = databaseManager.getConnection();

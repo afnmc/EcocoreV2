@@ -100,7 +100,8 @@ public final class ShopCatalogLoader {
                 ShopItemRecord record = new ShopItemRecord(
                         def.id(), def.category(), def.material(), null,
                         def.basePrice(), def.basePrice(), minPrice, maxPrice,
-                        maxStock, maxStock, elasticity, def.tradeable(), System.currentTimeMillis()
+                        maxStock, maxStock, elasticity, def.tradeable(), System.currentTimeMillis(),
+                        0L, 0, 0L
                 );
                 shopItemDao.upsert(record);
                 created++;

@@ -56,7 +56,7 @@ public final class ConfigManager {
         pricesConfig = new PricesConfig(loadYaml("prices.yml"));
         inflationConfig = new InflationConfig(loadYaml("inflation.yml"));
         jobsConfig = new JobsConfig(loadYaml("jobs.yml"));
-        minionsConfig = new MinionsConfig(loadYaml("minions.yml"));
+        minionsConfig = new MinionsConfig(plugin.getLogger(), loadYaml("minions.yml"));
         discordConfig = new DiscordConfig(loadYaml("discord.yml"));
         blacklistConfig = new BlacklistConfig(loadYaml("blacklist.yml"));
         databaseConfig = new DatabaseConfig(loadYaml("database.yml"));

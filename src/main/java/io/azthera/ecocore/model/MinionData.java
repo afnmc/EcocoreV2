@@ -146,12 +146,6 @@ public final class MinionData {
         return energy;
     }
 
-    /**
-     * Consumes energy for a minion action.
-     *
-     * @param amount energy to consume
-     * @return {@code true} if there was enough energy, {@code false} otherwise
-     */
     public boolean consumeEnergy(int amount) {
         if (energy < amount) {
             return false;
@@ -224,35 +218,15 @@ public final class MinionData {
         this.autoRepair = autoRepair;
     }
 
-    /**
-     * The cardinal direction locked in when this minion was placed.
-     * Always one of NORTH/SOUTH/EAST/WEST - never changes after
-     * placement (Revisi 1).
-     *
-     * @return the minion's fixed facing direction
-     */
     public BlockFace getFacing() {
         return facing;
     }
 
-    /**
-     * Sets the minion's facing. Only ever called once, immediately
-     * after placement - the AI controller must never call this.
-     *
-     * @param facing the cardinal direction to lock in
-     */
     public void setFacing(BlockFace facing) {
         this.facing = facing;
         touch();
     }
 
-    /**
-     * Whether a BOTH-work-mode minion is currently toggled into arena
-     * (360-degree) mode rather than its facing-only default. No
-     * effect on minions whose {@link MinionWorkMode} isn't BOTH.
-     *
-     * @return {@code true} if arena mode is active
-     */
     public boolean isUseArenaMode() {
         return useArenaMode;
     }
@@ -262,12 +236,6 @@ public final class MinionData {
         touch();
     }
 
-    /**
-     * How many 54-slot storage pages this minion currently has
-     * unlocked (Revisi 11), from 1 up to the configured max.
-     *
-     * @return the number of unlocked storage pages
-     */
     public int getStoragePageCount() {
         return storagePageCount;
     }
@@ -289,12 +257,6 @@ public final class MinionData {
         return entityUuid;
     }
 
-    /**
-     * Updates the tagged visual entity's uuid, called right after the
-     * minion's entity is (re)spawned.
-     *
-     * @param entityUuid the new entity uuid
-     */
     public void setEntityUuid(UUID entityUuid) {
         this.entityUuid = entityUuid;
         touch();

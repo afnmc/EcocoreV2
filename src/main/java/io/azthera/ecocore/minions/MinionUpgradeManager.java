@@ -1,4 +1,3 @@
-// FILE: src/main/java/io/azthera/ecocore/minions/MinionUpgradeManager.java
 package io.azthera.ecocore.minions;
 
 import io.azthera.ecocore.config.MinionsConfig;
@@ -13,21 +12,14 @@ import java.util.UUID;
  * enforcing the per-upgrade-type caps from {@code minions.yml} and
  * charging the owner via {@link EconomyEngine}.
  *
- * Revisi 11 replaced the old flat storage-slot-count model with
- * discrete storage pages (1-10, each a full 54-slot page) - {@link
- * UpgradeType#STORAGE_PAGE} tracks upgrades by page count directly
- * rather than deriving a tier from a slot count, which is what
- * caused the old "max level GUI won't open" bug: a flat slot count
- * could drift out of sync with the configured step size and produce
- * a negative or nonsensical tier. Page count is a plain integer with
- * a hard ceiling, so {@link #canUpgrade} can never miscompute.
+ * <p>Revisi 11 replaced the old flat storage-slot-count model with
+ * discrete storage pages (1-10, each a full 54-slot page).
+ * {@link UpgradeType#STORAGE_PAGE} tracks upgrades by page count
+ * directly, and {@link #canUpgrade}/{@link #computeUpgradeCost} are
+ * total functions that can never throw or misbehave at the max
+ * level (Revisi 14 fix for the old "GUI won't open at max" bug).
  */
 public final class MinionUpgradeManager {
-
-    private static final double STORAGE_PAGE_BASE_COST = 500.0;
-    private static final double RADIUS_UPGRADE_BASE_COST = 400.0;
-    private static final double SPEED_UPGRADE_BASE_COST = 500.0;
-    private static final double COST_GROWTH_PER_LEVEL = 1.35;
 
     private final MinionsConfig minionsConfig;
     private final EconomyEngine economyEngine;
@@ -43,47 +35,21 @@ public final class MinionUpgradeManager {
         SPEED
     }
 
-    /**
-     * The configured max number of storage pages any minion may unlock (Revisi 11).
-     *
-     * @return the max storage page count, always at least 1
-     */
     public int getMaxStoragePages() {
         return Math.max(1, minionsConfig.getMaxStoragePages());
     }
 
-    /**
-     * Whether a minion can still be upgraded in the given dimension.
-     * Always a safe, total function - never throws, never returns an
-     * inconsistent result at the boundary (this is the fix for
-     * Revisi 14's "GUI won't open at max level" bug).
-     *
-     * @param data the minion's persistent data
-     * @param type the upgrade type to check
-     * @return {@code true} if another upgrade of this type is available
-     */
     public boolean canUpgrade(MinionData data, UpgradeType type) {
         if (data == null) {
             return false;
         }
         return switch (type) {
-            case STORAGE_PAGE -> data.getStoragePageCount() getMaxStoragePages();
-            case RADIUS -> currentRadiusUpgrades(data) .getMaxRadiusUpgrades();
+            case STORAGE_PAGE -> data.getStoragePageCount() < getMaxStoragePages();
+            case RADIUS -> currentRadiusUpgrades(data) < minionsConfig.getMaxRadiusUpgrades();
             case SPEED -> data.getSpeedTicks() > minionsConfig.getMinSpeedTicks();
         };
     }
 
-    /**
-     * Computes the cost of the next upgrade of a given type. Safe to
-     * call even when {@link #canUpgrade} is {@code false} - simply
-     * returns the cost the next tier WOULD have cost, for display
-     * purposes; callers must still gate the actual purchase on
-     * {@link #canUpgrade}.
-     *
-     * @param data the minion's persistent data
-     * @param type the upgrade type
-     * @return the cost, growing geometrically with each successive upgrade
-     */
     public double computeUpgradeCost(MinionData data, UpgradeType type) {
         if (data == null) {
             return 0;
@@ -94,11 +60,11 @@ public final class MinionUpgradeManager {
             case SPEED -> currentSpeedUpgrades(data);
         };
         double baseCost = switch (type) {
-            case STORAGE_PAGE -> STORAGE_PAGE_BASE_COST;
-            case RADIUS -> RADIUS_UPGRADE_BASE_COST;
-            case SPEED -> SPEED_UPGRADE_BASE_COST;
+            case STORAGE_PAGE -> minionsConfig.getStoragePageUpgradeBaseCost();
+            case RADIUS -> minionsConfig.getRadiusUpgradeBaseCost();
+            case SPEED -> minionsConfig.getSpeedUpgradeBaseCost();
         };
-        return baseCost * Math.pow(COST_GROWTH_PER_LEVEL, currentTier);
+        return baseCost * Math.pow(minionsConfig.getUpgradeCostGrowthPerLevel(), currentTier);
     }
 
     /**
@@ -132,14 +98,6 @@ public final class MinionUpgradeManager {
         return true;
     }
 
-    /**
-     * Computes a minion's level from its total purchased upgrades
-     * (storage pages beyond the first + radius + speed tiers
-     * combined), starting at level 1 with zero upgrades.
-     *
-     * @param data the minion's persistent data (after the upgrade has been applied)
-     * @return the minion's current level
-     */
     public int computeLevel(MinionData data) {
         return 1 + Math.max(0, data.getStoragePageCount() - 1) + currentRadiusUpgrades(data) + currentSpeedUpgrades(data);
     }

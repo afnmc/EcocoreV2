@@ -1,8 +1,8 @@
-// FILE: src/main/java/io/azthera/ecocore/listener/MinionInteractListener.java
 package io.azthera.ecocore.listener;
 
 import io.azthera.ecocore.config.GuiConfig;
 import io.azthera.ecocore.config.MinionsConfig;
+import io.azthera.ecocore.database.dao.MinionConnectionDao;
 import io.azthera.ecocore.gui.GuiManager;
 import io.azthera.ecocore.gui.minions.MinionConnectorEntityGui;
 import io.azthera.ecocore.gui.minions.MinionUpgradeGui;
@@ -22,12 +22,12 @@ import org.bukkit.inventory.ItemStack;
 /**
  * Handles right-clicking a placed minion or a {@code
  * MinionConnectorEntity}. Revisi 9 replaced the old dedicated
- * "Connector Tool" item entirely: the connect-flow is now started
- * from the "Connector" button inside {@link MinionUpgradeGui}, which
- * puts the player into a pending-selection state via {@code
+ * "Connector Tool" item entirely: the connect-flow now starts from
+ * the "Connector" button inside {@link MinionUpgradeGui}, which puts
+ * the player into a pending-selection state via {@code
  * MinionConnectorManager.beginSelection}; the very next minion they
- * right-click (with an empty/non-fuel hand, no special tool needed)
- * becomes the destination and the link is validated and created
+ * right-click (no special tool needed) becomes the destination and
+ * the link mode (direct vs relay) is auto-detected and created
  * automatically. Cara connect ini sama untuk semua minion.
  */
 public final class MinionInteractListener implements Listener {
@@ -77,10 +77,6 @@ public final class MinionInteractListener implements Listener {
             return;
         }
 
-        // Revisi 9: if this player has a pending connector selection in
-        // progress, this click completes it as the destination - regardless
-        // of what's in their hand, and regardless of minion type (cara
-        // connect sama untuk semua minion).
         Long pendingSourceId = connectorManager.getPendingSource(player.getUniqueId());
         if (pendingSourceId != null) {
             handlePendingConnectionClick(player, pendingSourceId, data);
@@ -88,14 +84,14 @@ public final class MinionInteractListener implements Listener {
         }
 
         if (!data.getOwnerUuid().equals(player.getUniqueId()) && !player.hasPermission("ecocore.admin")) {
-            player.sendMessage("§cIni minion punya orang lain.");
+            player.sendMessage("\u00a7cIni minion punya orang lain.");
             return;
         }
 
         ItemStack handItem = player.getInventory().getItemInMainHand();
         if (fuelManager.isFuelItem(handItem.getType())) {
             if (fuelManager.refuelFromHand(data, handItem)) {
-                player.sendMessage("§aBerhasil isi fuel! Sisa fuel: §f"
+                player.sendMessage("\u00a7aBerhasil isi fuel! Sisa fuel: \u00a7f"
                         + (data.getFuelTicksRemaining() / 20) + " detik.");
             }
             return;
@@ -107,38 +103,32 @@ public final class MinionInteractListener implements Listener {
         upgradeGui.open();
     }
 
-    /**
-     * Completes a pending connect-flow selection: this minion becomes
-     * the destination, mode (DIRECT vs RELAY) is auto-detected from
-     * whether a {@code MinionConnectorEntity} sits at either endpoint
-     * (Revisi 9), and the link is validated/created if possible.
-     */
     private void handlePendingConnectionClick(Player player, long pendingSourceId, MinionData destinationData) {
         connectorManager.clearSelection(player.getUniqueId());
         if (pendingSourceId == destinationData.getId()) {
-            player.sendMessage("§cGak bisa connect minion ke dirinya sendiri.");
+            player.sendMessage("\u00a7cGak bisa connect minion ke dirinya sendiri.");
             return;
         }
         MinionData sourceData = minionManager.getMinion(pendingSourceId);
         if (sourceData == null) {
-            player.sendMessage("§cSource sebelumnya udah gak ada. Coba mulai ulang dari tombol Connector.");
+            player.sendMessage("\u00a7cSource sebelumnya udah gak ada. Coba mulai ulang dari tombol Connector.");
             return;
         }
         MinionConnectorManager.ResolvedLink resolvedLink = connectorManager.resolveLink(sourceData, destinationData);
         if (!resolvedLink.isValid()) {
-            player.sendMessage("§cGak bisa bikin koneksi ini: §f" + resolvedLink.rejectionReason());
+            player.sendMessage("\u00a7cGak bisa bikin koneksi ini: \u00a7f" + resolvedLink.rejectionReason());
             return;
         }
         boolean connected = connectorManager.connect(player.getUniqueId(), sourceData.getId(),
                 destinationData.getId(), resolvedLink);
         if (connected) {
-            String modeLabel = resolvedLink.linkMode() == io.azthera.ecocore.database.dao.MinionConnectionDao.LinkMode.RELAY
-                    ? "§d(via Minion Connector - relay)" : "§a(direct)";
-            player.sendMessage("§bBerhasil connect: §f" + sourceData.getType().configKey() + " §b-> §f"
+            String modeLabel = resolvedLink.linkMode() == MinionConnectionDao.LinkMode.RELAY
+                    ? "\u00a7d(via Minion Connector - relay)" : "\u00a7a(direct)";
+            player.sendMessage("\u00a7bBerhasil connect: \u00a7f" + sourceData.getType().configKey() + " \u00a7b-> \u00a7f"
                     + destinationData.getType().configKey() + " " + modeLabel);
             guiManager.playSound(player, "click");
         } else {
-            player.sendMessage("§cGagal membuat koneksi.");
+            player.sendMessage("\u00a7cGagal membuat koneksi.");
         }
     }
 
@@ -148,7 +138,7 @@ public final class MinionInteractListener implements Listener {
             return;
         }
         if (!connector.getOwnerUuid().equals(player.getUniqueId()) && !player.hasPermission("ecocore.admin")) {
-            player.sendMessage("§cIni Minion Connector punya orang lain.");
+            player.sendMessage("\u00a7cIni Minion Connector punya orang lain.");
             return;
         }
         MinionConnectorEntityGui gui = new MinionConnectorEntityGui(player, connectorEntityManager, guiManager, connectorId);

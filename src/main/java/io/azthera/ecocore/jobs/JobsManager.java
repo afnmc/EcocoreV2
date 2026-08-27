@@ -156,7 +156,14 @@ public final class JobsManager {
                 JobProgressTracker.ActionResult result = progressTracker.applyAction(
                         playerUuid, handler, actionKey, jobBonusMultiplier);
                 if (result != null) {
-                    missionManager.recordActionForMissions(playerUuid, handler.getType(), 1, jobBonusMultiplier);
+                    io.azthera.ecocore.model.MissionType missionType = mapActionKeyToMissionType(actionKey);
+                    String missionTarget = mapActionKeyToTarget(actionKey);
+                    if (missionType != null) {
+                        missionManager.recordActionForMissions(
+                                playerUuid, handler.getType(), missionType, missionTarget, 1, jobBonusMultiplier);
+                    } else {
+                        missionManager.recordActionForMissions(playerUuid, handler.getType(), 1, jobBonusMultiplier);
+                    }
 
                     if (result.leveledUp()) {
                         notifyLevelUp(playerUuid, handler.getType(), result.newLevel());
@@ -167,6 +174,102 @@ public final class JobsManager {
                         + " for " + playerUuid + ": " + exception.getMessage());
             }
         }
+    }
+
+    /**
+     * Maps a job action key (e.g. "BREAK_DIAMOND_ORE", "HARVEST_WHEAT")
+     * to its corresponding {@link io.azthera.ecocore.model.MissionType}
+     * (Revisi 18), following the VERB_TARGET convention used
+     * throughout the job handlers.
+     *
+     * @param actionKey the raw action key from a job handler
+     * @return the corresponding mission type, or {@code null} if unrecognized
+     */
+    private io.azthera.ecocore.model.MissionType mapActionKeyToMissionType(String actionKey) {
+        if (actionKey == null) {
+            return null;
+        }
+        String upper = actionKey.toUpperCase();
+        if (upper.startsWith("BREAK_")) {
+            if (upper.contains("ORE")) {
+                return io.azthera.ecocore.model.MissionType.MINE_ORE;
+            }
+            if (upper.contains("STONE") || upper.contains("DEEPSLATE")) {
+                return io.azthera.ecocore.model.MissionType.MINE_STONE;
+            }
+            return io.azthera.ecocore.model.MissionType.BREAK_BLOCK;
+        }
+        if (upper.startsWith("PLACE_")) {
+            return io.azthera.ecocore.model.MissionType.PLACE_BLOCK;
+        }
+        if (upper.startsWith("HARVEST_")) {
+            return io.azthera.ecocore.model.MissionType.HARVEST_CROP;
+        }
+        if (upper.startsWith("PLANT_")) {
+            return io.azthera.ecocore.model.MissionType.PLANT_CROP;
+        }
+        if (upper.startsWith("CHOP_")) {
+            return io.azthera.ecocore.model.MissionType.CHOP_TREE;
+        }
+        if (upper.startsWith("COLLECT_EGG")) {
+            return io.azthera.ecocore.model.MissionType.COLLECT_EGG;
+        }
+        if (upper.startsWith("COLLECT_")) {
+            return io.azthera.ecocore.model.MissionType.COLLECT_ITEM;
+        }
+        if (upper.startsWith("CRAFT_")) {
+            return io.azthera.ecocore.model.MissionType.CRAFT_ITEM;
+        }
+        if (upper.startsWith("SMELT_")) {
+            return io.azthera.ecocore.model.MissionType.SMELT_ITEM;
+        }
+        if (upper.startsWith("FISH_")) {
+            return io.azthera.ecocore.model.MissionType.FISH_ITEM;
+        }
+        if (upper.startsWith("KILL_")) {
+            return io.azthera.ecocore.model.MissionType.KILL_MOB;
+        }
+        if (upper.startsWith("BREED_")) {
+            return io.azthera.ecocore.model.MissionType.BREED_ANIMAL;
+        }
+        if (upper.startsWith("SHEAR_")) {
+            return io.azthera.ecocore.model.MissionType.SHEAR_SHEEP;
+        }
+        if (upper.startsWith("MILK_")) {
+            return io.azthera.ecocore.model.MissionType.MILK_COW;
+        }
+        if (upper.startsWith("TRADE_") || upper.equals("TRADE")) {
+            return io.azthera.ecocore.model.MissionType.TRADE;
+        }
+        if (upper.startsWith("ENCHANT_") || upper.equals("ENCHANT")) {
+            return io.azthera.ecocore.model.MissionType.ENCHANT;
+        }
+        if (upper.startsWith("BREW_")) {
+            return io.azthera.ecocore.model.MissionType.BREW_POTION;
+        }
+        if (upper.startsWith("SELL_")) {
+            return io.azthera.ecocore.model.MissionType.SELL_ITEM;
+        }
+        if (upper.startsWith("BUY_")) {
+            return io.azthera.ecocore.model.MissionType.BUY_SHOP;
+        }
+        return null;
+    }
+
+    /**
+     * Extracts the specific target material/entity/item from an
+     * action key following the VERB_TARGET convention.
+     *
+     * @param actionKey the raw action key
+     * @return the extracted target, or {@code null} if there's no target portion
+     */
+    private String mapActionKeyToTarget(String actionKey) {
+        if (actionKey == null || !actionKey.contains("_")) {
+            return null;
+        }
+        int firstUnderscore = actionKey.indexOf('_');
+        String remainder = actionKey.substring(firstUnderscore + 1);
+        return remainder.isBlank() ? null : remainder.toUpperCase();
     }
 
     private void notifyLevelUp(UUID playerUuid, JobType type, int newLevel) {

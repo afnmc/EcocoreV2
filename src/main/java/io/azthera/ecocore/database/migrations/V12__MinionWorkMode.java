@@ -1,4 +1,3 @@
-// FILE: src/main/java/io/azthera/ecocore/database/migrations/V12__MinionWorkMode.java
 package io.azthera.ecocore.database.migrations;
 
 import java.sql.Connection;
@@ -7,11 +6,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-/**
- * Adds a {@code use_arena_mode} column to {@code minions_data} for
- * minion types whose work mode is BOTH (Revisi 2), letting the
- * player toggle between facing-only and 360-degree arena work.
- */
 public final class V12__MinionWorkMode implements Migration {
 
     @Override

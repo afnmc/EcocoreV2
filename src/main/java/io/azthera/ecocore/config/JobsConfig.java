@@ -1,9 +1,12 @@
 package io.azthera.ecocore.config;
 
+import io.azthera.ecocore.jobs.MissionTemplate;
 import io.azthera.ecocore.model.JobType;
+import io.azthera.ecocore.model.MissionType;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +45,10 @@ public final class JobsConfig {
     private final List<Integer> perkUnlockLevels;
     private final int skillTreePointsPerLevel;
     private final int skillTreeMaxBranches;
+
+    private final Map<JobType, List<MissionTemplate>> missionPools = new EnumMap<>(JobType.class);
+    private final double antiAbuseCooldownSeconds;
+    private final int antiAbuseDailyActionCap;
 
     /**
      * Parses jobs configuration from the loaded {@code jobs.yml}.
@@ -84,6 +91,48 @@ public final class JobsConfig {
         this.perkUnlockLevels = config.getIntegerList("perks.perk-unlock-levels");
         this.skillTreePointsPerLevel = config.getInt("skill-tree.points-per-level", 1);
         this.skillTreeMaxBranches = config.getInt("skill-tree.max-branches", 3);
+
+        loadMissionPools(config.getConfigurationSection("mission-pools"));
+        this.antiAbuseCooldownSeconds = config.getDouble("anti-abuse.action-cooldown-seconds", 0.5);
+        this.antiAbuseDailyActionCap = config.getInt("anti-abuse.daily-action-cap-per-mission", 5000);
+    }
+
+    private void loadMissionPools(ConfigurationSection poolsSection) {
+        if (poolsSection == null) {
+            return;
+        }
+        for (String jobKey : poolsSection.getKeys(false)) {
+            JobType jobType = JobType.fromConfigKey(jobKey);
+            if (jobType == null) {
+                continue;
+            }
+            List<Map<?, ?>> entries = poolsSection.getMapList(jobKey);
+            List<MissionTemplate> templates = new ArrayList<>();
+            for (Map<?, ?> entry : entries) {
+                MissionType missionType = MissionType.fromConfigKey(String.valueOf(entry.get("type")));
+                if (missionType == null) {
+                    continue;
+                }
+                Object targetRaw = entry.get("target");
+                String target = targetRaw != null ? String.valueOf(targetRaw) : null;
+                int minAmount = entry.get("min-amount") != null ? ((Number) entry.get("min-amount")).intValue() : 10;
+                int maxAmount = entry.get("max-amount") != null ? ((Number) entry.get("max-amount")).intValue() : 50;
+                double moneyPerUnit = entry.get("money-per-unit") != null ? ((Number) entry.get("money-per-unit")).doubleValue() : 2.0;
+                double xpPerUnit = entry.get("xp-per-unit") != null ? ((Number) entry.get("xp-per-unit")).doubleValue() : 5.0;
+                double weight = entry.get("weight") != null ? ((Number) entry.get("weight")).doubleValue() : 1.0;
+                boolean dailyEligible = entry.get("daily") == null || Boolean.TRUE.equals(entry.get("daily"));
+                boolean weeklyEligible = entry.get("weekly") == null || Boolean.TRUE.equals(entry.get("weekly"));
+                boolean enabled = entry.get("enabled") == null || Boolean.TRUE.equals(entry.get("enabled"));
+                if (!enabled) {
+                    continue;
+                }
+                templates.add(new MissionTemplate(missionType, target, minAmount, maxAmount,
+                        moneyPerUnit, xpPerUnit, weight, dailyEligible, weeklyEligible));
+            }
+            if (!templates.isEmpty()) {
+                missionPools.put(jobType, templates);
+            }
+        }
     }
 
     public int getMaxLevel() {
@@ -164,5 +213,17 @@ public final class JobsConfig {
 
     public int getSkillTreeMaxBranches() {
         return skillTreeMaxBranches;
+    }
+
+    public List<MissionTemplate> getMissionPool(JobType type) {
+        return missionPools.getOrDefault(type, List.of());
+    }
+
+    public double getAntiAbuseCooldownSeconds() {
+        return antiAbuseCooldownSeconds;
+    }
+
+    public int getAntiAbuseDailyActionCap() {
+        return antiAbuseDailyActionCap;
     }
 }

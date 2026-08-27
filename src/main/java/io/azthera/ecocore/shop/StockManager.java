@@ -98,8 +98,22 @@ public final class StockManager {
                 return false;
             }
 
+            // Revisi 17: only non-admin restocks count toward the
+            // cooldown/daily-cap tracking - a manual admin adjustment is
+            // a deliberate override and should never be throttled by it.
+            boolean isThrottledRestockEvent = eventType.equals(EVENT_RESTOCK_SCHEDULED)
+                    || eventType.equals(EVENT_RESTOCK_EMERGENCY)
+                    || eventType.equals(EVENT_RESTOCK_RANDOM);
+            if (isThrottledRestockEvent) {
+                item.recordRestock(System.currentTimeMillis());
+            }
+
             try {
                 shopItemDao.updateStock(itemId, after, item.getUpdatedAt());
+                if (isThrottledRestockEvent) {
+                    shopItemDao.updateRestockTracking(itemId, item.getLastRestockAt(),
+                            item.getRestocksToday(), item.getRestockDayEpoch());
+                }
                 stockEventDao.insert(itemId, eventType, after - before, after);
                 return true;
             } catch (SQLException exception) {
