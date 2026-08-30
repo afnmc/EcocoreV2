@@ -105,6 +105,10 @@ public final class ConfigManager {
         return mainConfig.getBoolean("debug", false);
     }
 
+    public boolean isClaimProtectionEnabled() {
+        return mainConfig.getBoolean("claim-protection-enabled", true);
+    }
+
     public String getLocale() {
         return mainConfig.getString("locale", "id_ID");
     }

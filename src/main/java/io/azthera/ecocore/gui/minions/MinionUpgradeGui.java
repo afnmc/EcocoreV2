@@ -77,10 +77,16 @@ public final class MinionUpgradeGui extends AbstractGui {
         inventory.clear();
         MinionUpgradeManager upgrades = resolveUpgradeManager();
         inventory.setItem(SUMMARY_SLOT, buildSummaryIcon(data));
+        boolean isStorageType = data.getType() == MinionType.STORAGE;
+        MinionUpgradeManager.UpgradeType storageUpgradeType = isStorageType
+                ? MinionUpgradeManager.UpgradeType.STORAGE_PAGE
+                : MinionUpgradeManager.UpgradeType.STORAGE_SLOTS;
+        String storageUpgradeLabel = isStorageType
+                ? "Storage " + data.getStoragePageCount() + "/" + upgrades.getMaxStoragePages() + " halaman"
+                : "Slot " + data.getActiveSlotCount() + "/" + upgrades.getMaxActiveSlotCount();
         inventory.setItem(STORAGE_UPGRADE_SLOT, buildUpgradeIcon(
                 Material.CHEST, "\u00a7eUpgrade Storage", data, upgrades,
-                MinionUpgradeManager.UpgradeType.STORAGE_PAGE,
-                "Storage " + data.getStoragePageCount() + "/" + upgrades.getMaxStoragePages()));
+                storageUpgradeType, storageUpgradeLabel));
         inventory.setItem(RADIUS_UPGRADE_SLOT, buildUpgradeIcon(
                 Material.SPYGLASS, "\u00a7bUpgrade Radius", data, upgrades,
                 MinionUpgradeManager.UpgradeType.RADIUS, data.getRadius() + " block"));
@@ -218,7 +224,9 @@ public final class MinionUpgradeGui extends AbstractGui {
         }
 
         MinionUpgradeManager.UpgradeType type = switch (slot) {
-            case STORAGE_UPGRADE_SLOT -> MinionUpgradeManager.UpgradeType.STORAGE_PAGE;
+            case STORAGE_UPGRADE_SLOT -> data.getType() == MinionType.STORAGE
+                    ? MinionUpgradeManager.UpgradeType.STORAGE_PAGE
+                    : MinionUpgradeManager.UpgradeType.STORAGE_SLOTS;
             case RADIUS_UPGRADE_SLOT -> MinionUpgradeManager.UpgradeType.RADIUS;
             case SPEED_UPGRADE_SLOT -> MinionUpgradeManager.UpgradeType.SPEED;
             default -> null;
@@ -237,14 +245,18 @@ public final class MinionUpgradeGui extends AbstractGui {
             MinionType minionType = data.getType();
             boolean hasZones = minionType == MinionType.SMELTER || minionType == MinionType.LUMBERJACK
                     || minionType == MinionType.FARMER;
-            if (hasZones) {
+            if (minionType == MinionType.STORAGE) {
+                MinionStorageSelectionGui pageGui = new MinionStorageSelectionGui(getViewer(), minionManager, upgrades, minionId);
+                guiManager.register(getViewer(), pageGui);
+                pageGui.open();
+            } else if (hasZones) {
                 MinionStorageSelectGui zoneGui = new MinionStorageSelectGui(getViewer(), minionManager, minionId, this);
                 guiManager.register(getViewer(), zoneGui);
                 zoneGui.open();
             } else {
-                MinionStorageSelectionGui pageGui = new MinionStorageSelectionGui(getViewer(), minionManager, upgrades, minionId);
-                guiManager.register(getViewer(), pageGui);
-                pageGui.open();
+                MinionSingleStorageGui singleGui = new MinionSingleStorageGui(getViewer(), minionManager, minionId);
+                guiManager.register(getViewer(), singleGui);
+                singleGui.open();
             }
             return;
         }
@@ -261,9 +273,10 @@ public final class MinionUpgradeGui extends AbstractGui {
 
         if (slot == CONNECTOR_SLOT) {
             MinionConnectorManager connectorManager = resolveConnectorManager();
-            connectorManager.beginSelection(getViewer().getUniqueId(), minionId);
-            getViewer().closeInventory();
-            getViewer().sendMessage("\u00a7bKlik minion \u00a7fsumber\u00a7b (biasanya minion ini), lalu klik minion \u00a7ftujuan\u00a7b buat connect.");
+            MinionConnectListGui listGui = new MinionConnectListGui(
+                    getViewer(), minionManager, connectorManager, guiManager, minionId, this);
+            guiManager.register(getViewer(), listGui);
+            listGui.open();
             return;
         }
 

@@ -127,9 +127,9 @@ public final class MinionsBuyGui extends AbstractGui {
             return;
         }
 
-        if (minionManager.countOwnedBy(viewer.getUniqueId()) >= MinionManager.DEFAULT_MAX_MINIONS_PER_PLAYER) {
+        if (minionManager.countOwnedBy(viewer.getUniqueId()) >= minionManager.getMinionsConfig().getMaxMinionsPerPlayer()) {
             viewer.sendMessage("§cLu udah mencapai batas maksimal minion ("
-                    + MinionManager.DEFAULT_MAX_MINIONS_PER_PLAYER + ").");
+                    + minionManager.getMinionsConfig().getMaxMinionsPerPlayer() + ").");
             guiManager.playSound(viewer, "error");
             return;
         }

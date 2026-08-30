@@ -17,6 +17,7 @@ import io.azthera.ecocore.database.migrations.V13__MinionConnectorEntities;
 import io.azthera.ecocore.database.migrations.V14__MinionConnections;
 import io.azthera.ecocore.database.migrations.V15__MinionStorageSlots;
 import io.azthera.ecocore.database.migrations.V16__ShopItemRestockCooldown;
+import io.azthera.ecocore.database.migrations.V17__MinionActiveSlots;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -62,6 +63,7 @@ public final class MigrationManager {
         register(new V14__MinionConnections());
         register(new V15__MinionStorageSlots());
         register(new V16__ShopItemRestockCooldown());
+        register(new V17__MinionActiveSlots());
     }
 
     /**

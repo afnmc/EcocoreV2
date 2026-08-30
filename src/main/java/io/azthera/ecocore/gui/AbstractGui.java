@@ -72,6 +72,23 @@ public abstract class AbstractGui implements InventoryHolder {
     }
 
     /**
+     * Called when the viewer completes a drag that was allowed
+     * through (every touched slot passed {@link #isFreeDragSlot}).
+     * Default implementation does nothing; screens whose free-drag
+     * slots back a live data object (e.g. a minion's storage) should
+     * override this to sync the drag's result into that object -
+     * {@link org.bukkit.event.inventory.InventoryDragEvent} fires
+     * before Bukkit has applied the drag to the inventory, so any
+     * sync here must be scheduled for the next tick rather than done
+     * inline.
+     *
+     * @param event the triggering inventory drag event
+     */
+    public void handleDrag(org.bukkit.event.inventory.InventoryDragEvent event) {
+        // No-op by default.
+    }
+
+    /**
      * Called when the viewer closes this screen. Default implementation
      * does nothing; screens holding transient state can override this
      * to clean up or return items.

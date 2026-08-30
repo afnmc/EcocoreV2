@@ -24,7 +24,6 @@ public final class MinionConnectorManager {
     }
 
     private final Map<Long, List<Edge>> outgoing = new ConcurrentHashMap<>();
-    private final Map<UUID, Long> pendingSourceSelection = new ConcurrentHashMap<>();
 
     public MinionConnectorManager(Logger logger, MinionConnectionDao connectionDao,
                                    MinionConnectorEntityManager connectorEntityManager) {
@@ -44,18 +43,6 @@ public final class MinionConnectorManager {
         } catch (SQLException exception) {
             logger.severe("[EcoCore] Failed to load minion connections: " + exception.getMessage());
         }
-    }
-
-    public void beginSelection(UUID playerUuid, long minionId) {
-        pendingSourceSelection.put(playerUuid, minionId);
-    }
-
-    public Long getPendingSource(UUID playerUuid) {
-        return pendingSourceSelection.get(playerUuid);
-    }
-
-    public void clearSelection(UUID playerUuid) {
-        pendingSourceSelection.remove(playerUuid);
     }
 
     public record ResolvedLink(MinionConnectionDao.LinkMode linkMode, Long relayConnectorId,
@@ -175,6 +162,20 @@ public final class MinionConnectorManager {
             results.add(edge.destinationId());
         }
         return results;
+    }
+
+    /**
+     * Whether a direct edge already exists from {@code sourceId} to
+     * {@code destinationId} - used by the connect-list GUI to show
+     * "sudah terhubung" instead of letting the player attempt a
+     * duplicate connection.
+     *
+     * @param sourceId the source minion's database id
+     * @param destinationId the destination minion's database id
+     * @return {@code true} if this exact source-to-destination edge already exists
+     */
+    public boolean isConnected(long sourceId, long destinationId) {
+        return getOutgoing(sourceId).stream().anyMatch(edge -> edge.destinationId() == destinationId);
     }
 
     private List<Edge> getOutgoing(long sourceId) {

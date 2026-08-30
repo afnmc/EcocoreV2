@@ -27,8 +27,8 @@ public final class MinionsDao {
             INSERT INTO minions_data
             (owner_uuid, type, level, xp, energy, fuel_ticks_remaining, world, x, y, z,
              radius, speed_ticks, auto_repair, facing, use_arena_mode,
-             storage_page_count, storage_pages_json, entity_uuid, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             storage_page_count, active_slot_count, storage_pages_json, entity_uuid, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """;
         try (Connection connection = databaseManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -45,7 +45,7 @@ public final class MinionsDao {
             UPDATE minions_data SET
                 level = ?, xp = ?, energy = ?, fuel_ticks_remaining = ?, world = ?, x = ?, y = ?, z = ?,
                 radius = ?, speed_ticks = ?, auto_repair = ?, facing = ?, use_arena_mode = ?,
-                storage_page_count = ?, storage_pages_json = ?, entity_uuid = ?, updated_at = ?
+                storage_page_count = ?, active_slot_count = ?, storage_pages_json = ?, entity_uuid = ?, updated_at = ?
             WHERE id = ?
             """;
         try (Connection connection = databaseManager.getConnection();
@@ -64,10 +64,11 @@ public final class MinionsDao {
             statement.setString(12, data.getFacing().name());
             statement.setBoolean(13, data.isUseArenaMode());
             statement.setInt(14, data.getStoragePageCount());
-            statement.setString(15, storagePagesJson);
-            statement.setString(16, data.getEntityUuid() != null ? data.getEntityUuid().toString() : null);
-            statement.setLong(17, data.getUpdatedAt());
-            statement.setLong(18, data.getId());
+            statement.setInt(15, data.getActiveSlotCount());
+            statement.setString(16, storagePagesJson);
+            statement.setString(17, data.getEntityUuid() != null ? data.getEntityUuid().toString() : null);
+            statement.setLong(18, data.getUpdatedAt());
+            statement.setLong(19, data.getId());
             statement.executeUpdate();
         }
     }
@@ -172,10 +173,11 @@ public final class MinionsDao {
         statement.setString(14, data.getFacing().name());
         statement.setBoolean(15, data.isUseArenaMode());
         statement.setInt(16, data.getStoragePageCount());
-        statement.setString(17, storagePagesJson);
-        statement.setString(18, data.getEntityUuid() != null ? data.getEntityUuid().toString() : null);
-        statement.setLong(19, data.getCreatedAt());
-        statement.setLong(20, data.getUpdatedAt());
+        statement.setInt(17, data.getActiveSlotCount());
+        statement.setString(18, storagePagesJson);
+        statement.setString(19, data.getEntityUuid() != null ? data.getEntityUuid().toString() : null);
+        statement.setLong(20, data.getCreatedAt());
+        statement.setLong(21, data.getUpdatedAt());
     }
 
     private MinionData mapRow(ResultSet resultSet) throws SQLException {
@@ -187,6 +189,8 @@ public final class MinionsDao {
         } catch (IllegalArgumentException invalidFacing) {
             facing = BlockFace.SOUTH;
         }
+        int activeSlotCountRaw = resultSet.getInt("active_slot_count");
+        int activeSlotCount = activeSlotCountRaw > 0 ? activeSlotCountRaw : 9;
         return new MinionData(
                 resultSet.getLong("id"),
                 UUID.fromString(resultSet.getString("owner_uuid")),
@@ -205,6 +209,7 @@ public final class MinionsDao {
                 facing,
                 resultSet.getBoolean("use_arena_mode"),
                 Math.max(1, resultSet.getInt("storage_page_count")),
+                activeSlotCount,
                 resultSet.getLong("created_at"),
                 resultSet.getLong("updated_at"),
                 entityUuidRaw != null ? UUID.fromString(entityUuidRaw) : null

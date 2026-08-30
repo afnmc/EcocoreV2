@@ -68,6 +68,17 @@ public final class SellMainGui extends AbstractGui {
         return (rawSlot >= DEPOSIT_START_SLOT && rawSlot <= DEPOSIT_END_SLOT) || super.isFreeDragSlot(rawSlot);
     }
 
+    @Override
+    public void handleDrag(org.bukkit.event.inventory.InventoryDragEvent event) {
+        // Refresh the live price preview once Bukkit has applied the
+        // drag - matches the same 1-tick-later pattern used for clicks.
+        org.bukkit.Bukkit.getScheduler().runTask(io.azthera.ecocore.EcoCorePlugin.getInstance(), () -> {
+            if (inventory != null) {
+                inventory.setItem(PREVIEW_SLOT, buildPreviewIcon());
+            }
+        });
+    }
+
     private void render() {
         ItemStack info = new ItemStack(Material.HOPPER);
         ItemMeta infoMeta = info.getItemMeta();

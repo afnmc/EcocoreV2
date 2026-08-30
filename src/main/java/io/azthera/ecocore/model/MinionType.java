@@ -11,7 +11,8 @@ public enum MinionType {
     SMELTER,
     SELL,
     QUARRY,
-    CHEST;
+    CHEST,
+    STORAGE;
 
     public String configKey() {
         return name().toLowerCase();

@@ -43,6 +43,7 @@ public final class MinionFactory {
                 facing,
                 false,
                 1,
+                minionsConfig.getBaseActiveSlotCount(),
                 now, now, null
         );
     }

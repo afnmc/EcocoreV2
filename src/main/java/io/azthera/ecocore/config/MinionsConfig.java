@@ -34,6 +34,7 @@ public final class MinionsConfig {
     private final int maxLevel;
     private final int maxStoragePages;
     private final int maxMinionsPerPlayer;
+    private final int baseActiveSlotCount;
     private final int baseRadius;
     private final int radiusPerUpgrade;
     private final int maxRadiusUpgrades;
@@ -61,6 +62,9 @@ public final class MinionsConfig {
     private final double connectorUpgradeCostGrowth;
 
     private final double storagePageUpgradeBaseCost;
+    private final int maxActiveSlotCount;
+    private final int activeSlotsPerUpgrade;
+    private final double storageSlotUpgradeBaseCost;
     private final double radiusUpgradeBaseCost;
     private final double speedUpgradeBaseCost;
     private final double upgradeCostGrowthPerLevel;
@@ -84,6 +88,7 @@ public final class MinionsConfig {
         this.maxLevel = config.getInt("global.max-level", 50);
         this.maxStoragePages = config.getInt("global.max-storage-pages", 10);
         this.maxMinionsPerPlayer = config.getInt("global.max-minions-per-player", 20);
+        this.baseActiveSlotCount = config.getInt("global.base-active-slot-count", 9);
         this.baseRadius = config.getInt("global.base-radius", 6);
         this.radiusPerUpgrade = config.getInt("global.radius-per-upgrade", 2);
         this.maxRadiusUpgrades = config.getInt("global.max-radius-upgrades", 5);
@@ -115,6 +120,9 @@ public final class MinionsConfig {
 
         ConfigurationSection upgradesSection = config.getConfigurationSection("upgrades");
         this.storagePageUpgradeBaseCost = upgradesSection != null ? upgradesSection.getDouble("storage-page-base-cost", 500.0) : 500.0;
+        this.maxActiveSlotCount = upgradesSection != null ? upgradesSection.getInt("max-active-slot-count", 54) : 54;
+        this.activeSlotsPerUpgrade = upgradesSection != null ? upgradesSection.getInt("active-slots-per-upgrade", 9) : 9;
+        this.storageSlotUpgradeBaseCost = upgradesSection != null ? upgradesSection.getDouble("storage-slot-base-cost", 150.0) : 150.0;
         this.radiusUpgradeBaseCost = upgradesSection != null ? upgradesSection.getDouble("radius-base-cost", 400.0) : 400.0;
         this.speedUpgradeBaseCost = upgradesSection != null ? upgradesSection.getDouble("speed-base-cost", 500.0) : 500.0;
         this.upgradeCostGrowthPerLevel = upgradesSection != null ? upgradesSection.getDouble("cost-growth-per-level", 1.35) : 1.35;
@@ -336,6 +344,10 @@ public final class MinionsConfig {
         return maxMinionsPerPlayer;
     }
 
+    public int getBaseActiveSlotCount() {
+        return baseActiveSlotCount;
+    }
+
     public int getBaseRadius() {
         return baseRadius;
     }
@@ -421,6 +433,18 @@ public final class MinionsConfig {
 
     public double getStoragePageUpgradeBaseCost() {
         return storagePageUpgradeBaseCost;
+    }
+
+    public int getMaxActiveSlotCount() {
+        return maxActiveSlotCount;
+    }
+
+    public int getActiveSlotsPerUpgrade() {
+        return activeSlotsPerUpgrade;
+    }
+
+    public double getStorageSlotUpgradeBaseCost() {
+        return storageSlotUpgradeBaseCost;
     }
 
     public double getRadiusUpgradeBaseCost() {

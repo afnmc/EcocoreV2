@@ -136,15 +136,19 @@ public final class MinionsMainGui extends AbstractGui {
             boolean hasZones = minionType == io.azthera.ecocore.model.MinionType.SMELTER
                     || minionType == io.azthera.ecocore.model.MinionType.LUMBERJACK
                     || minionType == io.azthera.ecocore.model.MinionType.FARMER;
-            if (hasZones) {
-                MinionStorageSelectGui zoneGui = new MinionStorageSelectGui(viewer, minionManager, minionId, this);
-                guiManager.register(viewer, zoneGui);
-                zoneGui.open();
-            } else {
+            if (minionType == io.azthera.ecocore.model.MinionType.STORAGE) {
                 MinionStorageSelectionGui pageGui = new MinionStorageSelectionGui(
                         viewer, minionManager, io.azthera.ecocore.EcoCorePlugin.getInstance().getMinionUpgradeManager(), minionId);
                 guiManager.register(viewer, pageGui);
                 pageGui.open();
+            } else if (hasZones) {
+                MinionStorageSelectGui zoneGui = new MinionStorageSelectGui(viewer, minionManager, minionId, this);
+                guiManager.register(viewer, zoneGui);
+                zoneGui.open();
+            } else {
+                MinionSingleStorageGui singleGui = new MinionSingleStorageGui(viewer, minionManager, minionId);
+                guiManager.register(viewer, singleGui);
+                singleGui.open();
             }
             return;
         }

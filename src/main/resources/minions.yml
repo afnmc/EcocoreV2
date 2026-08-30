@@ -18,6 +18,11 @@ global:
   speed-reduction-per-upgrade-ticks: 2
   min-speed-ticks: 4
   base-energy: 1000
+  # Bug-fix round: STORAGE type alone uses max-storage-pages (above).
+  # Every other minion type instead starts with this many usable
+  # slots within its single 54-slot page, upgraded via
+  # upgrades.active-slots-per-upgrade below.
+  base-active-slot-count: 9
   energy-drain-per-action: 1
   fuel-types: [ "COAL", "COAL_BLOCK", "LAVA_BUCKET" ]
   auto-repair-enabled: true
@@ -243,6 +248,11 @@ connector:
 # ================================================================
 upgrades:
   storage-page-base-cost: 500.0
+  # Bug-fix round: non-STORAGE minions upgrade slot count instead of
+  # page count - these three keys control that.
+  max-active-slot-count: 54
+  active-slots-per-upgrade: 9
+  storage-slot-base-cost: 150.0
   radius-base-cost: 400.0
   speed-base-cost: 500.0
   cost-growth-per-level: 1.35
@@ -291,6 +301,10 @@ minions:
     display-name: "&6Chest Minion"
     icon: "BARREL"
     base-efficiency: 1.0
+  storage:
+    display-name: "&fStorage Minion"
+    icon: "CHEST"
+    base-efficiency: 1.0
 
 purchase:
   prices:
@@ -304,6 +318,7 @@ purchase:
     smelter: 500.0
     sell: 550.0
     chest: 200.0
+    storage: 350.0
 
 ai:
   # Sudah gak dipakai lagi untuk pathfinding - minion sekarang selalu

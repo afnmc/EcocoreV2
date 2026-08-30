@@ -95,7 +95,8 @@ public final class MinionManager {
         handlers.put(MinionType.SMELTER, new SmelterMinion());
         handlers.put(MinionType.SELL, new SellMinion());
         handlers.put(MinionType.QUARRY, new QuarryMinion());
-        handlers.put(MinionType.CHEST, new ChestMinion());
+        handlers.put(MinionType.CHEST, new io.azthera.ecocore.minions.types.ChestMinion());
+        handlers.put(MinionType.STORAGE, new io.azthera.ecocore.minions.types.StorageMinion());
     }
 
     public MinionHandler getHandler(MinionType type) {
@@ -306,7 +307,7 @@ public final class MinionManager {
                     data.getEnergy(), data.getFuelTicksRemaining(), data.getWorld(),
                     data.getX(), data.getY(), data.getZ(), data.getRadius(),
                     data.getSpeedTicks(), data.isAutoRepair(), data.getFacing(),
-                    data.isUseArenaMode(), data.getStoragePageCount(),
+                    data.isUseArenaMode(), data.getStoragePageCount(), data.getActiveSlotCount(),
                     data.getCreatedAt(), data.getUpdatedAt(), null
             );
             Entity entity = spawnVisualEntity(location, persisted);

@@ -126,6 +126,8 @@ public final class GuiManager {
                 return;
             }
         }
+
+        gui.handleDrag(event);
     }
 
     /**

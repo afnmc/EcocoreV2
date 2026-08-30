@@ -15,9 +15,11 @@ import java.util.Optional;
 /**
  * Finds the nearest matching block or entity for a STATIONARY
  * minion's next action, either within a full 360-degree radius
- * (ARENA mode) or along a directional slab in its locked facing
- * direction (FACING mode - Revisi 1/2). Minions never move from
- * where they were placed and never use pathfinding of any kind.
+ * (ARENA mode) or along a STRICT 1-WIDE STRAIGHT LINE in its locked
+ * facing direction (FACING mode - bug-fix round: narrowed from a
+ * wide slab to a strict straight line per explicit instruction).
+ * Minions never move from where they were placed and never use
+ * pathfinding of any kind.
  *
  * <p>Deliberately does NOT require a clear line of sight to the
  * target: for block-breaking minions especially, the whole point is
@@ -55,15 +57,17 @@ public final class MinionTargetSelector {
     }
 
     /**
-     * Finds the nearest matching block within a rectangular slab
-     * extending outward from the minion in its locked facing
-     * direction (FACING mode - Revisi 1/2), rather than a single
-     * one-block-wide line, so a Miner facing east tunnels a wide
-     * east-facing shaft instead of a pencil-thin line.
+     * Finds the nearest matching block along a STRICT 1-WIDE straight
+     * line extending outward from the minion in its locked facing
+     * direction (FACING mode) - no sideways spread at all, exactly
+     * the column of blocks directly ahead of the minion.
      */
-    public Optional<Block> findNearestBlockInFacingSlab(Location origin, BlockFace facing, int radius,
-                                                          MinionHandler handler) {
+    public Optional<Block> findNearestBlockInFacingLine(Location origin, BlockFace facing, int radius,
+                                                         MinionHandler handler) {
         if (handler.getTargetMaterials().isEmpty() || origin.getWorld() == null) {
+            return Optional.empty();
+        }
+        if (facing.getModX() == 0 && facing.getModZ() == 0) {
             return Optional.empty();
         }
         int baseX = origin.getBlockX();
@@ -72,21 +76,17 @@ public final class MinionTargetSelector {
         Block nearest = null;
         double nearestDistanceSq = Double.MAX_VALUE;
         for (int depth = 1; depth <= radius; depth++) {
-            int centerX = baseX + facing.getModX() * depth;
-            int centerZ = baseZ + facing.getModZ() * depth;
-            for (int side = -radius; side <= radius; side++) {
-                for (int dy = -Math.min(radius, 6); dy <= Math.min(radius, 6); dy++) {
-                    int x = facing.getModX() == 0 ? centerX + side : centerX;
-                    int z = facing.getModZ() == 0 ? centerZ + side : centerZ;
-                    Block block = origin.getWorld().getBlockAt(x, baseY + dy, z);
-                    if (!handler.getTargetMaterials().contains(block.getType())) {
-                        continue;
-                    }
-                    double distanceSq = block.getLocation().distanceSquared(origin);
-                    if (distanceSq < nearestDistanceSq) {
-                        nearestDistanceSq = distanceSq;
-                        nearest = block;
-                    }
+            int x = baseX + facing.getModX() * depth;
+            int z = baseZ + facing.getModZ() * depth;
+            for (int dy = -Math.min(radius, 6); dy <= Math.min(radius, 6); dy++) {
+                Block block = origin.getWorld().getBlockAt(x, baseY + dy, z);
+                if (!handler.getTargetMaterials().contains(block.getType())) {
+                    continue;
+                }
+                double distanceSq = block.getLocation().distanceSquared(origin);
+                if (distanceSq < nearestDistanceSq) {
+                    nearestDistanceSq = distanceSq;
+                    nearest = block;
                 }
             }
         }
@@ -110,14 +110,25 @@ public final class MinionTargetSelector {
                 .map(entity -> (LivingEntity) entity);
     }
 
-    public Optional<LivingEntity> findBestEntityInFacingSlab(Location origin, BlockFace facing, int radius,
-                                                               MinionHandler handler) {
+    /**
+     * Finds the nearest living entity along a STRICT 1-WIDE straight
+     * line ahead of the minion (FACING mode) using a thin bounding
+     * box rather than a wide one.
+     */
+    public Optional<LivingEntity> findBestEntityInFacingLine(Location origin, BlockFace facing, int radius,
+                                                              MinionHandler handler) {
         if (handler.getTargetEntities().isEmpty() || origin.getWorld() == null) {
             return Optional.empty();
         }
-        double halfWidth = radius;
+        if (facing.getModX() == 0 && facing.getModZ() == 0) {
+            return Optional.empty();
+        }
         Location center = origin.clone().add(facing.getModX() * (radius / 2.0), 0, facing.getModZ() * (radius / 2.0));
-        BoundingBox box = BoundingBox.of(center, halfWidth, Math.min(radius, 6), halfWidth);
+        double halfLength = radius / 2.0 + 0.5;
+        double halfWidth = 0.6; // just wide enough to cover a single block column
+        BoundingBox box = facing.getModX() != 0
+                ? BoundingBox.of(center, halfLength, Math.min(radius, 6), halfWidth)
+                : BoundingBox.of(center, halfWidth, Math.min(radius, 6), halfLength);
         List<Entity> nearby = origin.getWorld().getNearbyEntities(box).stream()
                 .filter(entity -> entity instanceof LivingEntity)
                 .filter(entity -> handler.getTargetEntities().contains(entity.getType()))

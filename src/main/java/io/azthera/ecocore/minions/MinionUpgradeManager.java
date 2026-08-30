@@ -4,20 +4,24 @@ import io.azthera.ecocore.config.MinionsConfig;
 import io.azthera.ecocore.economy.EconomyEngine;
 import io.azthera.ecocore.economy.TransactionLogger;
 import io.azthera.ecocore.model.MinionData;
+import io.azthera.ecocore.model.MinionType;
 
 import java.util.UUID;
 
 /**
- * Handles purchasing minion upgrades (storage pages, radius, speed),
+ * Handles purchasing minion upgrades (storage, radius, speed),
  * enforcing the per-upgrade-type caps from {@code minions.yml} and
  * charging the owner via {@link EconomyEngine}.
  *
- * <p>Revisi 11 replaced the old flat storage-slot-count model with
- * discrete storage pages (1-10, each a full 54-slot page).
- * {@link UpgradeType#STORAGE_PAGE} tracks upgrades by page count
- * directly, and {@link #canUpgrade}/{@link #computeUpgradeCost} are
- * total functions that can never throw or misbehave at the max
- * level (Revisi 14 fix for the old "GUI won't open at max" bug).
+ * <p>Bug-fix round: storage upgrades are now split by minion type.
+ * {@link UpgradeType#STORAGE_PAGE} (adding a whole 54-slot page, up
+ * to 10) is valid ONLY for {@link MinionType#STORAGE} - every other
+ * type instead uses {@link UpgradeType#STORAGE_SLOTS}, which
+ * unlocks more of its single page's 54 slots a few at a time
+ * (starting from a small active count) rather than adding pages.
+ * {@link #canUpgrade}/{@link #computeUpgradeCost} remain total
+ * functions that can never throw or misbehave at the max level
+ * (Revisi 14).
  */
 public final class MinionUpgradeManager {
 
@@ -30,7 +34,10 @@ public final class MinionUpgradeManager {
     }
 
     public enum UpgradeType {
+        /** Adds a whole 54-slot storage page. Valid ONLY for {@link MinionType#STORAGE}. */
         STORAGE_PAGE,
+        /** Unlocks more usable slots within the single page every other minion type has. */
+        STORAGE_SLOTS,
         RADIUS,
         SPEED
     }
@@ -39,12 +46,19 @@ public final class MinionUpgradeManager {
         return Math.max(1, minionsConfig.getMaxStoragePages());
     }
 
+    public int getMaxActiveSlotCount() {
+        return Math.max(1, minionsConfig.getMaxActiveSlotCount());
+    }
+
     public boolean canUpgrade(MinionData data, UpgradeType type) {
         if (data == null) {
             return false;
         }
         return switch (type) {
-            case STORAGE_PAGE -> data.getStoragePageCount() < getMaxStoragePages();
+            case STORAGE_PAGE -> data.getType() == MinionType.STORAGE
+                    && data.getStoragePageCount() < getMaxStoragePages();
+            case STORAGE_SLOTS -> data.getType() != MinionType.STORAGE
+                    && data.getActiveSlotCount() < getMaxActiveSlotCount();
             case RADIUS -> currentRadiusUpgrades(data) < minionsConfig.getMaxRadiusUpgrades();
             case SPEED -> data.getSpeedTicks() > minionsConfig.getMinSpeedTicks();
         };
@@ -56,11 +70,13 @@ public final class MinionUpgradeManager {
         }
         int currentTier = switch (type) {
             case STORAGE_PAGE -> Math.max(0, data.getStoragePageCount() - 1);
+            case STORAGE_SLOTS -> currentSlotUpgrades(data);
             case RADIUS -> currentRadiusUpgrades(data);
             case SPEED -> currentSpeedUpgrades(data);
         };
         double baseCost = switch (type) {
             case STORAGE_PAGE -> minionsConfig.getStoragePageUpgradeBaseCost();
+            case STORAGE_SLOTS -> minionsConfig.getStorageSlotUpgradeBaseCost();
             case RADIUS -> minionsConfig.getRadiusUpgradeBaseCost();
             case SPEED -> minionsConfig.getSpeedUpgradeBaseCost();
         };
@@ -90,6 +106,8 @@ public final class MinionUpgradeManager {
         }
         switch (type) {
             case STORAGE_PAGE -> minionManager.addStoragePage(data.getId(), getMaxStoragePages());
+            case STORAGE_SLOTS -> data.setActiveSlotCount(Math.min(getMaxActiveSlotCount(),
+                    data.getActiveSlotCount() + minionsConfig.getActiveSlotsPerUpgrade()));
             case RADIUS -> data.setRadius(data.getRadius() + minionsConfig.getRadiusPerUpgrade());
             case SPEED -> data.setSpeedTicks(Math.max(minionsConfig.getMinSpeedTicks(),
                     data.getSpeedTicks() - minionsConfig.getSpeedReductionPerUpgradeTicks()));
@@ -99,7 +117,16 @@ public final class MinionUpgradeManager {
     }
 
     public int computeLevel(MinionData data) {
-        return 1 + Math.max(0, data.getStoragePageCount() - 1) + currentRadiusUpgrades(data) + currentSpeedUpgrades(data);
+        int storageProgress = data.getType() == MinionType.STORAGE
+                ? Math.max(0, data.getStoragePageCount() - 1)
+                : currentSlotUpgrades(data);
+        return 1 + storageProgress + currentRadiusUpgrades(data) + currentSpeedUpgrades(data);
+    }
+
+    private int currentSlotUpgrades(MinionData data) {
+        int base = minionsConfig.getBaseActiveSlotCount();
+        int step = minionsConfig.getActiveSlotsPerUpgrade();
+        return step > 0 ? Math.max(0, (data.getActiveSlotCount() - base) / step) : 0;
     }
 
     private int currentRadiusUpgrades(MinionData data) {

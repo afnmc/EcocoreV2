@@ -11,7 +11,7 @@ public enum MinionWorkMode {
         return switch (type) {
             case MINER, QUARRY, LUMBERJACK, FARMER, COLLECTOR -> BOTH;
             case FISHERMAN -> ARENA_ONLY;
-            case SMELTER, CHEST, SELL -> NONE;
+            case SMELTER, CHEST, SELL, STORAGE -> NONE;
             case MOB_KILLER -> ARENA_ONLY;
         };
     }

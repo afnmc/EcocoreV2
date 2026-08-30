@@ -47,8 +47,22 @@ public final class MinionData {
      * How many {@link MinionStorage} pages (54 slots each) this
      * minion currently has unlocked, from 1 up to
      * {@code minions.yml global.max-storage-pages} (Revisi 11).
+     * Only ever meaningful for {@link MinionType#STORAGE} - every
+     * other type is locked to a single page and uses {@link
+     * #activeSlotCount} instead to gate how many of that one page's
+     * 54 slots are actually usable.
      */
     private int storagePageCount;
+
+    /**
+     * How many of this minion's single storage page's 54 slots are
+     * currently usable, from a small starting amount (e.g. 9) up to
+     * 54. Meaningless for {@link MinionType#STORAGE}, which instead
+     * unlocks additional whole pages via {@link #storagePageCount}.
+     * Slots beyond this count are locked (not shown/usable) until
+     * upgraded.
+     */
+    private int activeSlotCount;
 
     /**
      * The world-persistent Bukkit entity UUID this minion's visual
@@ -80,7 +94,8 @@ public final class MinionData {
      * @param autoRepair whether auto-repair is enabled
      * @param facing the cardinal direction locked in at placement
      * @param useArenaMode whether a BOTH-mode minion is currently set to arena mode
-     * @param storagePageCount how many 54-slot storage pages are unlocked
+     * @param storagePageCount how many 54-slot storage pages are unlocked (STORAGE type only)
+     * @param activeSlotCount how many of the single page's 54 slots are usable (non-STORAGE types only)
      * @param createdAt epoch millis when placed
      * @param updatedAt epoch millis of the last update
      * @param entityUuid the minion's tagged visual entity uuid, or {@code null} if never spawned
@@ -88,7 +103,7 @@ public final class MinionData {
     public MinionData(long id, UUID ownerUuid, MinionType type, int level, long xp, int energy,
                        int fuelTicksRemaining, String world, double x, double y, double z,
                        int radius, int speedTicks, boolean autoRepair,
-                       BlockFace facing, boolean useArenaMode, int storagePageCount,
+                       BlockFace facing, boolean useArenaMode, int storagePageCount, int activeSlotCount,
                        long createdAt, long updatedAt, UUID entityUuid) {
         this.id = id;
         this.ownerUuid = ownerUuid;
@@ -107,6 +122,7 @@ public final class MinionData {
         this.facing = facing != null ? facing : BlockFace.SOUTH;
         this.useArenaMode = useArenaMode;
         this.storagePageCount = Math.max(1, storagePageCount);
+        this.activeSlotCount = Math.max(1, Math.min(MinionStorage.SLOTS_PER_PAGE, activeSlotCount));
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.entityUuid = entityUuid;
@@ -242,6 +258,15 @@ public final class MinionData {
 
     public void setStoragePageCount(int storagePageCount) {
         this.storagePageCount = storagePageCount;
+        touch();
+    }
+
+    public int getActiveSlotCount() {
+        return activeSlotCount;
+    }
+
+    public void setActiveSlotCount(int activeSlotCount) {
+        this.activeSlotCount = Math.max(1, Math.min(MinionStorage.SLOTS_PER_PAGE, activeSlotCount));
         touch();
     }
 
