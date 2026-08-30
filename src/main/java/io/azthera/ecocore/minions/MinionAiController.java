@@ -14,7 +14,6 @@ import io.azthera.ecocore.model.MinionWorkMode;
 import io.azthera.ecocore.model.ShopItemRecord;
 import io.azthera.ecocore.sell.SellManager;
 import org.bukkit.Location;
-import org.bukkit.LootableInventory;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Bukkit;
@@ -762,7 +761,7 @@ public final class MinionAiController {
             return;
         }
         LootContext context = new LootContext.Builder(entity.getLocation()).build();
-        Set<ItemStack> catchResult;
+        java.util.Collection<ItemStack> catchResult;
         try {
             catchResult = fishingTable.populateLoot(ThreadLocalRandom.current(), context);
         } catch (IllegalStateException | IllegalArgumentException lootFailure) {
