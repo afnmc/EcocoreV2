@@ -6,23 +6,18 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public final class V11__MinionFacing implements Migration {
+public final class V18__ConnectorBuffer implements Migration {
+    @Override
+    public int getVersion() { return 18; }
 
     @Override
-    public int getVersion() {
-        return 11;
-    }
-
-    @Override
-    public String getDescription() {
-        return "Add facing column to minions_data";
-    }
+    public String getDescription() { return "Add buffer_json to minion_connector_entities"; }
 
     @Override
     public void apply(Connection connection) throws SQLException {
-        if (!columnExists(connection, "minions_data", "facing")) {
+        if (!columnExists(connection, "minion_connector_entities", "buffer_json")) {
             try (Statement statement = connection.createStatement()) {
-                statement.execute("ALTER TABLE minions_data ADD COLUMN facing TEXT DEFAULT 'SOUTH'");
+                statement.execute("ALTER TABLE minion_connector_entities ADD COLUMN buffer_json TEXT");
             }
         }
     }

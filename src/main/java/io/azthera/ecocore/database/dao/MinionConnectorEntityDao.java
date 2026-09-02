@@ -1,7 +1,6 @@
 package io.azthera.ecocore.database.dao;
 
 import io.azthera.ecocore.database.DatabaseManager;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -12,10 +11,10 @@ import java.util.List;
 import java.util.UUID;
 
 public final class MinionConnectorEntityDao {
-
+    // UPDATED RECORD to include bufferJson
     public record ConnectorEntityRecord(long id, UUID ownerUuid, String world,
                                          double x, double y, double z,
-                                         int rangeLevel, UUID entityUuid) {
+                                         int rangeLevel, UUID entityUuid, String bufferJson) {
     }
 
     private final DatabaseManager databaseManager;
@@ -27,8 +26,8 @@ public final class MinionConnectorEntityDao {
     public long insert(UUID ownerUuid, String world, double x, double y, double z) throws SQLException {
         String sql = """
             INSERT INTO minion_connector_entities
-            (owner_uuid, world, x, y, z, range_level, entity_uuid, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, 0, NULL, ?, ?)
+            (owner_uuid, world, x, y, z, range_level, entity_uuid, buffer_json, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, 0, NULL, NULL, ?, ?)
             """;
         long now = System.currentTimeMillis();
         try (Connection connection = databaseManager.getConnection();
@@ -68,6 +67,18 @@ public final class MinionConnectorEntityDao {
         }
     }
 
+    // NEW METHOD for buffer persistence
+    public void updateBufferJson(long id, String bufferJson) throws SQLException {
+        String sql = "UPDATE minion_connector_entities SET buffer_json = ?, updated_at = ? WHERE id = ?";
+        try (Connection connection = databaseManager.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, bufferJson);
+            statement.setLong(2, System.currentTimeMillis());
+            statement.setLong(3, id);
+            statement.executeUpdate();
+        }
+    }
+
     public void delete(long id) throws SQLException {
         String sql = "DELETE FROM minion_connector_entities WHERE id = ?";
         try (Connection connection = databaseManager.getConnection();
@@ -100,7 +111,8 @@ public final class MinionConnectorEntityDao {
                 resultSet.getDouble("y"),
                 resultSet.getDouble("z"),
                 resultSet.getInt("range_level"),
-                entityUuidRaw != null ? UUID.fromString(entityUuidRaw) : null
+                entityUuidRaw != null ? UUID.fromString(entityUuidRaw) : null,
+                resultSet.getString("buffer_json") // Mapped new column
         );
     }
 }

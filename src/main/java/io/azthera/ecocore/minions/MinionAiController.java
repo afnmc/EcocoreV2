@@ -537,42 +537,42 @@ public final class MinionAiController {
     private void plantSaplingFromZoneA(MinionData data, MinionHandler handler, Location origin, List<MinionStorage> pages) {
         MinionStorage zoneAPage = pages.get(0);
         int saplingSlot = -1;
-        Material saplingType = null;
+        TreeSpeciesData foundSpecies = null;
+        
         for (int i = 0; i < ZONE_A_SLOTS; i++) {
             ItemStack slot = zoneAPage.getSlot(i);
             if (slot != null && slot.getAmount() > 0) {
-                boolean isKnownSapling = handler.getTreeSpeciesData().values().stream()
-                        .anyMatch(species -> species.saplingMaterial() == slot.getType());
-                if (isKnownSapling) {
+                Material slotType = slot.getType();
+                // slotType is effectively final, so it's safe to use in this lambda
+                TreeSpeciesData species = handler.getTreeSpeciesData().values().stream()
+                        .filter(candidate -> candidate.saplingMaterial() == slotType)
+                        .findFirst().orElse(null);
+                
+                if (species != null) {
                     saplingSlot = i;
-                    saplingType = slot.getType();
+                    foundSpecies = species;
                     break;
                 }
             }
         }
-        if (saplingSlot == -1) {
-            return;
-        }
-        TreeSpeciesData species = handler.getTreeSpeciesData().values().stream()
-                .filter(candidate -> candidate.saplingMaterial() == saplingType)
-                .findFirst().orElse(null);
-        if (species == null) {
+        
+        if (saplingSlot == -1 || foundSpecies == null) {
             return;
         }
 
-        if (species.require2x2()) {
-            plant2x2Sapling(data, handler, origin, species, zoneAPage, saplingSlot, saplingType);
+        if (foundSpecies.require2x2()) {
+            plant2x2Sapling(data, handler, origin, foundSpecies, zoneAPage, saplingSlot, foundSpecies.saplingMaterial());
             return;
         }
 
-        Optional<Block> spot = findSpacedTreeSpot(data, origin, species);
+        Optional<Block> spot = findSpacedTreeSpot(data, origin, foundSpecies);
         if (spot.isEmpty()) {
             return;
         }
         if (!data.consumeEnergy(handler.getEnergyCostPerAction())) {
             return;
         }
-        spot.get().setType(saplingType);
+        spot.get().setType(foundSpecies.saplingMaterial());
         consumeOneSapling(zoneAPage, saplingSlot);
         animationHandler.playActionEffect(spot.get().getLocation());
     }
