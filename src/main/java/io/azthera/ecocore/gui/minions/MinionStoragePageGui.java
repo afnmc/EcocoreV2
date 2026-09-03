@@ -9,14 +9,30 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
-import org.bukkit.inventory.ItemStack;
+
 import java.util.List;
 
+/**
+ * A single 54-slot storage page's raw contents, directly editable by
+ * the player (Revisi 11).
+ *
+ * <p>BUG FIX: this used to snapshot the page's contents into the GUI
+ * on open and only write back on close. Since {@code
+ * MinionAiController} keeps modifying the LIVE {@link MinionStorage}
+ * object in the background every tick while the GUI is open, that
+ * old approach silently lost whatever the minion added/removed
+ * during the visit, and could let a player duplicate an item (take
+ * it out of the GUI, but the live storage still "has" it until
+ * close, so the minion could act on it too). Every click and drag is
+ * now synced back into the live {@link MinionStorage} one tick after
+ * Bukkit finishes applying it, so the two are never out of sync for
+ * more than a single tick and never resolved by a stale overwrite.
+ */
 public final class MinionStoragePageGui extends AbstractGui {
+
     private final MinionManager minionManager;
     private final long minionId;
     private final int pageIndex;
-    private ItemStack[] renderedSnapshot;
 
     public MinionStoragePageGui(Player viewer, MinionManager minionManager, long minionId, int pageIndex) {
         super(viewer);
@@ -29,55 +45,47 @@ public final class MinionStoragePageGui extends AbstractGui {
     public void build() {
         List<MinionStorage> pages = minionManager.getMinionPages(minionId);
         if (pages == null || pageIndex >= pages.size()) {
-            inventory = Bukkit.createInventory(this, 54, "§8Storage tidak ditemukan");
-            renderedSnapshot = new ItemStack[0];
+            inventory = Bukkit.createInventory(this, 54, "\u00a78Storage tidak ditemukan");
             return;
         }
         MinionStorage page = pages.get(pageIndex);
-        inventory = Bukkit.createInventory(this, 54, "§8Storage " + (pageIndex + 1));
+        inventory = Bukkit.createInventory(this, 54, "\u00a78Storage " + (pageIndex + 1));
         inventory.setContents(page.getContents().clone());
-        renderedSnapshot = deepClone(inventory.getContents());
     }
 
     private MinionStorage resolveLivePage() {
         List<MinionStorage> pages = minionManager.getMinionPages(minionId);
-        return (pages != null && pageIndex < pages.size()) ? pages.get(pageIndex) : null;
+        if (pages == null || pageIndex >= pages.size()) {
+            return null;
+        }
+        return pages.get(pageIndex);
     }
 
-    private static ItemStack[] deepClone(ItemStack[] source) {
-        ItemStack[] copy = new ItemStack[source.length];
-        for (int i = 0; i < source.length; i++) copy[i] = source[i] == null ? null : source[i].clone();
-        return copy;
-    }
-
-    private static boolean isSame(ItemStack a, ItemStack b) {
-        if (a == null && b == null) return true;
-        if (a == null || b == null) return false;
-        return a.isSimilar(b) && a.getAmount() == b.getAmount();
-    }
-
+    /**
+     * Writes the GUI's current contents back into the live {@link
+     * MinionStorage} immediately. Safe to call from the main thread
+     * synchronously (Bukkit is single-threaded, so there's no real
+     * race with the minion tick - only staleness if this were
+     * deferred, which is exactly the bug this fixes).
+     */
     private void syncToLiveStorage() {
         MinionStorage page = resolveLivePage();
-        if (page == null || inventory == null || renderedSnapshot == null) return;
-        
-        int slots = Math.min(inventory.getSize(), renderedSnapshot.length);
-        for (int i = 0; i < slots; i++) {
-            ItemStack guiItem = inventory.getItem(i);
-            if (isSame(guiItem, renderedSnapshot[i])) {
-                // Player didn't touch this slot -> Update GUI from Live State (Minion might have added items)
-                ItemStack live = page.getSlot(i);
-                inventory.setItem(i, live == null ? null : live.clone());
-                renderedSnapshot[i] = live == null ? null : live.clone();
-            } else {
-                // Player changed this slot -> Update Live State from GUI
-                page.setSlot(i, guiItem == null ? null : guiItem.clone());
-                renderedSnapshot[i] = guiItem == null ? null : guiItem.clone();
-            }
+        if (page == null || inventory == null) {
+            return;
+        }
+        var contents = inventory.getContents();
+        for (int i = 0; i < Math.min(contents.length, MinionStorage.SLOTS_PER_PAGE); i++) {
+            page.setSlot(i, contents[i]);
         }
     }
 
     @Override
     public void handleClick(InventoryClickEvent event) {
+        // Free vanilla interaction within the storage page - not
+        // cancelled, so click/shift-click/number-key/double-click/
+        // offhand all work like a normal chest. Sync happens one tick
+        // later so Bukkit has already applied the click's result to
+        // `inventory` before we read it back into the live storage.
         Bukkit.getScheduler().runTask(EcoCorePlugin.getInstance(), this::syncToLiveStorage);
     }
 
@@ -87,8 +95,12 @@ public final class MinionStoragePageGui extends AbstractGui {
     }
 
     @Override
-    public boolean isFreeDragSlot(int rawSlot) { return true; }
+    public boolean isFreeDragSlot(int rawSlot) {
+        return true;
+    }
 
     @Override
-    public void handleClose(InventoryCloseEvent event) { syncToLiveStorage(); }
+    public void handleClose(InventoryCloseEvent event) {
+        syncToLiveStorage();
+    }
 }

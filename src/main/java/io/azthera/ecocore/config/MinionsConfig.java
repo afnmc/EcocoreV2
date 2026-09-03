@@ -83,6 +83,12 @@ public final class MinionsConfig {
     private final int pathfindingMaxNodes;
     private final int pathfindingRecalculateTicks;
 
+
+    // REVISED
+    private final int connectorMaxDirectDistance;
+    private final int connectorMaxRelayDistance;
+    private final boolean connectorDebug;
+
     public MinionsConfig(Logger logger, FileConfiguration config) {
         this.logger = logger;
         this.maxLevel = config.getInt("global.max-level", 50);
@@ -116,7 +122,13 @@ public final class MinionsConfig {
         this.connectorRangePerUpgrade = connectorSection != null ? connectorSection.getDouble("range-per-upgrade", 15.0) : 15.0;
         this.connectorMaxRangeUpgrades = connectorSection != null ? connectorSection.getInt("max-range-upgrades", 10) : 10;
         this.connectorUpgradeBaseCost = connectorSection != null ? connectorSection.getDouble("upgrade-base-cost", 750.0) : 750.0;
-        this.connectorUpgradeCostGrowth = connectorSection != null ? connectorSection.getDouble("upgrade-cost-growth", 1.4) : 1.4;
+        
+        // REVISED
+        this.connectorMaxDirectDistance = config.getInt("connector.max-direct-distance", 10);
+        this.connectorMaxRelayDistance = config.getInt("connector.max-relay-distance", 32);
+        this.connectorDebug = config.getBoolean("connector.debug", false);
+
+        // Storagethis.connectorUpgradeCostGrowth = connectorSection != null ? connectorSection.getDouble("upgrade-cost-growth", 1.4) : 1.4;
 
         ConfigurationSection upgradesSection = config.getConfigurationSection("upgrades");
         this.storagePageUpgradeBaseCost = upgradesSection != null ? upgradesSection.getDouble("storage-page-base-cost", 500.0) : 500.0;
@@ -502,4 +514,8 @@ public final class MinionsConfig {
     public int getPathfindingRecalculateTicks() {
         return pathfindingRecalculateTicks;
     }
+    // REVISED
+    public int getConnectorMaxDirectDistance() { return connectorMaxDirectDistance; }
+    public int getConnectorMaxRelayDistance() { return connectorMaxRelayDistance; }
+    public boolean isConnectorDebug() { return connectorDebug; }
 }

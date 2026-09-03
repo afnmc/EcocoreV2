@@ -345,7 +345,7 @@ public final class EcoCorePlugin extends JavaPlugin {
 
         minionConnectorEntityManager = new io.azthera.ecocore.minions.MinionConnectorEntityManager(
                 getLogger(), minionConnectorEntityDao, configManager.getMinionsConfig());
-        minionConnectorManager = new MinionConnectorManager(getLogger(), minionConnectionDao, minionConnectorEntityManager);
+        minionConnectorManager = new MinionConnectorManager(getLogger(), minionConnectionDao, minionConnectorEntityManager, configManager.getMinionsConfig().getConnectorMaxDirectDistance(), configManager.getMinionsConfig().getConnectorMaxRelayDistance(), configManager.getMinionsConfig().isConnectorDebug());
 
         claimManager = new io.azthera.ecocore.claim.ClaimManager(
                 getLogger(), configManager.isClaimProtectionEnabled());
