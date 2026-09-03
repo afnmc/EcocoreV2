@@ -128,7 +128,8 @@ public final class MinionsConfig {
         this.connectorMaxRelayDistance = config.getInt("connector.max-relay-distance", 32);
         this.connectorDebug = config.getBoolean("connector.debug", false);
 
-        // Storagethis.connectorUpgradeCostGrowth = connectorSection != null ? connectorSection.getDouble("upgrade-cost-growth", 1.4) : 1.4;
+        // Storage
+        this.connectorUpgradeCostGrowth = connectorSection != null ? connectorSection.getDouble("upgrade-cost-growth", 1.4) : 1.4;
 
         ConfigurationSection upgradesSection = config.getConfigurationSection("upgrades");
         this.storagePageUpgradeBaseCost = upgradesSection != null ? upgradesSection.getDouble("storage-page-base-cost", 500.0) : 500.0;
