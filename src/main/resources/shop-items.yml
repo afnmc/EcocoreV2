@@ -1,0 +1,1405 @@
+# ==========================================================
+# EcoCore - Shop Item Catalog (processed from EconomyShopGUI)
+#
+# MAIN SHOP: common -> uncommon -> normal rare utility items.
+# NIGHT MARKET: endgame / high-value / exceptionally rare items.
+# Prices below are EcoCore-designed prices; EconomyShopGUI is only the source
+# item catalog. Live price/stock are still managed by EcoCore.
+#
+# Variant entries below use the same EconomyShopGUI prices and preserve
+# potion/enchantment metadata so the shop gives the correct ItemStack.
+# Variant data is configuration-owned and re-applied after DB loading.
+# ==========================================================
+items:
+  activator_rail: { category: combat, material: ACTIVATOR_RAIL, base-price: 55 }
+  arrow: { category: combat, material: ARROW, base-price: 180 }
+  bolt_armor_trim_smithing_template: { category: combat, material: BOLT_ARMOR_TRIM_SMITHING_TEMPLATE, base-price: 2075 }
+  bow: { category: combat, material: BOW, base-price: 140 }
+  calibrated_sculk_sensor: { category: combat, material: CALIBRATED_SCULK_SENSOR, base-price: 99 }
+  chainmail_boots: { category: combat, material: CHAINMAIL_BOOTS, base-price: 205 }
+  chainmail_chestplate: { category: combat, material: CHAINMAIL_CHESTPLATE, base-price: 240 }
+  chainmail_helmet: { category: combat, material: CHAINMAIL_HELMET, base-price: 205 }
+  chainmail_leggings: { category: combat, material: CHAINMAIL_LEGGINGS, base-price: 245 }
+  coast_armor_trim_smithing_template: { category: combat, material: COAST_ARMOR_TRIM_SMITHING_TEMPLATE, base-price: 1225 }
+  comparator: { category: combat, material: COMPARATOR, base-price: 125 }
+  copper_axe: { category: combat, material: COPPER_AXE, base-price: 32 }
+  copper_boots: { category: combat, material: COPPER_BOOTS, base-price: 32 }
+  copper_chestplate: { category: combat, material: COPPER_CHESTPLATE, base-price: 51 }
+  copper_helmet: { category: combat, material: COPPER_HELMET, base-price: 40 }
+  copper_hoe: { category: combat, material: COPPER_HOE, base-price: 29 }
+  copper_horse_armor: { category: combat, material: COPPER_HORSE_ARMOR, base-price: 380 }
+  copper_leggings: { category: combat, material: COPPER_LEGGINGS, base-price: 49 }
+  copper_nautilus_armor: { category: combat, material: COPPER_NAUTILUS_ARMOR, base-price: 420 }
+  copper_pickaxe: { category: combat, material: COPPER_PICKAXE, base-price: 33 }
+  copper_shovel: { category: combat, material: COPPER_SHOVEL, base-price: 23 }
+  copper_spear: { category: combat, material: COPPER_SPEAR, base-price: 22 }
+  copper_sword: { category: combat, material: COPPER_SWORD, base-price: 27 }
+  crafter: { category: combat, material: CRAFTER, base-price: 240 }
+  crossbow: { category: combat, material: CROSSBOW, base-price: 145 }
+  daylight_detector: { category: combat, material: DAYLIGHT_DETECTOR, base-price: 205 }
+  detector_rail: { category: combat, material: DETECTOR_RAIL, base-price: 50 }
+  diamond_axe: { category: combat, material: DIAMOND_AXE, base-price: 890 }
+  diamond_boots: { category: combat, material: DIAMOND_BOOTS, base-price: 975 }
+  diamond_chestplate: { category: combat, material: DIAMOND_CHESTPLATE, base-price: 1725 }
+  diamond_helmet: { category: combat, material: DIAMOND_HELMET, base-price: 1100 }
+  diamond_hoe: { category: combat, material: DIAMOND_HOE, base-price: 615 }
+  diamond_horse_armor: { category: combat, material: DIAMOND_HORSE_ARMOR, base-price: 7200 }
+  diamond_leggings: { category: combat, material: DIAMOND_LEGGINGS, base-price: 1550 }
+  diamond_nautilus_armor: { category: combat, material: DIAMOND_NAUTILUS_ARMOR, base-price: 6700 }
+  diamond_pickaxe: { category: combat, material: DIAMOND_PICKAXE, base-price: 760 }
+  diamond_shovel: { category: combat, material: DIAMOND_SHOVEL, base-price: 365 }
+  diamond_spear: { category: combat, material: DIAMOND_SPEAR, base-price: 365 }
+  diamond_sword: { category: combat, material: DIAMOND_SWORD, base-price: 680 }
+  dispenser: { category: combat, material: DISPENSER, base-price: 160 }
+  dropper: { category: combat, material: DROPPER, base-price: 66 }
+  dune_armor_trim_smithing_template: { category: combat, material: DUNE_ARMOR_TRIM_SMITHING_TEMPLATE, base-price: 1150 }
+  eye_armor_trim_smithing_template: { category: combat, material: EYE_ARMOR_TRIM_SMITHING_TEMPLATE, base-price: 1225 }
+  flow_armor_trim_smithing_template: { category: combat, material: FLOW_ARMOR_TRIM_SMITHING_TEMPLATE, base-price: 1925 }
+  golden_axe: { category: combat, material: GOLDEN_AXE, base-price: 180 }
+  golden_boots: { category: combat, material: GOLDEN_BOOTS, base-price: 190 }
+  golden_chestplate: { category: combat, material: GOLDEN_CHESTPLATE, base-price: 345 }
+  golden_helmet: { category: combat, material: GOLDEN_HELMET, base-price: 245 }
+  golden_hoe: { category: combat, material: GOLDEN_HOE, base-price: 120 }
+  golden_horse_armor: { category: combat, material: GOLDEN_HORSE_ARMOR, base-price: 2625 }
+  golden_leggings: { category: combat, material: GOLDEN_LEGGINGS, base-price: 315 }
+  golden_nautilus_armor: { category: combat, material: GOLDEN_NAUTILUS_ARMOR, base-price: 3000 }
+  golden_pickaxe: { category: combat, material: GOLDEN_PICKAXE, base-price: 160 }
+  golden_shovel: { category: combat, material: GOLDEN_SHOVEL, base-price: 74 }
+  golden_spear: { category: combat, material: GOLDEN_SPEAR, base-price: 84 }
+  golden_sword: { category: combat, material: GOLDEN_SWORD, base-price: 120 }
+  hopper: { category: combat, material: HOPPER, base-price: 175 }
+  host_armor_trim_smithing_template: { category: combat, material: HOST_ARMOR_TRIM_SMITHING_TEMPLATE, base-price: 1275 }
+  iron_axe: { category: combat, material: IRON_AXE, base-price: 125 }
+  iron_boots: { category: combat, material: IRON_BOOTS, base-price: 150 }
+  iron_chestplate: { category: combat, material: IRON_CHESTPLATE, base-price: 200 }
+  iron_helmet: { category: combat, material: IRON_HELMET, base-price: 170 }
+  iron_hoe: { category: combat, material: IRON_HOE, base-price: 96 }
+  iron_horse_armor: { category: combat, material: IRON_HORSE_ARMOR, base-price: 840 }
+  iron_leggings: { category: combat, material: IRON_LEGGINGS, base-price: 210 }
+  iron_nautilus_armor: { category: combat, material: IRON_NAUTILUS_ARMOR, base-price: 1700 }
+  iron_pickaxe: { category: combat, material: IRON_PICKAXE, base-price: 120 }
+  iron_shovel: { category: combat, material: IRON_SHOVEL, base-price: 62 }
+  iron_spear: { category: combat, material: IRON_SPEAR, base-price: 52 }
+  iron_sword: { category: combat, material: IRON_SWORD, base-price: 88 }
+  leather_boots: { category: combat, material: LEATHER_BOOTS, base-price: 475 }
+  leather_chestplate: { category: combat, material: LEATHER_CHESTPLATE, base-price: 805 }
+  leather_helmet: { category: combat, material: LEATHER_HELMET, base-price: 525 }
+  leather_horse_armor: { category: combat, material: LEATHER_HORSE_ARMOR, base-price: 480 }
+  leather_leggings: { category: combat, material: LEATHER_LEGGINGS, base-price: 775 }
+  lever: { category: combat, material: LEVER, base-price: 15 }
+  note_block: { category: combat, material: NOTE_BLOCK, base-price: 84 }
+  observer: { category: combat, material: OBSERVER, base-price: 125 }
+  piston: { category: combat, material: PISTON, base-price: 98 }
+  powered_rail: { category: combat, material: POWERED_RAIL, base-price: 58 }
+  rail: { category: combat, material: RAIL, base-price: 26 }
+  raiser_armor_trim_smithing_template: { category: combat, material: RAISER_ARMOR_TRIM_SMITHING_TEMPLATE, base-price: 1150 }
+  redstone_lamp: { category: combat, material: REDSTONE_LAMP, base-price: 200 }
+  redstone_torch: { category: combat, material: REDSTONE_TORCH, base-price: 38 }
+  repeater: { category: combat, material: REPEATER, base-price: 100 }
+  rib_armor_trim_smithing_template: { category: combat, material: RIB_ARMOR_TRIM_SMITHING_TEMPLATE, base-price: 1225 }
+  sculk_sensor: { category: combat, material: SCULK_SENSOR, base-price: 405 }
+  sentry_armor_trim_smithing_template: { category: combat, material: SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE, base-price: 1225 }
+  shaper_armor_trim_smithing_template: { category: combat, material: SHAPER_ARMOR_TRIM_SMITHING_TEMPLATE, base-price: 1200 }
+  shield: { category: combat, material: SHIELD, base-price: 76 }
+  silence_armor_trim_smithing_template: { category: combat, material: SILENCE_ARMOR_TRIM_SMITHING_TEMPLATE, base-price: 1150 }
+  snout_armor_trim_smithing_template: { category: combat, material: SNOUT_ARMOR_TRIM_SMITHING_TEMPLATE, base-price: 1200 }
+  spectral_arrow: { category: combat, material: SPECTRAL_ARROW, base-price: 430 }
+  spire_armor_trim_smithing_template: { category: combat, material: SPIRE_ARMOR_TRIM_SMITHING_TEMPLATE, base-price: 1175 }
+  sticky_piston: { category: combat, material: STICKY_PISTON, base-price: 115 }
+  stone_axe: { category: combat, material: STONE_AXE, base-price: 30 }
+  stone_hoe: { category: combat, material: STONE_HOE, base-price: 28 }
+  stone_pickaxe: { category: combat, material: STONE_PICKAXE, base-price: 34 }
+  stone_shovel: { category: combat, material: STONE_SHOVEL, base-price: 20 }
+  stone_spear: { category: combat, material: STONE_SPEAR, base-price: 22 }
+  stone_sword: { category: combat, material: STONE_SWORD, base-price: 23 }
+  target: { category: combat, material: TARGET, base-price: 255 }
+  tide_armor_trim_smithing_template: { category: combat, material: TIDE_ARMOR_TRIM_SMITHING_TEMPLATE, base-price: 1275 }
+  tnt: { category: combat, material: TNT, base-price: 370 }
+  trident: { category: combat, material: TRIDENT, base-price: 620 }
+  tripwire_hook: { category: combat, material: TRIPWIRE_HOOK, base-price: 34 }
+  turtle_helmet: { category: combat, material: TURTLE_HELMET, base-price: 4325 }
+  vex_armor_trim_smithing_template: { category: combat, material: VEX_ARMOR_TRIM_SMITHING_TEMPLATE, base-price: 1150 }
+  ward_armor_trim_smithing_template: { category: combat, material: WARD_ARMOR_TRIM_SMITHING_TEMPLATE, base-price: 1100 }
+  wayfinder_armor_trim_smithing_template: { category: combat, material: WAYFINDER_ARMOR_TRIM_SMITHING_TEMPLATE, base-price: 1150 }
+  wild_armor_trim_smithing_template: { category: combat, material: WILD_ARMOR_TRIM_SMITHING_TEMPLATE, base-price: 1150 }
+  wolf_armor: { category: combat, material: WOLF_ARMOR, base-price: 4925 }
+  wooden_axe: { category: combat, material: WOODEN_AXE, base-price: 43 }
+  wooden_hoe: { category: combat, material: WOODEN_HOE, base-price: 33 }
+  wooden_pickaxe: { category: combat, material: WOODEN_PICKAXE, base-price: 44 }
+  wooden_shovel: { category: combat, material: WOODEN_SHOVEL, base-price: 28 }
+  wooden_spear: { category: combat, material: WOODEN_SPEAR, base-price: 25 }
+  wooden_sword: { category: combat, material: WOODEN_SWORD, base-price: 34 }
+  acacia_sapling: { category: decoration, material: ACACIA_SAPLING, base-price: 18 }
+  allium: { category: decoration, material: ALLIUM, base-price: 9 }
+  angler_pottery_sherd: { category: decoration, material: ANGLER_POTTERY_SHERD, base-price: 93 }
+  archer_pottery_sherd: { category: decoration, material: ARCHER_POTTERY_SHERD, base-price: 96 }
+  arms_up_pottery_sherd: { category: decoration, material: ARMS_UP_POTTERY_SHERD, base-price: 93 }
+  azalea: { category: decoration, material: AZALEA, base-price: 18 }
+  azure_bluet: { category: decoration, material: AZURE_BLUET, base-price: 8 }
+  big_dripleaf: { category: decoration, material: BIG_DRIPLEAF, base-price: 44 }
+  birch_sapling: { category: decoration, material: BIRCH_SAPLING, base-price: 17 }
+  black_candle: { category: decoration, material: BLACK_CANDLE, base-price: 67 }
+  black_dye: { category: decoration, material: BLACK_DYE, base-price: 73 }
+  blade_pottery_sherd: { category: decoration, material: BLADE_POTTERY_SHERD, base-price: 97 }
+  blue_candle: { category: decoration, material: BLUE_CANDLE, base-price: 48 }
+  blue_dye: { category: decoration, material: BLUE_DYE, base-price: 24 }
+  blue_orchid: { category: decoration, material: BLUE_ORCHID, base-price: 8.5 }
+  brain_coral: { category: decoration, material: BRAIN_CORAL, base-price: 27 }
+  brain_coral_fan: { category: decoration, material: BRAIN_CORAL_FAN, base-price: 19 }
+  brewer_pottery_sherd: { category: decoration, material: BREWER_POTTERY_SHERD, base-price: 91 }
+  brown_candle: { category: decoration, material: BROWN_CANDLE, base-price: 64 }
+  brown_dye: { category: decoration, material: BROWN_DYE, base-price: 91 }
+  bubble_coral: { category: decoration, material: BUBBLE_CORAL, base-price: 29 }
+  bubble_coral_fan: { category: decoration, material: BUBBLE_CORAL_FAN, base-price: 18 }
+  burn_pottery_sherd: { category: decoration, material: BURN_POTTERY_SHERD, base-price: 100 }
+  candle: { category: decoration, material: CANDLE, base-price: 47 }
+  cherry_sapling: { category: decoration, material: CHERRY_SAPLING, base-price: 20 }
+  cornflower: { category: decoration, material: CORNFLOWER, base-price: 9.5 }
+  creeper_banner_pattern: { category: decoration, material: CREEPER_BANNER_PATTERN, base-price: 860 }
+  cyan_candle: { category: decoration, material: CYAN_CANDLE, base-price: 55 }
+  cyan_dye: { category: decoration, material: CYAN_DYE, base-price: 16 }
+  dandelion: { category: decoration, material: DANDELION, base-price: 8 }
+  danger_pottery_sherd: { category: decoration, material: DANGER_POTTERY_SHERD, base-price: 98 }
+  dark_oak_sapling: { category: decoration, material: DARK_OAK_SAPLING, base-price: 18 }
+  dead_brain_coral: { category: decoration, material: DEAD_BRAIN_CORAL, base-price: 25 }
+  dead_brain_coral_fan: { category: decoration, material: DEAD_BRAIN_CORAL_FAN, base-price: 18 }
+  dead_bubble_coral: { category: decoration, material: DEAD_BUBBLE_CORAL, base-price: 27 }
+  dead_bubble_coral_fan: { category: decoration, material: DEAD_BUBBLE_CORAL_FAN, base-price: 21 }
+  dead_fire_coral: { category: decoration, material: DEAD_FIRE_CORAL, base-price: 26 }
+  dead_fire_coral_fan: { category: decoration, material: DEAD_FIRE_CORAL_FAN, base-price: 19 }
+  dead_horn_coral: { category: decoration, material: DEAD_HORN_CORAL, base-price: 28 }
+  dead_horn_coral_fan: { category: decoration, material: DEAD_HORN_CORAL_FAN, base-price: 17 }
+  dead_tube_coral: { category: decoration, material: DEAD_TUBE_CORAL, base-price: 29 }
+  dead_tube_coral_fan: { category: decoration, material: DEAD_TUBE_CORAL_FAN, base-price: 19 }
+  explorer_pottery_sherd: { category: decoration, material: EXPLORER_POTTERY_SHERD, base-price: 100 }
+  fire_coral: { category: decoration, material: FIRE_CORAL, base-price: 28 }
+  fire_coral_fan: { category: decoration, material: FIRE_CORAL_FAN, base-price: 20 }
+  flowering_azalea: { category: decoration, material: FLOWERING_AZALEA, base-price: 18 }
+  flower_banner_pattern: { category: decoration, material: FLOWER_BANNER_PATTERN, base-price: 9 }
+  flower_pot: { category: decoration, material: FLOWER_POT, base-price: 180 }
+  flow_banner_pattern: { category: decoration, material: FLOW_BANNER_PATTERN, base-price: 1375 }
+  flow_pottery_sherd: { category: decoration, material: FLOW_POTTERY_SHERD, base-price: 98 }
+  friend_pottery_sherd: { category: decoration, material: FRIEND_POTTERY_SHERD, base-price: 100 }
+  globe_banner_pattern: { category: decoration, material: GLOBE_BANNER_PATTERN, base-price: 550 }
+  glow_ink_sac: { category: decoration, material: GLOW_INK_SAC, base-price: 29 }
+  glow_lichen: { category: decoration, material: GLOW_LICHEN, base-price: 8.5 }
+  gray_candle: { category: decoration, material: GRAY_CANDLE, base-price: 64 }
+  gray_dye: { category: decoration, material: GRAY_DYE, base-price: 54 }
+  green_candle: { category: decoration, material: GREEN_CANDLE, base-price: 51 }
+  green_dye: { category: decoration, material: GREEN_DYE, base-price: 9.5 }
+  guster_banner_pattern: { category: decoration, material: GUSTER_BANNER_PATTERN, base-price: 1050 }
+  guster_pottery_sherd: { category: decoration, material: GUSTER_POTTERY_SHERD, base-price: 99 }
+  heartbreak_pottery_sherd: { category: decoration, material: HEARTBREAK_POTTERY_SHERD, base-price: 91 }
+  heart_pottery_sherd: { category: decoration, material: HEART_POTTERY_SHERD, base-price: 96 }
+  horn_coral: { category: decoration, material: HORN_CORAL, base-price: 28 }
+  horn_coral_fan: { category: decoration, material: HORN_CORAL_FAN, base-price: 18 }
+  howl_pottery_sherd: { category: decoration, material: HOWL_POTTERY_SHERD, base-price: 105 }
+  ink_sac: { category: decoration, material: INK_SAC, base-price: 29 }
+  jungle_sapling: { category: decoration, material: JUNGLE_SAPLING, base-price: 17 }
+  light_blue_candle: { category: decoration, material: LIGHT_BLUE_CANDLE, base-price: 55 }
+  light_blue_dye: { category: decoration, material: LIGHT_BLUE_DYE, base-price: 23 }
+  light_gray_candle: { category: decoration, material: LIGHT_GRAY_CANDLE, base-price: 56 }
+  light_gray_dye: { category: decoration, material: LIGHT_GRAY_DYE, base-price: 25 }
+  lilac: { category: decoration, material: LILAC, base-price: 9 }
+  lily_of_the_valley: { category: decoration, material: LILY_OF_THE_VALLEY, base-price: 8 }
+  lily_pad: { category: decoration, material: LILY_PAD, base-price: 100 }
+  lime_candle: { category: decoration, material: LIME_CANDLE, base-price: 74 }
+  lime_dye: { category: decoration, material: LIME_DYE, base-price: 84 }
+  magenta_candle: { category: decoration, material: MAGENTA_CANDLE, base-price: 48 }
+  magenta_dye: { category: decoration, material: MAGENTA_DYE, base-price: 23 }
+  mangrove_propagule: { category: decoration, material: MANGROVE_PROPAGULE, base-price: 18 }
+  miner_pottery_sherd: { category: decoration, material: MINER_POTTERY_SHERD, base-price: 93 }
+  mojang_banner_pattern: { category: decoration, material: MOJANG_BANNER_PATTERN, base-price: 7400 }
+  mourner_pottery_sherd: { category: decoration, material: MOURNER_POTTERY_SHERD, base-price: 100 }
+  oak_sapling: { category: decoration, material: OAK_SAPLING, base-price: 18 }
+  orange_candle: { category: decoration, material: ORANGE_CANDLE, base-price: 50 }
+  orange_dye: { category: decoration, material: ORANGE_DYE, base-price: 23 }
+  orange_tulip: { category: decoration, material: ORANGE_TULIP, base-price: 8.5 }
+  oxeye_daisy: { category: decoration, material: OXEYE_DAISY, base-price: 8 }
+  peony: { category: decoration, material: PEONY, base-price: 8 }
+  piglin_banner_pattern: { category: decoration, material: PIGLIN_BANNER_PATTERN, base-price: 7200 }
+  pink_candle: { category: decoration, material: PINK_CANDLE, base-price: 54 }
+  pink_dye: { category: decoration, material: PINK_DYE, base-price: 24 }
+  pink_petals: { category: decoration, material: PINK_PETALS, base-price: 9.5 }
+  pink_tulip: { category: decoration, material: PINK_TULIP, base-price: 8.5 }
+  pitcher_plant: { category: decoration, material: PITCHER_PLANT, base-price: 73 }
+  plenty_pottery_sherd: { category: decoration, material: PLENTY_POTTERY_SHERD, base-price: 105 }
+  poppy: { category: decoration, material: POPPY, base-price: 8.5 }
+  prize_pottery_sherd: { category: decoration, material: PRIZE_POTTERY_SHERD, base-price: 97 }
+  purple_candle: { category: decoration, material: PURPLE_CANDLE, base-price: 56 }
+  purple_dye: { category: decoration, material: PURPLE_DYE, base-price: 25 }
+  red_candle: { category: decoration, material: RED_CANDLE, base-price: 57 }
+  red_dye: { category: decoration, material: RED_DYE, base-price: 25 }
+  red_tulip: { category: decoration, material: RED_TULIP, base-price: 8.5 }
+  rose_bush: { category: decoration, material: ROSE_BUSH, base-price: 9 }
+  scrape_pottery_sherd: { category: decoration, material: SCRAPE_POTTERY_SHERD, base-price: 96 }
+  sheaf_pottery_sherd: { category: decoration, material: SHEAF_POTTERY_SHERD, base-price: 97 }
+  shelter_pottery_sherd: { category: decoration, material: SHELTER_POTTERY_SHERD, base-price: 96 }
+  skull_banner_pattern: { category: decoration, material: SKULL_BANNER_PATTERN, base-price: 1375 }
+  skull_pottery_sherd: { category: decoration, material: SKULL_POTTERY_SHERD, base-price: 100 }
+  small_dripleaf: { category: decoration, material: SMALL_DRIPLEAF, base-price: 46 }
+  snort_pottery_sherd: { category: decoration, material: SNORT_POTTERY_SHERD, base-price: 91 }
+  spore_blossom: { category: decoration, material: SPORE_BLOSSOM, base-price: 22 }
+  spruce_sapling: { category: decoration, material: SPRUCE_SAPLING, base-price: 18 }
+  sunflower: { category: decoration, material: SUNFLOWER, base-price: 8.5 }
+  torchflower: { category: decoration, material: TORCHFLOWER, base-price: 84 }
+  tube_coral: { category: decoration, material: TUBE_CORAL, base-price: 28 }
+  tube_coral_fan: { category: decoration, material: TUBE_CORAL_FAN, base-price: 33 }
+  twisting_vines: { category: decoration, material: TWISTING_VINES, base-price: 30 }
+  vine: { category: decoration, material: VINE, base-price: 33 }
+  weeping_vines: { category: decoration, material: WEEPING_VINES, base-price: 34 }
+  white_candle: { category: decoration, material: WHITE_CANDLE, base-price: 54 }
+  white_dye: { category: decoration, material: WHITE_DYE, base-price: 30 }
+  white_tulip: { category: decoration, material: WHITE_TULIP, base-price: 8 }
+  wither_rose: { category: decoration, material: WITHER_ROSE, base-price: 14 }
+  yellow_candle: { category: decoration, material: YELLOW_CANDLE, base-price: 48 }
+  yellow_dye: { category: decoration, material: YELLOW_DYE, base-price: 17 }
+  apple: { category: farming, material: APPLE, base-price: 125 }
+  baked_potato: { category: farming, material: BAKED_POTATO, base-price: 245 }
+  bamboo: { category: farming, material: BAMBOO, base-price: 9.5 }
+  beef: { category: farming, material: BEEF, base-price: 35 }
+  beehive: { category: farming, material: BEEHIVE, base-price: 73 }
+  beetroot: { category: farming, material: BEETROOT, base-price: 90 }
+  beetroot_seeds: { category: farming, material: BEETROOT_SEEDS, base-price: 20 }
+  beetroot_soup: { category: farming, material: BEETROOT_SOUP, base-price: 135 }
+  bee_nest: { category: farming, material: BEE_NEST, base-price: 8.5 }
+  bone_meal: { category: farming, material: BONE_MEAL, base-price: 210 }
+  bread: { category: farming, material: BREAD, base-price: 510 }
+  brown_mushroom: { category: farming, material: BROWN_MUSHROOM, base-price: 15 }
+  cactus: { category: farming, material: CACTUS, base-price: 10 }
+  cake: { category: farming, material: CAKE, base-price: 205 }
+  carrot: { category: farming, material: CARROT, base-price: 85 }
+  chicken: { category: farming, material: CHICKEN, base-price: 34 }
+  chorus_flower: { category: farming, material: CHORUS_FLOWER, base-price: 9 }
+  chorus_fruit: { category: farming, material: CHORUS_FRUIT, base-price: 58 }
+  cocoa_beans: { category: farming, material: COCOA_BEANS, base-price: 34 }
+  cod: { category: farming, material: COD, base-price: 33 }
+  cooked_beef: { category: farming, material: COOKED_BEEF, base-price: 160 }
+  cooked_chicken: { category: farming, material: COOKED_CHICKEN, base-price: 175 }
+  cooked_cod: { category: farming, material: COOKED_COD, base-price: 165 }
+  cooked_mutton: { category: farming, material: COOKED_MUTTON, base-price: 160 }
+  cooked_porkchop: { category: farming, material: COOKED_PORKCHOP, base-price: 170 }
+  cooked_rabbit: { category: farming, material: COOKED_RABBIT, base-price: 105 }
+  cooked_salmon: { category: farming, material: COOKED_SALMON, base-price: 160 }
+  cookie: { category: farming, material: COOKIE, base-price: 125 }
+  crimson_fungus: { category: farming, material: CRIMSON_FUNGUS, base-price: 35 }
+  dried_kelp: { category: farming, material: DRIED_KELP, base-price: 9 }
+  dried_kelp_block: { category: farming, material: DRIED_KELP_BLOCK, base-price: 9 }
+  egg: { category: farming, material: EGG, base-price: 76 }
+  glistering_melon_slice: { category: farming, material: GLISTERING_MELON_SLICE, base-price: 38 }
+  glow_berries: { category: farming, material: GLOW_BERRIES, base-price: 25 }
+  golden_apple: { category: farming, material: GOLDEN_APPLE, base-price: 275 }
+  golden_carrot: { category: farming, material: GOLDEN_CARROT, base-price: 190 }
+  hay_block: { category: farming, material: HAY_BLOCK, base-price: 160 }
+  honeycomb: { category: farming, material: HONEYCOMB, base-price: 62 }
+  honey_bottle: { category: farming, material: HONEY_BOTTLE, base-price: 39 }
+  kelp: { category: farming, material: KELP, base-price: 8.5 }
+  melon: { category: farming, material: MELON, base-price: 130 }
+  melon_seeds: { category: farming, material: MELON_SEEDS, base-price: 21 }
+  melon_slice: { category: farming, material: MELON_SLICE, base-price: 9 }
+  mushroom_stew: { category: farming, material: MUSHROOM_STEW, base-price: 29 }
+  mutton: { category: farming, material: MUTTON, base-price: 32 }
+  nether_wart: { category: farming, material: NETHER_WART, base-price: 56 }
+  pitcher_pod: { category: farming, material: PITCHER_POD, base-price: 82 }
+  porkchop: { category: farming, material: PORKCHOP, base-price: 34 }
+  potato: { category: farming, material: POTATO, base-price: 88 }
+  pumpkin: { category: farming, material: PUMPKIN, base-price: 89 }
+  pumpkin_pie: { category: farming, material: PUMPKIN_PIE, base-price: 125 }
+  pumpkin_seeds: { category: farming, material: PUMPKIN_SEEDS, base-price: 10 }
+  rabbit: { category: farming, material: RABBIT, base-price: 36 }
+  rabbit_stew: { category: farming, material: RABBIT_STEW, base-price: 78 }
+  red_mushroom: { category: farming, material: RED_MUSHROOM, base-price: 14 }
+  salmon: { category: farming, material: SALMON, base-price: 35 }
+  sugar: { category: farming, material: SUGAR, base-price: 10 }
+  sugar_cane: { category: farming, material: SUGAR_CANE, base-price: 10 }
+  sweet_berries: { category: farming, material: SWEET_BERRIES, base-price: 86 }
+  torchflower_seeds: { category: farming, material: TORCHFLOWER_SEEDS, base-price: 90 }
+  warped_fungus: { category: farming, material: WARPED_FUNGUS, base-price: 32 }
+  wheat: { category: farming, material: WHEAT, base-price: 87 }
+  wheat_seeds: { category: farming, material: WHEAT_SEEDS, base-price: 20 }
+  blaze_powder: { category: magic, material: BLAZE_POWDER, base-price: 250 }
+  brewing_stand: { category: magic, material: BREWING_STAND, base-price: 62 }
+  glass_bottle: { category: magic, material: GLASS_BOTTLE, base-price: 130 }
+  glowstone_dust: { category: magic, material: GLOWSTONE_DUST, base-price: 330 }
+  blaze_rod: { category: mob-drops, material: BLAZE_ROD, base-price: 105 }
+  bone: { category: mob-drops, material: BONE, base-price: 340 }
+  breeze_rod: { category: mob-drops, material: BREEZE_ROD, base-price: 305 }
+  creeper_head: { category: mob-drops, material: CREEPER_HEAD, base-price: 11 }
+  ender_pearl: { category: mob-drops, material: ENDER_PEARL, base-price: 145 }
+  feather: { category: mob-drops, material: FEATHER, base-price: 335 }
+  fermented_spider_eye: { category: mob-drops, material: FERMENTED_SPIDER_EYE, base-price: 180 }
+  ghast_tear: { category: mob-drops, material: GHAST_TEAR, base-price: 175 }
+  gunpowder: { category: mob-drops, material: GUNPOWDER, base-price: 620 }
+  leather: { category: mob-drops, material: LEATHER, base-price: 395 }
+  magma_cream: { category: mob-drops, material: MAGMA_CREAM, base-price: 140 }
+  phantom_membrane: { category: mob-drops, material: PHANTOM_MEMBRANE, base-price: 1100 }
+  rabbit_foot: { category: mob-drops, material: RABBIT_FOOT, base-price: 510 }
+  rabbit_hide: { category: mob-drops, material: RABBIT_HIDE, base-price: 59 }
+  rotten_flesh: { category: mob-drops, material: ROTTEN_FLESH, base-price: 260 }
+  skeleton_skull: { category: mob-drops, material: SKELETON_SKULL, base-price: 13 }
+  slime_ball: { category: mob-drops, material: SLIME_BALL, base-price: 105 }
+  spider_eye: { category: mob-drops, material: SPIDER_EYE, base-price: 195 }
+  string: { category: mob-drops, material: STRING, base-price: 345 }
+  wind_charge: { category: mob-drops, material: WIND_CHARGE, base-price: 190 }
+  zombie_head: { category: mob-drops, material: ZOMBIE_HEAD, base-price: 13 }
+  disc_fragment: { category: music, material: DISC_FRAGMENT, base-price: 485 }
+  goat_horn: { category: music, material: GOAT_HORN, base-price: 495 }
+  jukebox: { category: music, material: JUKEBOX, base-price: 360 }
+  music_disc_11: { category: music, material: MUSIC_DISC_11, base-price: 675 }
+  music_disc_13: { category: music, material: MUSIC_DISC_13, base-price: 610 }
+  music_disc_5: { category: music, material: MUSIC_DISC_5, base-price: 4325 }
+  music_disc_blocks: { category: music, material: MUSIC_DISC_BLOCKS, base-price: 645 }
+  music_disc_cat: { category: music, material: MUSIC_DISC_CAT, base-price: 645 }
+  music_disc_chirp: { category: music, material: MUSIC_DISC_CHIRP, base-price: 660 }
+  music_disc_creator: { category: music, material: MUSIC_DISC_CREATOR, base-price: 890 }
+  music_disc_creator_music_box: { category: music, material: MUSIC_DISC_CREATOR_MUSIC_BOX, base-price: 745 }
+  music_disc_far: { category: music, material: MUSIC_DISC_FAR, base-price: 705 }
+  music_disc_mall: { category: music, material: MUSIC_DISC_MALL, base-price: 730 }
+  music_disc_mellohi: { category: music, material: MUSIC_DISC_MELLOHI, base-price: 680 }
+  music_disc_otherside: { category: music, material: MUSIC_DISC_OTHERSIDE, base-price: 630 }
+  music_disc_precipice: { category: music, material: MUSIC_DISC_PRECIPICE, base-price: 835 }
+  music_disc_relic: { category: music, material: MUSIC_DISC_RELIC, base-price: 885 }
+  music_disc_stal: { category: music, material: MUSIC_DISC_STAL, base-price: 665 }
+  music_disc_strad: { category: music, material: MUSIC_DISC_STRAD, base-price: 650 }
+  music_disc_wait: { category: music, material: MUSIC_DISC_WAIT, base-price: 645 }
+  music_disc_ward: { category: music, material: MUSIC_DISC_WARD, base-price: 700 }
+  amethyst_block: { category: resources, material: AMETHYST_BLOCK, base-price: 45 }
+  amethyst_cluster: { category: resources, material: AMETHYST_CLUSTER, base-price: 40 }
+  amethyst_shard: { category: resources, material: AMETHYST_SHARD, base-price: 69 }
+  ancient_debris: { category: resources, material: ANCIENT_DEBRIS, base-price: 1200 }
+  coal: { category: resources, material: COAL, base-price: 190 }
+  coal_block: { category: resources, material: COAL_BLOCK, base-price: 200 }
+  coal_ore: { category: resources, material: COAL_ORE, base-price: 56 }
+  copper_ingot: { category: resources, material: COPPER_INGOT, base-price: 52 }
+  copper_ore: { category: resources, material: COPPER_ORE, base-price: 79 }
+  diamond: { category: resources, material: DIAMOND, base-price: 1575 }
+  diamond_block: { category: resources, material: DIAMOND_BLOCK, base-price: 1600 }
+  diamond_ore: { category: resources, material: DIAMOND_ORE, base-price: 2625 }
+  emerald: { category: resources, material: EMERALD, base-price: 1175 }
+  emerald_block: { category: resources, material: EMERALD_BLOCK, base-price: 1075 }
+  emerald_ore: { category: resources, material: EMERALD_ORE, base-price: 645 }
+  gold_block: { category: resources, material: GOLD_BLOCK, base-price: 335 }
+  gold_ingot: { category: resources, material: GOLD_INGOT, base-price: 310 }
+  gold_ore: { category: resources, material: GOLD_ORE, base-price: 170 }
+  iron_block: { category: resources, material: IRON_BLOCK, base-price: 205 }
+  iron_ingot: { category: resources, material: IRON_INGOT, base-price: 215 }
+  iron_ore: { category: resources, material: IRON_ORE, base-price: 115 }
+  lapis_block: { category: resources, material: LAPIS_BLOCK, base-price: 270 }
+  lapis_lazuli: { category: resources, material: LAPIS_LAZULI, base-price: 220 }
+  lapis_ore: { category: resources, material: LAPIS_ORE, base-price: 200 }
+  nether_quartz_ore: { category: resources, material: NETHER_QUARTZ_ORE, base-price: 140 }
+  quartz: { category: resources, material: QUARTZ, base-price: 245 }
+  redstone: { category: resources, material: REDSTONE, base-price: 160 }
+  redstone_block: { category: resources, material: REDSTONE_BLOCK, base-price: 150 }
+  redstone_ore: { category: resources, material: REDSTONE_ORE, base-price: 94 }
+  resin_block: { category: resources, material: RESIN_BLOCK, base-price: 160 }
+  resin_brick: { category: resources, material: RESIN_BRICK, base-price: 165 }
+  resin_clump: { category: resources, material: RESIN_CLUMP, base-price: 35 }
+  barrel: { category: storage, material: BARREL, base-price: 52 }
+  black_bundle: { category: storage, material: BLACK_BUNDLE, base-price: 625 }
+  blue_bundle: { category: storage, material: BLUE_BUNDLE, base-price: 525 }
+  brown_bundle: { category: storage, material: BROWN_BUNDLE, base-price: 585 }
+  bundle: { category: storage, material: BUNDLE, base-price: 525 }
+  cauldron: { category: storage, material: CAULDRON, base-price: 110 }
+  chest: { category: storage, material: CHEST, base-price: 52 }
+  chiseled_bookshelf: { category: storage, material: CHISELED_BOOKSHELF, base-price: 55 }
+  copper_chest: { category: storage, material: COPPER_CHEST, base-price: 76 }
+  cyan_bundle: { category: storage, material: CYAN_BUNDLE, base-price: 515 }
+  decorated_pot: { category: storage, material: DECORATED_POT, base-price: 280 }
+  ender_chest: { category: storage, material: ENDER_CHEST, base-price: 570 }
+  gray_bundle: { category: storage, material: GRAY_BUNDLE, base-price: 620 }
+  green_bundle: { category: storage, material: GREEN_BUNDLE, base-price: 560 }
+  light_blue_bundle: { category: storage, material: LIGHT_BLUE_BUNDLE, base-price: 600 }
+  light_gray_bundle: { category: storage, material: LIGHT_GRAY_BUNDLE, base-price: 575 }
+  lime_bundle: { category: storage, material: LIME_BUNDLE, base-price: 530 }
+  magenta_bundle: { category: storage, material: MAGENTA_BUNDLE, base-price: 580 }
+  orange_bundle: { category: storage, material: ORANGE_BUNDLE, base-price: 525 }
+  pink_bundle: { category: storage, material: PINK_BUNDLE, base-price: 535 }
+  purple_bundle: { category: storage, material: PURPLE_BUNDLE, base-price: 625 }
+  red_bundle: { category: storage, material: RED_BUNDLE, base-price: 535 }
+  white_bundle: { category: storage, material: WHITE_BUNDLE, base-price: 580 }
+  yellow_bundle: { category: storage, material: YELLOW_BUNDLE, base-price: 570 }
+  acacia_boat: { category: misc, material: ACACIA_BOAT, base-price: 44 }
+  acacia_button: { category: misc, material: ACACIA_BUTTON, base-price: 14 }
+  acacia_chest_boat: { category: misc, material: ACACIA_CHEST_BOAT, base-price: 91 }
+  acacia_door: { category: misc, material: ACACIA_DOOR, base-price: 22 }
+  acacia_hanging_sign: { category: misc, material: ACACIA_HANGING_SIGN, base-price: 31 }
+  acacia_pressure_plate: { category: misc, material: ACACIA_PRESSURE_PLATE, base-price: 22 }
+  acacia_sign: { category: misc, material: ACACIA_SIGN, base-price: 20 }
+  acacia_trapdoor: { category: misc, material: ACACIA_TRAPDOOR, base-price: 30 }
+  andesite_wall: { category: misc, material: ANDESITE_WALL, base-price: 11 }
+  anvil: { category: misc, material: ANVIL, base-price: 475 }
+  armadillo_scute: { category: misc, material: ARMADILLO_SCUTE, base-price: 1125 }
+  armor_stand: { category: misc, material: ARMOR_STAND, base-price: 30 }
+  axolotl_bucket: { category: misc, material: AXOLOTL_BUCKET, base-price: 93 }
+  bamboo_button: { category: misc, material: BAMBOO_BUTTON, base-price: 11 }
+  bamboo_chest_raft: { category: misc, material: BAMBOO_CHEST_RAFT, base-price: 69 }
+  bamboo_door: { category: misc, material: BAMBOO_DOOR, base-price: 11 }
+  bamboo_hanging_sign: { category: misc, material: BAMBOO_HANGING_SIGN, base-price: 26 }
+  bamboo_mosaic_slab: { category: misc, material: BAMBOO_MOSAIC_SLAB, base-price: 11 }
+  bamboo_mosaic_stairs: { category: misc, material: BAMBOO_MOSAIC_STAIRS, base-price: 12 }
+  bamboo_pressure_plate: { category: misc, material: BAMBOO_PRESSURE_PLATE, base-price: 13 }
+  bamboo_raft: { category: misc, material: BAMBOO_RAFT, base-price: 21 }
+  bamboo_sign: { category: misc, material: BAMBOO_SIGN, base-price: 14 }
+  bamboo_trapdoor: { category: misc, material: BAMBOO_TRAPDOOR, base-price: 15 }
+  beacon: { category: misc, material: BEACON, base-price: 2325 }
+  bell: { category: misc, material: BELL, base-price: 1800 }
+  birch_boat: { category: misc, material: BIRCH_BOAT, base-price: 44 }
+  birch_button: { category: misc, material: BIRCH_BUTTON, base-price: 13 }
+  birch_chest_boat: { category: misc, material: BIRCH_CHEST_BOAT, base-price: 78 }
+  birch_door: { category: misc, material: BIRCH_DOOR, base-price: 22 }
+  birch_hanging_sign: { category: misc, material: BIRCH_HANGING_SIGN, base-price: 28 }
+  birch_pressure_plate: { category: misc, material: BIRCH_PRESSURE_PLATE, base-price: 20 }
+  birch_sign: { category: misc, material: BIRCH_SIGN, base-price: 21 }
+  birch_trapdoor: { category: misc, material: BIRCH_TRAPDOOR, base-price: 28 }
+  blackstone_wall: { category: misc, material: BLACKSTONE_WALL, base-price: 11 }
+  black_banner: { category: misc, material: BLACK_BANNER, base-price: 515 }
+  black_bed: { category: misc, material: BLACK_BED, base-price: 285 }
+  black_carpet: { category: misc, material: BLACK_CARPET, base-price: 97 }
+  blast_furnace: { category: misc, material: BLAST_FURNACE, base-price: 150 }
+  blue_banner: { category: misc, material: BLUE_BANNER, base-price: 525 }
+  blue_bed: { category: misc, material: BLUE_BED, base-price: 280 }
+  blue_carpet: { category: misc, material: BLUE_CARPET, base-price: 91 }
+  bone_block: { category: misc, material: BONE_BLOCK, base-price: 97 }
+  book: { category: misc, material: BOOK, base-price: 175 }
+  bowl: { category: misc, material: BOWL, base-price: 12 }
+  brick: { category: misc, material: BRICK, base-price: 110 }
+  brick_wall: { category: misc, material: BRICK_WALL, base-price: 305 }
+  brown_banner: { category: misc, material: BROWN_BANNER, base-price: 495 }
+  brown_bed: { category: misc, material: BROWN_BED, base-price: 315 }
+  brown_carpet: { category: misc, material: BROWN_CARPET, base-price: 105 }
+  brown_mushroom_block: { category: misc, material: BROWN_MUSHROOM_BLOCK, base-price: 10 }
+  brush: { category: misc, material: BRUSH, base-price: 45 }
+  bucket: { category: misc, material: BUCKET, base-price: 94 }
+  campfire: { category: misc, material: CAMPFIRE, base-price: 95 }
+  carrot_on_a_stick: { category: misc, material: CARROT_ON_A_STICK, base-price: 51 }
+  cartography_table: { category: misc, material: CARTOGRAPHY_TABLE, base-price: 38 }
+  carved_pumpkin: { category: misc, material: CARVED_PUMPKIN, base-price: 44 }
+  chain: { category: misc, material: CHAIN, base-price: 47 }
+  charcoal: { category: misc, material: CHARCOAL, base-price: 44 }
+  cherry_boat: { category: misc, material: CHERRY_BOAT, base-price: 32 }
+  cherry_button: { category: misc, material: CHERRY_BUTTON, base-price: 12 }
+  cherry_chest_boat: { category: misc, material: CHERRY_CHEST_BOAT, base-price: 80 }
+  cherry_hanging_sign: { category: misc, material: CHERRY_HANGING_SIGN, base-price: 28 }
+  cherry_pressure_plate: { category: misc, material: CHERRY_PRESSURE_PLATE, base-price: 17 }
+  cherry_sign: { category: misc, material: CHERRY_SIGN, base-price: 17 }
+  cherry_trapdoor: { category: misc, material: CHERRY_TRAPDOOR, base-price: 23 }
+  chest_minecart: { category: misc, material: CHEST_MINECART, base-price: 175 }
+  chiseled_copper: { category: misc, material: CHISELED_COPPER, base-price: 11 }
+  clay_ball: { category: misc, material: CLAY_BALL, base-price: 35 }
+  cobbled_deepslate_wall: { category: misc, material: COBBLED_DEEPSLATE_WALL, base-price: 12 }
+  cobblestone_wall: { category: misc, material: COBBLESTONE_WALL, base-price: 11 }
+  cobweb: { category: misc, material: COBWEB, base-price: 170 }
+  cod_bucket: { category: misc, material: COD_BUCKET, base-price: 130 }
+  compass: { category: misc, material: COMPASS, base-price: 130 }
+  composter: { category: misc, material: COMPOSTER, base-price: 33 }
+  copper_bulb: { category: misc, material: COPPER_BULB, base-price: 36 }
+  copper_door: { category: misc, material: COPPER_DOOR, base-price: 44 }
+  copper_grate: { category: misc, material: COPPER_GRATE, base-price: 11 }
+  copper_trapdoor: { category: misc, material: COPPER_TRAPDOOR, base-price: 56 }
+  crafting_table: { category: misc, material: CRAFTING_TABLE, base-price: 38 }
+  crimson_button: { category: misc, material: CRIMSON_BUTTON, base-price: 11 }
+  crimson_door: { category: misc, material: CRIMSON_DOOR, base-price: 17 }
+  crimson_hanging_sign: { category: misc, material: CRIMSON_HANGING_SIGN, base-price: 26 }
+  crimson_pressure_plate: { category: misc, material: CRIMSON_PRESSURE_PLATE, base-price: 15 }
+  crimson_roots: { category: misc, material: CRIMSON_ROOTS, base-price: 39 }
+  crimson_sign: { category: misc, material: CRIMSON_SIGN, base-price: 19 }
+  crimson_trapdoor: { category: misc, material: CRIMSON_TRAPDOOR, base-price: 24 }
+  cut_copper_slab: { category: misc, material: CUT_COPPER_SLAB, base-price: 11 }
+  cut_copper_stairs: { category: misc, material: CUT_COPPER_STAIRS, base-price: 11 }
+  cut_red_sandstone: { category: misc, material: CUT_RED_SANDSTONE, base-price: 135 }
+  cut_red_sandstone_slab: { category: misc, material: CUT_RED_SANDSTONE_SLAB, base-price: 85 }
+  cut_sandstone: { category: misc, material: CUT_SANDSTONE, base-price: 76 }
+  cut_sandstone_slab: { category: misc, material: CUT_SANDSTONE_SLAB, base-price: 40 }
+  cyan_banner: { category: misc, material: CYAN_BANNER, base-price: 475 }
+  cyan_bed: { category: misc, material: CYAN_BED, base-price: 275 }
+  cyan_carpet: { category: misc, material: CYAN_CARPET, base-price: 110 }
+  dark_oak_boat: { category: misc, material: DARK_OAK_BOAT, base-price: 40 }
+  dark_oak_button: { category: misc, material: DARK_OAK_BUTTON, base-price: 13 }
+  dark_oak_chest_boat: { category: misc, material: DARK_OAK_CHEST_BOAT, base-price: 80 }
+  dark_oak_door: { category: misc, material: DARK_OAK_DOOR, base-price: 20 }
+  dark_oak_hanging_sign: { category: misc, material: DARK_OAK_HANGING_SIGN, base-price: 30 }
+  dark_oak_pressure_plate: { category: misc, material: DARK_OAK_PRESSURE_PLATE, base-price: 20 }
+  dark_oak_sign: { category: misc, material: DARK_OAK_SIGN, base-price: 21 }
+  dark_oak_trapdoor: { category: misc, material: DARK_OAK_TRAPDOOR, base-price: 29 }
+  dead_bush: { category: misc, material: DEAD_BUSH, base-price: 140 }
+  deepslate_brick_wall: { category: misc, material: DEEPSLATE_BRICK_WALL, base-price: 12 }
+  deepslate_coal_ore: { category: misc, material: DEEPSLATE_COAL_ORE, base-price: 93 }
+  deepslate_copper_ore: { category: misc, material: DEEPSLATE_COPPER_ORE, base-price: 78 }
+  deepslate_diamond_ore: { category: misc, material: DEEPSLATE_DIAMOND_ORE, base-price: 735 }
+  deepslate_emerald_ore: { category: misc, material: DEEPSLATE_EMERALD_ORE, base-price: 585 }
+  deepslate_gold_ore: { category: misc, material: DEEPSLATE_GOLD_ORE, base-price: 145 }
+  deepslate_iron_ore: { category: misc, material: DEEPSLATE_IRON_ORE, base-price: 97 }
+  deepslate_lapis_ore: { category: misc, material: DEEPSLATE_LAPIS_ORE, base-price: 225 }
+  deepslate_redstone_ore: { category: misc, material: DEEPSLATE_REDSTONE_ORE, base-price: 100 }
+  deepslate_tile_wall: { category: misc, material: DEEPSLATE_TILE_WALL, base-price: 12 }
+  diorite_wall: { category: misc, material: DIORITE_WALL, base-price: 12 }
+  dragon_egg: { category: misc, material: DRAGON_EGG, base-price: 5400 }
+  dragon_head: { category: misc, material: DRAGON_HEAD, base-price: 12 }
+  echo_shard: { category: misc, material: ECHO_SHARD, base-price: 315 }
+  enchanting_table: { category: misc, material: ENCHANTING_TABLE, base-price: 715 }
+  ender_eye: { category: misc, material: ENDER_EYE, base-price: 59 }
+  end_rod: { category: misc, material: END_ROD, base-price: 18 }
+  end_stone_brick_wall: { category: misc, material: END_STONE_BRICK_WALL, base-price: 38 }
+  experience_bottle: { category: misc, material: EXPERIENCE_BOTTLE, base-price: 335 }
+  exposed_chiseled_copper: { category: misc, material: EXPOSED_CHISELED_COPPER, base-price: 11 }
+  exposed_copper: { category: misc, material: EXPOSED_COPPER, base-price: 29 }
+  exposed_copper_bulb: { category: misc, material: EXPOSED_COPPER_BULB, base-price: 38 }
+  exposed_copper_door: { category: misc, material: EXPOSED_COPPER_DOOR, base-price: 44 }
+  exposed_copper_grate: { category: misc, material: EXPOSED_COPPER_GRATE, base-price: 11 }
+  exposed_copper_trapdoor: { category: misc, material: EXPOSED_COPPER_TRAPDOOR, base-price: 61 }
+  exposed_cut_copper: { category: misc, material: EXPOSED_CUT_COPPER, base-price: 29 }
+  exposed_cut_copper_slab: { category: misc, material: EXPOSED_CUT_COPPER_SLAB, base-price: 10 }
+  exposed_cut_copper_stairs: { category: misc, material: EXPOSED_CUT_COPPER_STAIRS, base-price: 10 }
+  fern: { category: misc, material: FERN, base-price: 45 }
+  firework: { category: misc, material: FIREWORK, base-price: 730 }
+  firework_rocket: { category: misc, material: FIREWORK_ROCKET, base-price: 37 }
+  firework_star: { category: misc, material: FIREWORK_STAR, base-price: 85 }
+  fire_charge: { category: misc, material: FIRE_CHARGE, base-price: 50 }
+  fishing_rod: { category: misc, material: FISHING_ROD, base-price: 88 }
+  fletching_table: { category: misc, material: FLETCHING_TABLE, base-price: 51 }
+  flint: { category: misc, material: FLINT, base-price: 17 }
+  flint_and_steel: { category: misc, material: FLINT_AND_STEEL, base-price: 51 }
+  furnace: { category: misc, material: FURNACE, base-price: 39 }
+  furnace_minecart: { category: misc, material: FURNACE_MINECART, base-price: 165 }
+  glow_item_frame: { category: misc, material: GLOW_ITEM_FRAME, base-price: 195 }
+  gold_nugget: { category: misc, material: GOLD_NUGGET, base-price: 14 }
+  granite_wall: { category: misc, material: GRANITE_WALL, base-price: 11 }
+  gray_banner: { category: misc, material: GRAY_BANNER, base-price: 480 }
+  gray_bed: { category: misc, material: GRAY_BED, base-price: 325 }
+  gray_carpet: { category: misc, material: GRAY_CARPET, base-price: 93 }
+  green_banner: { category: misc, material: GREEN_BANNER, base-price: 500 }
+  green_bed: { category: misc, material: GREEN_BED, base-price: 275 }
+  green_carpet: { category: misc, material: GREEN_CARPET, base-price: 100 }
+  grindstone: { category: misc, material: GRINDSTONE, base-price: 32 }
+  hanging_roots: { category: misc, material: HANGING_ROOTS, base-price: 12 }
+  heavy_weighted_pressure_plate: { category: misc, material: HEAVY_WEIGHTED_PRESSURE_PLATE, base-price: 68 }
+  hopper_minecart: { category: misc, material: HOPPER_MINECART, base-price: 230 }
+  iron_bars: { category: misc, material: IRON_BARS, base-price: 20 }
+  iron_door: { category: misc, material: IRON_DOOR, base-price: 39 }
+  iron_nugget: { category: misc, material: IRON_NUGGET, base-price: 11 }
+  iron_trapdoor: { category: misc, material: IRON_TRAPDOOR, base-price: 120 }
+  item_frame: { category: misc, material: ITEM_FRAME, base-price: 155 }
+  jungle_boat: { category: misc, material: JUNGLE_BOAT, base-price: 43 }
+  jungle_button: { category: misc, material: JUNGLE_BUTTON, base-price: 13 }
+  jungle_chest_boat: { category: misc, material: JUNGLE_CHEST_BOAT, base-price: 81 }
+  jungle_door: { category: misc, material: JUNGLE_DOOR, base-price: 20 }
+  jungle_hanging_sign: { category: misc, material: JUNGLE_HANGING_SIGN, base-price: 28 }
+  jungle_pressure_plate: { category: misc, material: JUNGLE_PRESSURE_PLATE, base-price: 20 }
+  jungle_sign: { category: misc, material: JUNGLE_SIGN, base-price: 24 }
+  jungle_trapdoor: { category: misc, material: JUNGLE_TRAPDOOR, base-price: 25 }
+  ladder: { category: misc, material: LADDER, base-price: 14 }
+  lantern: { category: misc, material: LANTERN, base-price: 46 }
+  large_amethyst_bud: { category: misc, material: LARGE_AMETHYST_BUD, base-price: 34 }
+  large_fern: { category: misc, material: LARGE_FERN, base-price: 44 }
+  lava_bucket: { category: misc, material: LAVA_BUCKET, base-price: 90 }
+  lead: { category: misc, material: LEAD, base-price: 96 }
+  lectern: { category: misc, material: LECTERN, base-price: 405 }
+  lightning_rod: { category: misc, material: LIGHTNING_ROD, base-price: 23 }
+  light_blue_banner: { category: misc, material: LIGHT_BLUE_BANNER, base-price: 460 }
+  light_blue_bed: { category: misc, material: LIGHT_BLUE_BED, base-price: 320 }
+  light_blue_carpet: { category: misc, material: LIGHT_BLUE_CARPET, base-price: 91 }
+  light_gray_banner: { category: misc, material: LIGHT_GRAY_BANNER, base-price: 455 }
+  light_gray_bed: { category: misc, material: LIGHT_GRAY_BED, base-price: 310 }
+  light_gray_carpet: { category: misc, material: LIGHT_GRAY_CARPET, base-price: 93 }
+  light_weighted_pressure_plate: { category: misc, material: LIGHT_WEIGHTED_PRESSURE_PLATE, base-price: 87 }
+  lime_banner: { category: misc, material: LIME_BANNER, base-price: 475 }
+  lime_bed: { category: misc, material: LIME_BED, base-price: 280 }
+  lime_carpet: { category: misc, material: LIME_CARPET, base-price: 100 }
+  lodestone: { category: misc, material: LODESTONE, base-price: 1150 }
+  loom: { category: misc, material: LOOM, base-price: 87 }
+  magenta_banner: { category: misc, material: MAGENTA_BANNER, base-price: 515 }
+  magenta_bed: { category: misc, material: MAGENTA_BED, base-price: 320 }
+  magenta_carpet: { category: misc, material: MAGENTA_CARPET, base-price: 105 }
+  mangrove_boat: { category: misc, material: MANGROVE_BOAT, base-price: 29 }
+  mangrove_chest_boat: { category: misc, material: MANGROVE_CHEST_BOAT, base-price: 78 }
+  mangrove_hanging_sign: { category: misc, material: MANGROVE_HANGING_SIGN, base-price: 26 }
+  mangrove_sign: { category: misc, material: MANGROVE_SIGN, base-price: 19 }
+  map: { category: misc, material: MAP, base-price: 125 }
+  medium_amethyst_bud: { category: misc, material: MEDIUM_AMETHYST_BUD, base-price: 24 }
+  milk_bucket: { category: misc, material: MILK_BUCKET, base-price: 95 }
+  minecart: { category: misc, material: MINECART, base-price: 135 }
+  mossy_cobblestone_wall: { category: misc, material: MOSSY_COBBLESTONE_WALL, base-price: 51 }
+  mossy_stone_brick_wall: { category: misc, material: MOSSY_STONE_BRICK_WALL, base-price: 48 }
+  moss_carpet: { category: misc, material: MOSS_CARPET, base-price: 11 }
+  mud_brick_wall: { category: misc, material: MUD_BRICK_WALL, base-price: 55 }
+  mushroom_stem: { category: misc, material: MUSHROOM_STEM, base-price: 11 }
+  name_tag: { category: misc, material: NAME_TAG, base-price: 41 }
+  nautilus_shell: { category: misc, material: NAUTILUS_SHELL, base-price: 445 }
+  nether_brick: { category: misc, material: NETHER_BRICK, base-price: 12 }
+  nether_brick_fence: { category: misc, material: NETHER_BRICK_FENCE, base-price: 11 }
+  nether_brick_wall: { category: misc, material: NETHER_BRICK_WALL, base-price: 12 }
+  nether_gold_ore: { category: misc, material: NETHER_GOLD_ORE, base-price: 145 }
+  nether_sprouts: { category: misc, material: NETHER_SPROUTS, base-price: 34 }
+  nether_wart_block: { category: misc, material: NETHER_WART_BLOCK, base-price: 130 }
+  oak_boat: { category: misc, material: OAK_BOAT, base-price: 42 }
+  oak_button: { category: misc, material: OAK_BUTTON, base-price: 13 }
+  oak_chest_boat: { category: misc, material: OAK_CHEST_BOAT, base-price: 79 }
+  oak_door: { category: misc, material: OAK_DOOR, base-price: 22 }
+  oak_hanging_sign: { category: misc, material: OAK_HANGING_SIGN, base-price: 26 }
+  oak_pressure_plate: { category: misc, material: OAK_PRESSURE_PLATE, base-price: 22 }
+  oak_sign: { category: misc, material: OAK_SIGN, base-price: 23 }
+  oak_trapdoor: { category: misc, material: OAK_TRAPDOOR, base-price: 30 }
+  ominous_bottle: { category: misc, material: OMINOUS_BOTTLE, base-price: 13700 }
+  ominous_trial_key: { category: misc, material: OMINOUS_TRIAL_KEY, base-price: 10700 }
+  orange_banner: { category: misc, material: ORANGE_BANNER, base-price: 495 }
+  orange_bed: { category: misc, material: ORANGE_BED, base-price: 330 }
+  orange_carpet: { category: misc, material: ORANGE_CARPET, base-price: 105 }
+  oxidized_chiseled_copper: { category: misc, material: OXIDIZED_CHISELED_COPPER, base-price: 11 }
+  oxidized_copper: { category: misc, material: OXIDIZED_COPPER, base-price: 32 }
+  oxidized_copper_bulb: { category: misc, material: OXIDIZED_COPPER_BULB, base-price: 33 }
+  oxidized_copper_door: { category: misc, material: OXIDIZED_COPPER_DOOR, base-price: 54 }
+  oxidized_copper_grate: { category: misc, material: OXIDIZED_COPPER_GRATE, base-price: 12 }
+  oxidized_copper_trapdoor: { category: misc, material: OXIDIZED_COPPER_TRAPDOOR, base-price: 70 }
+  oxidized_cut_copper: { category: misc, material: OXIDIZED_CUT_COPPER, base-price: 33 }
+  oxidized_cut_copper_slab: { category: misc, material: OXIDIZED_CUT_COPPER_SLAB, base-price: 10 }
+  oxidized_cut_copper_stairs: { category: misc, material: OXIDIZED_CUT_COPPER_STAIRS, base-price: 11 }
+  painting: { category: misc, material: PAINTING, base-price: 155 }
+  paper: { category: misc, material: PAPER, base-price: 11 }
+  piglin_head: { category: misc, material: PIGLIN_HEAD, base-price: 1075 }
+  pink_banner: { category: misc, material: PINK_BANNER, base-price: 450 }
+  pink_bed: { category: misc, material: PINK_BED, base-price: 300 }
+  pink_carpet: { category: misc, material: PINK_CARPET, base-price: 105 }
+  pointed_dripstone: { category: misc, material: POINTED_DRIPSTONE, base-price: 13 }
+  poisonous_potato: { category: misc, material: POISONOUS_POTATO, base-price: 12 }
+  polished_blackstone_brick_wall: { category: misc, material: POLISHED_BLACKSTONE_BRICK_WALL, base-price: 12 }
+  polished_blackstone_button: { category: misc, material: POLISHED_BLACKSTONE_BUTTON, base-price: 10 }
+  polished_blackstone_pressure_plate: { category: misc, material: POLISHED_BLACKSTONE_PRESSURE_PLATE, base-price: 18 }
+  polished_blackstone_wall: { category: misc, material: POLISHED_BLACKSTONE_WALL, base-price: 11 }
+  polished_deepslate: { category: misc, material: POLISHED_DEEPSLATE, base-price: 10 }
+  polished_deepslate_slab: { category: misc, material: POLISHED_DEEPSLATE_SLAB, base-price: 11 }
+  polished_deepslate_stairs: { category: misc, material: POLISHED_DEEPSLATE_STAIRS, base-price: 11 }
+  polished_deepslate_wall: { category: misc, material: POLISHED_DEEPSLATE_WALL, base-price: 11 }
+  polished_tuff_wall: { category: misc, material: POLISHED_TUFF_WALL, base-price: 19 }
+  popped_chorus_fruit: { category: misc, material: POPPED_CHORUS_FRUIT, base-price: 24 }
+  powder_snow_bucket: { category: misc, material: POWDER_SNOW_BUCKET, base-price: 135 }
+  prismarine_crystals: { category: misc, material: PRISMARINE_CRYSTALS, base-price: 44 }
+  prismarine_shard: { category: misc, material: PRISMARINE_SHARD, base-price: 48 }
+  prismarine_wall: { category: misc, material: PRISMARINE_WALL, base-price: 140 }
+  pufferfish: { category: misc, material: PUFFERFISH, base-price: 43 }
+  pufferfish_bucket: { category: misc, material: PUFFERFISH_BUCKET, base-price: 120 }
+  purple_banner: { category: misc, material: PURPLE_BANNER, base-price: 490 }
+  purple_bed: { category: misc, material: PURPLE_BED, base-price: 330 }
+  purple_carpet: { category: misc, material: PURPLE_CARPET, base-price: 105 }
+  raw_copper: { category: misc, material: RAW_COPPER, base-price: 11 }
+  raw_copper_block: { category: misc, material: RAW_COPPER_BLOCK, base-price: 51 }
+  raw_gold: { category: misc, material: RAW_GOLD, base-price: 55 }
+  raw_gold_block: { category: misc, material: RAW_GOLD_BLOCK, base-price: 320 }
+  raw_iron: { category: misc, material: RAW_IRON, base-price: 39 }
+  raw_iron_block: { category: misc, material: RAW_IRON_BLOCK, base-price: 205 }
+  red_banner: { category: misc, material: RED_BANNER, base-price: 450 }
+  red_bed: { category: misc, material: RED_BED, base-price: 325 }
+  red_carpet: { category: misc, material: RED_CARPET, base-price: 96 }
+  red_mushroom_block: { category: misc, material: RED_MUSHROOM_BLOCK, base-price: 12 }
+  red_nether_brick_wall: { category: misc, material: RED_NETHER_BRICK_WALL, base-price: 51 }
+  red_sandstone_wall: { category: misc, material: RED_SANDSTONE_WALL, base-price: 135 }
+  respawn_anchor: { category: misc, material: RESPAWN_ANCHOR, base-price: 940 }
+  saddle: { category: misc, material: SADDLE, base-price: 340 }
+  salmon_bucket: { category: misc, material: SALMON_BUCKET, base-price: 130 }
+  sandstone_wall: { category: misc, material: SANDSTONE_WALL, base-price: 71 }
+  scaffolding: { category: misc, material: SCAFFOLDING, base-price: 13 }
+  sculk: { category: misc, material: SCULK, base-price: 71 }
+  sculk_catalyst: { category: misc, material: SCULK_CATALYST, base-price: 5500 }
+  sculk_shrieker: { category: misc, material: SCULK_SHRIEKER, base-price: 13900 }
+  sculk_vein: { category: misc, material: SCULK_VEIN, base-price: 20 }
+  scute: { category: misc, material: SCUTE, base-price: 1100 }
+  seagrass: { category: misc, material: SEAGRASS, base-price: 46 }
+  sea_pickle: { category: misc, material: SEA_PICKLE, base-price: 41 }
+  shears: { category: misc, material: SHEARS, base-price: 67 }
+  small_amethyst_bud: { category: misc, material: SMALL_AMETHYST_BUD, base-price: 18 }
+  smithing_table: { category: misc, material: SMITHING_TABLE, base-price: 84 }
+  smoker: { category: misc, material: SMOKER, base-price: 91 }
+  sniffer_egg: { category: misc, material: SNIFFER_EGG, base-price: 105 }
+  snow: { category: misc, material: SNOW, base-price: 46 }
+  snowball: { category: misc, material: SNOWBALL, base-price: 25 }
+  soul_campfire: { category: misc, material: SOUL_CAMPFIRE, base-price: 98 }
+  soul_lantern: { category: misc, material: SOUL_LANTERN, base-price: 59 }
+  soul_torch: { category: misc, material: SOUL_TORCH, base-price: 34 }
+  spruce_boat: { category: misc, material: SPRUCE_BOAT, base-price: 44 }
+  spruce_button: { category: misc, material: SPRUCE_BUTTON, base-price: 11 }
+  spruce_chest_boat: { category: misc, material: SPRUCE_CHEST_BOAT, base-price: 87 }
+  spruce_door: { category: misc, material: SPRUCE_DOOR, base-price: 22 }
+  spruce_hanging_sign: { category: misc, material: SPRUCE_HANGING_SIGN, base-price: 28 }
+  spruce_pressure_plate: { category: misc, material: SPRUCE_PRESSURE_PLATE, base-price: 19 }
+  spruce_sign: { category: misc, material: SPRUCE_SIGN, base-price: 23 }
+  spruce_trapdoor: { category: misc, material: SPRUCE_TRAPDOOR, base-price: 29 }
+  spyglass: { category: misc, material: SPYGLASS, base-price: 29 }
+  stick: { category: misc, material: STICK, base-price: 12 }
+  stonecutter: { category: misc, material: STONECUTTER, base-price: 53 }
+  stone_brick_wall: { category: misc, material: STONE_BRICK_WALL, base-price: 11 }
+  stone_button: { category: misc, material: STONE_BUTTON, base-price: 12 }
+  stone_pressure_plate: { category: misc, material: STONE_PRESSURE_PLATE, base-price: 14 }
+  stripped_acacia_log: { category: misc, material: STRIPPED_ACACIA_LOG, base-price: 26 }
+  stripped_acacia_wood: { category: misc, material: STRIPPED_ACACIA_WOOD, base-price: 33 }
+  stripped_birch_log: { category: misc, material: STRIPPED_BIRCH_LOG, base-price: 28 }
+  stripped_birch_wood: { category: misc, material: STRIPPED_BIRCH_WOOD, base-price: 32 }
+  stripped_crimson_hyphae: { category: misc, material: STRIPPED_CRIMSON_HYPHAE, base-price: 30 }
+  stripped_crimson_stem: { category: misc, material: STRIPPED_CRIMSON_STEM, base-price: 26 }
+  stripped_dark_oak_log: { category: misc, material: STRIPPED_DARK_OAK_LOG, base-price: 27 }
+  stripped_dark_oak_wood: { category: misc, material: STRIPPED_DARK_OAK_WOOD, base-price: 30 }
+  stripped_jungle_log: { category: misc, material: STRIPPED_JUNGLE_LOG, base-price: 27 }
+  stripped_jungle_wood: { category: misc, material: STRIPPED_JUNGLE_WOOD, base-price: 32 }
+  stripped_oak_log: { category: misc, material: STRIPPED_OAK_LOG, base-price: 28 }
+  stripped_oak_wood: { category: misc, material: STRIPPED_OAK_WOOD, base-price: 34 }
+  stripped_spruce_log: { category: misc, material: STRIPPED_SPRUCE_LOG, base-price: 28 }
+  stripped_spruce_wood: { category: misc, material: STRIPPED_SPRUCE_WOOD, base-price: 33 }
+  stripped_warped_hyphae: { category: misc, material: STRIPPED_WARPED_HYPHAE, base-price: 31 }
+  stripped_warped_stem: { category: misc, material: STRIPPED_WARPED_STEM, base-price: 24 }
+  tadpole_bucket: { category: misc, material: TADPOLE_BUCKET, base-price: 105 }
+  tall_grass: { category: misc, material: TALL_GRASS, base-price: 40 }
+  terracotta: { category: misc, material: TERRACOTTA, base-price: 110 }
+  tnt_minecart: { category: misc, material: TNT_MINECART, base-price: 420 }
+  torch: { category: misc, material: TORCH, base-price: 15 }
+  trapped_chest: { category: misc, material: TRAPPED_CHEST, base-price: 81 }
+  trial_key: { category: misc, material: TRIAL_KEY, base-price: 9000 }
+  tropical_fish: { category: misc, material: TROPICAL_FISH, base-price: 40 }
+  tropical_fish_bucket: { category: misc, material: TROPICAL_FISH_BUCKET, base-price: 120 }
+  tuff_brick_wall: { category: misc, material: TUFF_BRICK_WALL, base-price: 19 }
+  tuff_wall: { category: misc, material: TUFF_WALL, base-price: 18 }
+  turtle_egg: { category: misc, material: TURTLE_EGG, base-price: 75 }
+  vault: { category: misc, material: VAULT, base-price: 25000 }
+  warped_button: { category: misc, material: WARPED_BUTTON, base-price: 12 }
+  warped_door: { category: misc, material: WARPED_DOOR, base-price: 18 }
+  warped_fungus_on_a_stick: { category: misc, material: WARPED_FUNGUS_ON_A_STICK, base-price: 115 }
+  warped_hanging_sign: { category: misc, material: WARPED_HANGING_SIGN, base-price: 25 }
+  warped_pressure_plate: { category: misc, material: WARPED_PRESSURE_PLATE, base-price: 12 }
+  warped_roots: { category: misc, material: WARPED_ROOTS, base-price: 40 }
+  warped_sign: { category: misc, material: WARPED_SIGN, base-price: 17 }
+  warped_trapdoor: { category: misc, material: WARPED_TRAPDOOR, base-price: 21 }
+  warped_wart_block: { category: misc, material: WARPED_WART_BLOCK, base-price: 115 }
+  water_bucket: { category: misc, material: WATER_BUCKET, base-price: 97 }
+  waxed_chiseled_copper: { category: misc, material: WAXED_CHISELED_COPPER, base-price: 27 }
+  waxed_copper_bulb: { category: misc, material: WAXED_COPPER_BULB, base-price: 50 }
+  waxed_copper_door: { category: misc, material: WAXED_COPPER_DOOR, base-price: 65 }
+  waxed_copper_grate: { category: misc, material: WAXED_COPPER_GRATE, base-price: 27 }
+  waxed_copper_trapdoor: { category: misc, material: WAXED_COPPER_TRAPDOOR, base-price: 69 }
+  waxed_cut_copper_slab: { category: misc, material: WAXED_CUT_COPPER_SLAB, base-price: 10 }
+  waxed_cut_copper_stairs: { category: misc, material: WAXED_CUT_COPPER_STAIRS, base-price: 16 }
+  waxed_exposed_chiseled_copper: { category: misc, material: WAXED_EXPOSED_CHISELED_COPPER, base-price: 27 }
+  waxed_exposed_copper: { category: misc, material: WAXED_EXPOSED_COPPER, base-price: 40 }
+  waxed_exposed_copper_bulb: { category: misc, material: WAXED_EXPOSED_COPPER_BULB, base-price: 50 }
+  waxed_exposed_copper_door: { category: misc, material: WAXED_EXPOSED_COPPER_DOOR, base-price: 66 }
+  waxed_exposed_copper_grate: { category: misc, material: WAXED_EXPOSED_COPPER_GRATE, base-price: 31 }
+  waxed_exposed_copper_trapdoor: { category: misc, material: WAXED_EXPOSED_COPPER_TRAPDOOR, base-price: 86 }
+  waxed_exposed_cut_copper: { category: misc, material: WAXED_EXPOSED_CUT_COPPER, base-price: 43 }
+  waxed_exposed_cut_copper_slab: { category: misc, material: WAXED_EXPOSED_CUT_COPPER_SLAB, base-price: 9 }
+  waxed_exposed_cut_copper_stairs: { category: misc, material: WAXED_EXPOSED_CUT_COPPER_STAIRS, base-price: 16 }
+  waxed_oxidized_chiseled_copper: { category: misc, material: WAXED_OXIDIZED_CHISELED_COPPER, base-price: 33 }
+  waxed_oxidized_copper: { category: misc, material: WAXED_OXIDIZED_COPPER, base-price: 48 }
+  waxed_oxidized_copper_bulb: { category: misc, material: WAXED_OXIDIZED_COPPER_BULB, base-price: 50 }
+  waxed_oxidized_copper_door: { category: misc, material: WAXED_OXIDIZED_COPPER_DOOR, base-price: 60 }
+  waxed_oxidized_copper_grate: { category: misc, material: WAXED_OXIDIZED_COPPER_GRATE, base-price: 29 }
+  waxed_oxidized_copper_trapdoor: { category: misc, material: WAXED_OXIDIZED_COPPER_TRAPDOOR, base-price: 78 }
+  waxed_oxidized_cut_copper: { category: misc, material: WAXED_OXIDIZED_CUT_COPPER, base-price: 45 }
+  waxed_oxidized_cut_copper_slab: { category: misc, material: WAXED_OXIDIZED_CUT_COPPER_SLAB, base-price: 10 }
+  waxed_oxidized_cut_copper_stairs: { category: misc, material: WAXED_OXIDIZED_CUT_COPPER_STAIRS, base-price: 17 }
+  waxed_weathered_chiseled_copper: { category: misc, material: WAXED_WEATHERED_CHISELED_COPPER, base-price: 29 }
+  waxed_weathered_copper: { category: misc, material: WAXED_WEATHERED_COPPER, base-price: 47 }
+  waxed_weathered_copper_bulb: { category: misc, material: WAXED_WEATHERED_COPPER_BULB, base-price: 47 }
+  waxed_weathered_copper_door: { category: misc, material: WAXED_WEATHERED_COPPER_DOOR, base-price: 60 }
+  waxed_weathered_copper_grate: { category: misc, material: WAXED_WEATHERED_COPPER_GRATE, base-price: 33 }
+  waxed_weathered_copper_trapdoor: { category: misc, material: WAXED_WEATHERED_COPPER_TRAPDOOR, base-price: 79 }
+  waxed_weathered_cut_copper: { category: misc, material: WAXED_WEATHERED_CUT_COPPER, base-price: 49 }
+  waxed_weathered_cut_copper_slab: { category: misc, material: WAXED_WEATHERED_CUT_COPPER_SLAB, base-price: 11 }
+  waxed_weathered_cut_copper_stairs: { category: misc, material: WAXED_WEATHERED_CUT_COPPER_STAIRS, base-price: 16 }
+  weathered_chiseled_copper: { category: misc, material: WEATHERED_CHISELED_COPPER, base-price: 11 }
+  weathered_copper: { category: misc, material: WEATHERED_COPPER, base-price: 27 }
+  weathered_copper_bulb: { category: misc, material: WEATHERED_COPPER_BULB, base-price: 36 }
+  weathered_copper_door: { category: misc, material: WEATHERED_COPPER_DOOR, base-price: 49 }
+  weathered_copper_grate: { category: misc, material: WEATHERED_COPPER_GRATE, base-price: 11 }
+  weathered_copper_trapdoor: { category: misc, material: WEATHERED_COPPER_TRAPDOOR, base-price: 69 }
+  weathered_cut_copper: { category: misc, material: WEATHERED_CUT_COPPER, base-price: 30 }
+  weathered_cut_copper_slab: { category: misc, material: WEATHERED_CUT_COPPER_SLAB, base-price: 11 }
+  weathered_cut_copper_stairs: { category: misc, material: WEATHERED_CUT_COPPER_STAIRS, base-price: 11 }
+  wet_sponge: { category: misc, material: WET_SPONGE, base-price: 10 }
+  white_banner: { category: misc, material: WHITE_BANNER, base-price: 455 }
+  white_bed: { category: misc, material: WHITE_BED, base-price: 310 }
+  white_carpet: { category: misc, material: WHITE_CARPET, base-price: 92 }
+  writable_book: { category: misc, material: WRITABLE_BOOK, base-price: 205 }
+  yellow_banner: { category: misc, material: YELLOW_BANNER, base-price: 525 }
+  yellow_bed: { category: misc, material: YELLOW_BED, base-price: 305 }
+  yellow_carpet: { category: misc, material: YELLOW_CARPET, base-price: 105 }
+  acacia_fence: { category: misc, material: ACACIA_FENCE, base-price: 37 }
+  acacia_fence_gate: { category: misc, material: ACACIA_FENCE_GATE, base-price: 38 }
+  acacia_leaves: { category: misc, material: ACACIA_LEAVES, base-price: 25 }
+  acacia_log: { category: misc, material: ACACIA_LOG, base-price: 24 }
+  acacia_planks: { category: misc, material: ACACIA_PLANKS, base-price: 34 }
+  acacia_slab: { category: misc, material: ACACIA_SLAB, base-price: 30 }
+  acacia_stairs: { category: misc, material: ACACIA_STAIRS, base-price: 47 }
+  acacia_wood: { category: misc, material: ACACIA_WOOD, base-price: 35 }
+  andesite: { category: misc, material: ANDESITE, base-price: 12 }
+  andesite_slab: { category: misc, material: ANDESITE_SLAB, base-price: 12 }
+  andesite_stairs: { category: misc, material: ANDESITE_STAIRS, base-price: 11 }
+  azalea_leaves: { category: misc, material: AZALEA_LEAVES, base-price: 27 }
+  bamboo_block: { category: misc, material: BAMBOO_BLOCK, base-price: 11 }
+  bamboo_fence: { category: misc, material: BAMBOO_FENCE, base-price: 25 }
+  bamboo_fence_gate: { category: misc, material: BAMBOO_FENCE_GATE, base-price: 29 }
+  bamboo_mosaic: { category: misc, material: BAMBOO_MOSAIC, base-price: 10 }
+  bamboo_planks: { category: misc, material: BAMBOO_PLANKS, base-price: 20 }
+  bamboo_slab: { category: misc, material: BAMBOO_SLAB, base-price: 18 }
+  bamboo_stairs: { category: misc, material: BAMBOO_STAIRS, base-price: 25 }
+  basalt: { category: misc, material: BASALT, base-price: 15 }
+  birch_fence: { category: misc, material: BIRCH_FENCE, base-price: 43 }
+  birch_fence_gate: { category: misc, material: BIRCH_FENCE_GATE, base-price: 38 }
+  birch_leaves: { category: misc, material: BIRCH_LEAVES, base-price: 26 }
+  birch_log: { category: misc, material: BIRCH_LOG, base-price: 25 }
+  birch_planks: { category: misc, material: BIRCH_PLANKS, base-price: 31 }
+  birch_slab: { category: misc, material: BIRCH_SLAB, base-price: 29 }
+  birch_stairs: { category: misc, material: BIRCH_STAIRS, base-price: 48 }
+  birch_wood: { category: misc, material: BIRCH_WOOD, base-price: 33 }
+  blackstone: { category: misc, material: BLACKSTONE, base-price: 11 }
+  blackstone_slab: { category: misc, material: BLACKSTONE_SLAB, base-price: 13 }
+  blackstone_stairs: { category: misc, material: BLACKSTONE_STAIRS, base-price: 11 }
+  black_concrete: { category: misc, material: BLACK_CONCRETE, base-price: 58 }
+  black_concrete_powder: { category: misc, material: BLACK_CONCRETE_POWDER, base-price: 52 }
+  black_glazed_terracotta: { category: misc, material: BLACK_GLAZED_TERRACOTTA, base-price: 105 }
+  black_stained_glass: { category: misc, material: BLACK_STAINED_GLASS, base-price: 49 }
+  black_stained_glass_pane: { category: misc, material: BLACK_STAINED_GLASS_PANE, base-price: 25 }
+  black_terracotta: { category: misc, material: BLACK_TERRACOTTA, base-price: 110 }
+  black_wool: { category: misc, material: BLACK_WOOL, base-price: 120 }
+  blue_concrete: { category: misc, material: BLUE_CONCRETE, base-price: 60 }
+  blue_concrete_powder: { category: misc, material: BLUE_CONCRETE_POWDER, base-price: 56 }
+  blue_glazed_terracotta: { category: misc, material: BLUE_GLAZED_TERRACOTTA, base-price: 120 }
+  blue_ice: { category: misc, material: BLUE_ICE, base-price: 215 }
+  blue_stained_glass: { category: misc, material: BLUE_STAINED_GLASS, base-price: 49 }
+  blue_stained_glass_pane: { category: misc, material: BLUE_STAINED_GLASS_PANE, base-price: 21 }
+  blue_terracotta: { category: misc, material: BLUE_TERRACOTTA, base-price: 115 }
+  blue_wool: { category: misc, material: BLUE_WOOL, base-price: 120 }
+  bookshelf: { category: misc, material: BOOKSHELF, base-price: 430 }
+  brain_coral_block: { category: misc, material: BRAIN_CORAL_BLOCK, base-price: 77 }
+  bricks: { category: misc, material: BRICKS, base-price: 310 }
+  brick_slab: { category: misc, material: BRICK_SLAB, base-price: 175 }
+  brick_stairs: { category: misc, material: BRICK_STAIRS, base-price: 330 }
+  brown_concrete: { category: misc, material: BROWN_CONCRETE, base-price: 55 }
+  brown_concrete_powder: { category: misc, material: BROWN_CONCRETE_POWDER, base-price: 47 }
+  brown_glazed_terracotta: { category: misc, material: BROWN_GLAZED_TERRACOTTA, base-price: 125 }
+  brown_stained_glass: { category: misc, material: BROWN_STAINED_GLASS, base-price: 45 }
+  brown_stained_glass_pane: { category: misc, material: BROWN_STAINED_GLASS_PANE, base-price: 25 }
+  brown_terracotta: { category: misc, material: BROWN_TERRACOTTA, base-price: 110 }
+  brown_wool: { category: misc, material: BROWN_WOOL, base-price: 145 }
+  bubble_coral_block: { category: misc, material: BUBBLE_CORAL_BLOCK, base-price: 78 }
+  calcite: { category: misc, material: CALCITE, base-price: 18 }
+  cherry_fence: { category: misc, material: CHERRY_FENCE, base-price: 39 }
+  cherry_fence_gate: { category: misc, material: CHERRY_FENCE_GATE, base-price: 36 }
+  cherry_leaves: { category: misc, material: CHERRY_LEAVES, base-price: 28 }
+  cherry_log: { category: misc, material: CHERRY_LOG, base-price: 23 }
+  cherry_planks: { category: misc, material: CHERRY_PLANKS, base-price: 27 }
+  cherry_slab: { category: misc, material: CHERRY_SLAB, base-price: 23 }
+  cherry_stairs: { category: misc, material: CHERRY_STAIRS, base-price: 36 }
+  cherry_wood: { category: misc, material: CHERRY_WOOD, base-price: 31 }
+  chiseled_deepslate: { category: misc, material: CHISELED_DEEPSLATE, base-price: 11 }
+  chiseled_nether_bricks: { category: misc, material: CHISELED_NETHER_BRICKS, base-price: 11 }
+  chiseled_polished_blackstone: { category: misc, material: CHISELED_POLISHED_BLACKSTONE, base-price: 12 }
+  chiseled_quartz_block: { category: misc, material: CHISELED_QUARTZ_BLOCK, base-price: 150 }
+  chiseled_red_sandstone: { category: misc, material: CHISELED_RED_SANDSTONE, base-price: 160 }
+  chiseled_sandstone: { category: misc, material: CHISELED_SANDSTONE, base-price: 72 }
+  chiseled_stone_bricks: { category: misc, material: CHISELED_STONE_BRICKS, base-price: 11 }
+  chiseled_tuff: { category: misc, material: CHISELED_TUFF, base-price: 19 }
+  chiseled_tuff_bricks: { category: misc, material: CHISELED_TUFF_BRICKS, base-price: 21 }
+  clay: { category: misc, material: CLAY, base-price: 92 }
+  coarse_dirt: { category: misc, material: COARSE_DIRT, base-price: 38 }
+  cobbled_deepslate: { category: misc, material: COBBLED_DEEPSLATE, base-price: 11 }
+  cobbled_deepslate_slab: { category: misc, material: COBBLED_DEEPSLATE_SLAB, base-price: 12 }
+  cobbled_deepslate_stairs: { category: misc, material: COBBLED_DEEPSLATE_STAIRS, base-price: 12 }
+  cobblestone: { category: misc, material: COBBLESTONE, base-price: 12 }
+  cobblestone_slab: { category: misc, material: COBBLESTONE_SLAB, base-price: 11 }
+  cobblestone_stairs: { category: misc, material: COBBLESTONE_STAIRS, base-price: 12 }
+  copper_block: { category: misc, material: COPPER_BLOCK, base-price: 25 }
+  cracked_deepslate_bricks: { category: misc, material: CRACKED_DEEPSLATE_BRICKS, base-price: 12 }
+  cracked_deepslate_tiles: { category: misc, material: CRACKED_DEEPSLATE_TILES, base-price: 12 }
+  cracked_nether_bricks: { category: misc, material: CRACKED_NETHER_BRICKS, base-price: 11 }
+  cracked_polished_blackstone_bricks: { category: misc, material: CRACKED_POLISHED_BLACKSTONE_BRICKS, base-price: 12 }
+  cracked_stone_bricks: { category: misc, material: CRACKED_STONE_BRICKS, base-price: 11 }
+  crimson_fence: { category: misc, material: CRIMSON_FENCE, base-price: 44 }
+  crimson_fence_gate: { category: misc, material: CRIMSON_FENCE_GATE, base-price: 37 }
+  crimson_hyphae: { category: misc, material: CRIMSON_HYPHAE, base-price: 30 }
+  crimson_nylium: { category: misc, material: CRIMSON_NYLIUM, base-price: 42 }
+  crimson_planks: { category: misc, material: CRIMSON_PLANKS, base-price: 26 }
+  crimson_slab: { category: misc, material: CRIMSON_SLAB, base-price: 22 }
+  crimson_stairs: { category: misc, material: CRIMSON_STAIRS, base-price: 40 }
+  crimson_stem: { category: misc, material: CRIMSON_STEM, base-price: 27 }
+  crying_obsidian: { category: misc, material: CRYING_OBSIDIAN, base-price: 235 }
+  cut_copper: { category: misc, material: CUT_COPPER, base-price: 26 }
+  cyan_concrete: { category: misc, material: CYAN_CONCRETE, base-price: 53 }
+  cyan_concrete_powder: { category: misc, material: CYAN_CONCRETE_POWDER, base-price: 48 }
+  cyan_glazed_terracotta: { category: misc, material: CYAN_GLAZED_TERRACOTTA, base-price: 125 }
+  cyan_stained_glass: { category: misc, material: CYAN_STAINED_GLASS, base-price: 41 }
+  cyan_stained_glass_pane: { category: misc, material: CYAN_STAINED_GLASS_PANE, base-price: 23 }
+  cyan_terracotta: { category: misc, material: CYAN_TERRACOTTA, base-price: 105 }
+  cyan_wool: { category: misc, material: CYAN_WOOL, base-price: 130 }
+  dark_oak_fence: { category: misc, material: DARK_OAK_FENCE, base-price: 42 }
+  dark_oak_fence_gate: { category: misc, material: DARK_OAK_FENCE_GATE, base-price: 36 }
+  dark_oak_leaves: { category: misc, material: DARK_OAK_LEAVES, base-price: 25 }
+  dark_oak_log: { category: misc, material: DARK_OAK_LOG, base-price: 25 }
+  dark_oak_planks: { category: misc, material: DARK_OAK_PLANKS, base-price: 36 }
+  dark_oak_slab: { category: misc, material: DARK_OAK_SLAB, base-price: 29 }
+  dark_oak_stairs: { category: misc, material: DARK_OAK_STAIRS, base-price: 49 }
+  dark_oak_wood: { category: misc, material: DARK_OAK_WOOD, base-price: 30 }
+  dark_prismarine: { category: misc, material: DARK_PRISMARINE, base-price: 245 }
+  dark_prismarine_slab: { category: misc, material: DARK_PRISMARINE_SLAB, base-price: 145 }
+  dark_prismarine_stairs: { category: misc, material: DARK_PRISMARINE_STAIRS, base-price: 250 }
+  dead_brain_coral_block: { category: misc, material: DEAD_BRAIN_CORAL_BLOCK, base-price: 78 }
+  dead_bubble_coral_block: { category: misc, material: DEAD_BUBBLE_CORAL_BLOCK, base-price: 91 }
+  dead_fire_coral_block: { category: misc, material: DEAD_FIRE_CORAL_BLOCK, base-price: 80 }
+  dead_horn_coral_block: { category: misc, material: DEAD_HORN_CORAL_BLOCK, base-price: 91 }
+  dead_tube_coral_block: { category: misc, material: DEAD_TUBE_CORAL_BLOCK, base-price: 77 }
+  deepslate: { category: misc, material: DEEPSLATE, base-price: 12 }
+  deepslate_bricks: { category: misc, material: DEEPSLATE_BRICKS, base-price: 12 }
+  deepslate_brick_slab: { category: misc, material: DEEPSLATE_BRICK_SLAB, base-price: 12 }
+  deepslate_brick_stairs: { category: misc, material: DEEPSLATE_BRICK_STAIRS, base-price: 12 }
+  deepslate_tiles: { category: misc, material: DEEPSLATE_TILES, base-price: 12 }
+  deepslate_tile_slab: { category: misc, material: DEEPSLATE_TILE_SLAB, base-price: 11 }
+  deepslate_tile_stairs: { category: misc, material: DEEPSLATE_TILE_STAIRS, base-price: 12 }
+  diorite: { category: misc, material: DIORITE, base-price: 11 }
+  diorite_slab: { category: misc, material: DIORITE_SLAB, base-price: 11 }
+  diorite_stairs: { category: misc, material: DIORITE_STAIRS, base-price: 12 }
+  dirt: { category: misc, material: DIRT, base-price: 26 }
+  dripstone_block: { category: misc, material: DRIPSTONE_BLOCK, base-price: 11 }
+  end_stone: { category: misc, material: END_STONE, base-price: 38 }
+  end_stone_bricks: { category: misc, material: END_STONE_BRICKS, base-price: 34 }
+  end_stone_brick_slab: { category: misc, material: END_STONE_BRICK_SLAB, base-price: 24 }
+  end_stone_brick_stairs: { category: misc, material: END_STONE_BRICK_STAIRS, base-price: 38 }
+  fire_coral_block: { category: misc, material: FIRE_CORAL_BLOCK, base-price: 85 }
+  flowering_azalea_leaves: { category: misc, material: FLOWERING_AZALEA_LEAVES, base-price: 26 }
+  gilded_blackstone: { category: misc, material: GILDED_BLACKSTONE, base-price: 86 }
+  glass: { category: misc, material: GLASS, base-price: 39 }
+  glass_pane: { category: misc, material: GLASS_PANE, base-price: 24 }
+  glowstone: { category: misc, material: GLOWSTONE, base-price: 120 }
+  granite: { category: misc, material: GRANITE, base-price: 12 }
+  granite_slab: { category: misc, material: GRANITE_SLAB, base-price: 11 }
+  granite_stairs: { category: misc, material: GRANITE_STAIRS, base-price: 11 }
+  grass_block: { category: misc, material: GRASS_BLOCK, base-price: 54 }
+  gravel: { category: misc, material: GRAVEL, base-price: 48 }
+  gray_concrete: { category: misc, material: GRAY_CONCRETE, base-price: 51 }
+  gray_concrete_powder: { category: misc, material: GRAY_CONCRETE_POWDER, base-price: 52 }
+  gray_glazed_terracotta: { category: misc, material: GRAY_GLAZED_TERRACOTTA, base-price: 115 }
+  gray_stained_glass: { category: misc, material: GRAY_STAINED_GLASS, base-price: 50 }
+  gray_stained_glass_pane: { category: misc, material: GRAY_STAINED_GLASS_PANE, base-price: 23 }
+  gray_terracotta: { category: misc, material: GRAY_TERRACOTTA, base-price: 105 }
+  gray_wool: { category: misc, material: GRAY_WOOL, base-price: 125 }
+  green_concrete: { category: misc, material: GREEN_CONCRETE, base-price: 55 }
+  green_concrete_powder: { category: misc, material: GREEN_CONCRETE_POWDER, base-price: 52 }
+  green_glazed_terracotta: { category: misc, material: GREEN_GLAZED_TERRACOTTA, base-price: 110 }
+  green_stained_glass: { category: misc, material: GREEN_STAINED_GLASS, base-price: 44 }
+  green_stained_glass_pane: { category: misc, material: GREEN_STAINED_GLASS_PANE, base-price: 22 }
+  green_terracotta: { category: misc, material: GREEN_TERRACOTTA, base-price: 110 }
+  green_wool: { category: misc, material: GREEN_WOOL, base-price: 130 }
+  honeycomb_block: { category: misc, material: HONEYCOMB_BLOCK, base-price: 76 }
+  honey_block: { category: misc, material: HONEY_BLOCK, base-price: 135 }
+  horn_coral_block: { category: misc, material: HORN_CORAL_BLOCK, base-price: 76 }
+  ice: { category: misc, material: ICE, base-price: 24 }
+  jack_o_lantern: { category: misc, material: JACK_O_LANTERN, base-price: 41 }
+  jungle_fence: { category: misc, material: JUNGLE_FENCE, base-price: 41 }
+  jungle_fence_gate: { category: misc, material: JUNGLE_FENCE_GATE, base-price: 38 }
+  jungle_leaves: { category: misc, material: JUNGLE_LEAVES, base-price: 27 }
+  jungle_log: { category: misc, material: JUNGLE_LOG, base-price: 24 }
+  jungle_planks: { category: misc, material: JUNGLE_PLANKS, base-price: 36 }
+  jungle_slab: { category: misc, material: JUNGLE_SLAB, base-price: 29 }
+  jungle_stairs: { category: misc, material: JUNGLE_STAIRS, base-price: 47 }
+  jungle_wood: { category: misc, material: JUNGLE_WOOD, base-price: 34 }
+  light_blue_concrete: { category: misc, material: LIGHT_BLUE_CONCRETE, base-price: 53 }
+  light_blue_concrete_powder: { category: misc, material: LIGHT_BLUE_CONCRETE_POWDER, base-price: 50 }
+  light_blue_glazed_terracotta: { category: misc, material: LIGHT_BLUE_GLAZED_TERRACOTTA, base-price: 115 }
+  light_blue_stained_glass: { category: misc, material: LIGHT_BLUE_STAINED_GLASS, base-price: 42 }
+  light_blue_stained_glass_pane: { category: misc, material: LIGHT_BLUE_STAINED_GLASS_PANE, base-price: 22 }
+  light_blue_terracotta: { category: misc, material: LIGHT_BLUE_TERRACOTTA, base-price: 115 }
+  light_blue_wool: { category: misc, material: LIGHT_BLUE_WOOL, base-price: 140 }
+  light_gray_concrete: { category: misc, material: LIGHT_GRAY_CONCRETE, base-price: 50 }
+  light_gray_concrete_powder: { category: misc, material: LIGHT_GRAY_CONCRETE_POWDER, base-price: 44 }
+  light_gray_glazed_terracotta: { category: misc, material: LIGHT_GRAY_GLAZED_TERRACOTTA, base-price: 105 }
+  light_gray_stained_glass: { category: misc, material: LIGHT_GRAY_STAINED_GLASS, base-price: 47 }
+  light_gray_stained_glass_pane: { category: misc, material: LIGHT_GRAY_STAINED_GLASS_PANE, base-price: 23 }
+  light_gray_terracotta: { category: misc, material: LIGHT_GRAY_TERRACOTTA, base-price: 105 }
+  light_gray_wool: { category: misc, material: LIGHT_GRAY_WOOL, base-price: 120 }
+  lime_concrete: { category: misc, material: LIME_CONCRETE, base-price: 69 }
+  lime_concrete_powder: { category: misc, material: LIME_CONCRETE_POWDER, base-price: 66 }
+  lime_glazed_terracotta: { category: misc, material: LIME_GLAZED_TERRACOTTA, base-price: 120 }
+  lime_stained_glass: { category: misc, material: LIME_STAINED_GLASS, base-price: 44 }
+  lime_stained_glass_pane: { category: misc, material: LIME_STAINED_GLASS_PANE, base-price: 26 }
+  lime_terracotta: { category: misc, material: LIME_TERRACOTTA, base-price: 100 }
+  lime_wool: { category: misc, material: LIME_WOOL, base-price: 135 }
+  magenta_concrete: { category: misc, material: MAGENTA_CONCRETE, base-price: 74 }
+  magenta_concrete_powder: { category: misc, material: MAGENTA_CONCRETE_POWDER, base-price: 59 }
+  magenta_glazed_terracotta: { category: misc, material: MAGENTA_GLAZED_TERRACOTTA, base-price: 120 }
+  magenta_stained_glass: { category: misc, material: MAGENTA_STAINED_GLASS, base-price: 47 }
+  magenta_stained_glass_pane: { category: misc, material: MAGENTA_STAINED_GLASS_PANE, base-price: 23 }
+  magenta_terracotta: { category: misc, material: MAGENTA_TERRACOTTA, base-price: 115 }
+  magenta_wool: { category: misc, material: MAGENTA_WOOL, base-price: 140 }
+  magma_block: { category: misc, material: MAGMA_BLOCK, base-price: 155 }
+  mangrove_fence: { category: misc, material: MANGROVE_FENCE, base-price: 41 }
+  mangrove_fence_gate: { category: misc, material: MANGROVE_FENCE_GATE, base-price: 34 }
+  mangrove_leaves: { category: misc, material: MANGROVE_LEAVES, base-price: 23 }
+  mangrove_log: { category: misc, material: MANGROVE_LOG, base-price: 24 }
+  mangrove_planks: { category: misc, material: MANGROVE_PLANKS, base-price: 27 }
+  mangrove_roots: { category: misc, material: MANGROVE_ROOTS, base-price: 24 }
+  mangrove_slab: { category: misc, material: MANGROVE_SLAB, base-price: 24 }
+  mangrove_stairs: { category: misc, material: MANGROVE_STAIRS, base-price: 34 }
+  mangrove_wood: { category: misc, material: MANGROVE_WOOD, base-price: 33 }
+  mossy_cobblestone: { category: misc, material: MOSSY_COBBLESTONE, base-price: 45 }
+  mossy_cobblestone_slab: { category: misc, material: MOSSY_COBBLESTONE_SLAB, base-price: 27 }
+  mossy_cobblestone_stairs: { category: misc, material: MOSSY_COBBLESTONE_STAIRS, base-price: 55 }
+  mossy_stone_bricks: { category: misc, material: MOSSY_STONE_BRICKS, base-price: 51 }
+  mossy_stone_brick_slab: { category: misc, material: MOSSY_STONE_BRICK_SLAB, base-price: 11 }
+  mossy_stone_brick_stairs: { category: misc, material: MOSSY_STONE_BRICK_STAIRS, base-price: 51 }
+  moss_block: { category: misc, material: MOSS_BLOCK, base-price: 11 }
+  mud: { category: misc, material: MUD, base-price: 27 }
+  muddy_mangrove_roots: { category: misc, material: MUDDY_MANGROVE_ROOTS, base-price: 25 }
+  mud_bricks: { category: misc, material: MUD_BRICKS, base-price: 56 }
+  mud_brick_slab: { category: misc, material: MUD_BRICK_SLAB, base-price: 37 }
+  mud_brick_stairs: { category: misc, material: MUD_BRICK_STAIRS, base-price: 58 }
+  mycelium: { category: misc, material: MYCELIUM, base-price: 49 }
+  netherrack: { category: misc, material: NETHERRACK, base-price: 11 }
+  nether_bricks: { category: misc, material: NETHER_BRICKS, base-price: 12 }
+  nether_brick_slab: { category: misc, material: NETHER_BRICK_SLAB, base-price: 12 }
+  nether_brick_stairs: { category: misc, material: NETHER_BRICK_STAIRS, base-price: 12 }
+  oak_fence: { category: misc, material: OAK_FENCE, base-price: 43 }
+  oak_fence_gate: { category: misc, material: OAK_FENCE_GATE, base-price: 37 }
+  oak_leaves: { category: misc, material: OAK_LEAVES, base-price: 25 }
+  oak_log: { category: misc, material: OAK_LOG, base-price: 26 }
+  oak_planks: { category: misc, material: OAK_PLANKS, base-price: 31 }
+  oak_slab: { category: misc, material: OAK_SLAB, base-price: 28 }
+  oak_stairs: { category: misc, material: OAK_STAIRS, base-price: 47 }
+  oak_wood: { category: misc, material: OAK_WOOD, base-price: 33 }
+  obsidian: { category: misc, material: OBSIDIAN, base-price: 130 }
+  ochre_froglight: { category: misc, material: OCHRE_FROGLIGHT, base-price: 42 }
+  orange_concrete: { category: misc, material: ORANGE_CONCRETE, base-price: 51 }
+  orange_concrete_powder: { category: misc, material: ORANGE_CONCRETE_POWDER, base-price: 52 }
+  orange_glazed_terracotta: { category: misc, material: ORANGE_GLAZED_TERRACOTTA, base-price: 135 }
+  orange_stained_glass: { category: misc, material: ORANGE_STAINED_GLASS, base-price: 44 }
+  orange_stained_glass_pane: { category: misc, material: ORANGE_STAINED_GLASS_PANE, base-price: 22 }
+  orange_terracotta: { category: misc, material: ORANGE_TERRACOTTA, base-price: 105 }
+  orange_wool: { category: misc, material: ORANGE_WOOL, base-price: 120 }
+  packed_ice: { category: misc, material: PACKED_ICE, base-price: 74 }
+  packed_mud: { category: misc, material: PACKED_MUD, base-price: 57 }
+  pale_oak_fence: { category: misc, material: PALE_OAK_FENCE, base-price: 37 }
+  pale_oak_fence_gate: { category: misc, material: PALE_OAK_FENCE_GATE, base-price: 37 }
+  pale_oak_log: { category: misc, material: PALE_OAK_LOG, base-price: 25 }
+  pale_oak_planks: { category: misc, material: PALE_OAK_PLANKS, base-price: 33 }
+  pale_oak_slab: { category: misc, material: PALE_OAK_SLAB, base-price: 26 }
+  pale_oak_stairs: { category: misc, material: PALE_OAK_STAIRS, base-price: 46 }
+  pale_oak_wood: { category: misc, material: PALE_OAK_WOOD, base-price: 31 }
+  pearlescent_froglight: { category: misc, material: PEARLESCENT_FROGLIGHT, base-price: 40 }
+  pink_concrete: { category: misc, material: PINK_CONCRETE, base-price: 55 }
+  pink_concrete_powder: { category: misc, material: PINK_CONCRETE_POWDER, base-price: 46 }
+  pink_glazed_terracotta: { category: misc, material: PINK_GLAZED_TERRACOTTA, base-price: 110 }
+  pink_stained_glass: { category: misc, material: PINK_STAINED_GLASS, base-price: 45 }
+  pink_stained_glass_pane: { category: misc, material: PINK_STAINED_GLASS_PANE, base-price: 24 }
+  pink_terracotta: { category: misc, material: PINK_TERRACOTTA, base-price: 115 }
+  pink_wool: { category: misc, material: PINK_WOOL, base-price: 125 }
+  podzol: { category: misc, material: PODZOL, base-price: 51 }
+  polished_andesite: { category: misc, material: POLISHED_ANDESITE, base-price: 11 }
+  polished_andesite_slab: { category: misc, material: POLISHED_ANDESITE_SLAB, base-price: 12 }
+  polished_andesite_stairs: { category: misc, material: POLISHED_ANDESITE_STAIRS, base-price: 12 }
+  polished_basalt: { category: misc, material: POLISHED_BASALT, base-price: 27 }
+  polished_blackstone: { category: misc, material: POLISHED_BLACKSTONE, base-price: 12 }
+  polished_blackstone_bricks: { category: misc, material: POLISHED_BLACKSTONE_BRICKS, base-price: 12 }
+  polished_blackstone_brick_slab: { category: misc, material: POLISHED_BLACKSTONE_BRICK_SLAB, base-price: 12 }
+  polished_blackstone_brick_stairs: { category: misc, material: POLISHED_BLACKSTONE_BRICK_STAIRS, base-price: 11 }
+  polished_blackstone_slab: { category: misc, material: POLISHED_BLACKSTONE_SLAB, base-price: 11 }
+  polished_blackstone_stairs: { category: misc, material: POLISHED_BLACKSTONE_STAIRS, base-price: 12 }
+  polished_diorite: { category: misc, material: POLISHED_DIORITE, base-price: 12 }
+  polished_diorite_slab: { category: misc, material: POLISHED_DIORITE_SLAB, base-price: 12 }
+  polished_diorite_stairs: { category: misc, material: POLISHED_DIORITE_STAIRS, base-price: 11 }
+  polished_granite: { category: misc, material: POLISHED_GRANITE, base-price: 12 }
+  polished_granite_slab: { category: misc, material: POLISHED_GRANITE_SLAB, base-price: 11 }
+  polished_granite_stairs: { category: misc, material: POLISHED_GRANITE_STAIRS, base-price: 11 }
+  polished_tuff: { category: misc, material: POLISHED_TUFF, base-price: 21 }
+  polished_tuff_slab: { category: misc, material: POLISHED_TUFF_SLAB, base-price: 11 }
+  polished_tuff_stairs: { category: misc, material: POLISHED_TUFF_STAIRS, base-price: 21 }
+  prismarine: { category: misc, material: PRISMARINE, base-price: 130 }
+  prismarine_bricks: { category: misc, material: PRISMARINE_BRICKS, base-price: 245 }
+  prismarine_brick_slab: { category: misc, material: PRISMARINE_BRICK_SLAB, base-price: 130 }
+  prismarine_brick_stairs: { category: misc, material: PRISMARINE_BRICK_STAIRS, base-price: 260 }
+  prismarine_slab: { category: misc, material: PRISMARINE_SLAB, base-price: 87 }
+  prismarine_stairs: { category: misc, material: PRISMARINE_STAIRS, base-price: 145 }
+  purple_concrete: { category: misc, material: PURPLE_CONCRETE, base-price: 79 }
+  purple_concrete_powder: { category: misc, material: PURPLE_CONCRETE_POWDER, base-price: 68 }
+  purple_glazed_terracotta: { category: misc, material: PURPLE_GLAZED_TERRACOTTA, base-price: 105 }
+  purple_stained_glass: { category: misc, material: PURPLE_STAINED_GLASS, base-price: 46 }
+  purple_stained_glass_pane: { category: misc, material: PURPLE_STAINED_GLASS_PANE, base-price: 25 }
+  purple_terracotta: { category: misc, material: PURPLE_TERRACOTTA, base-price: 105 }
+  purple_wool: { category: misc, material: PURPLE_WOOL, base-price: 130 }
+  purpur_block: { category: misc, material: PURPUR_BLOCK, base-price: 28 }
+  purpur_pillar: { category: misc, material: PURPUR_PILLAR, base-price: 29 }
+  purpur_slab: { category: misc, material: PURPUR_SLAB, base-price: 16 }
+  purpur_stairs: { category: misc, material: PURPUR_STAIRS, base-price: 29 }
+  quartz_block: { category: misc, material: QUARTZ_BLOCK, base-price: 145 }
+  quartz_bricks: { category: misc, material: QUARTZ_BRICKS, base-price: 155 }
+  quartz_pillar: { category: misc, material: QUARTZ_PILLAR, base-price: 160 }
+  quartz_slab: { category: misc, material: QUARTZ_SLAB, base-price: 86 }
+  quartz_stairs: { category: misc, material: QUARTZ_STAIRS, base-price: 165 }
+  red_concrete: { category: misc, material: RED_CONCRETE, base-price: 56 }
+  red_concrete_powder: { category: misc, material: RED_CONCRETE_POWDER, base-price: 46 }
+  red_glazed_terracotta: { category: misc, material: RED_GLAZED_TERRACOTTA, base-price: 110 }
+  red_nether_bricks: { category: misc, material: RED_NETHER_BRICKS, base-price: 57 }
+  red_nether_brick_slab: { category: misc, material: RED_NETHER_BRICK_SLAB, base-price: 36 }
+  red_nether_brick_stairs: { category: misc, material: RED_NETHER_BRICK_STAIRS, base-price: 57 }
+  red_sand: { category: misc, material: RED_SAND, base-price: 51 }
+  red_sandstone: { category: misc, material: RED_SANDSTONE, base-price: 145 }
+  red_sandstone_slab: { category: misc, material: RED_SANDSTONE_SLAB, base-price: 85 }
+  red_sandstone_stairs: { category: misc, material: RED_SANDSTONE_STAIRS, base-price: 160 }
+  red_stained_glass: { category: misc, material: RED_STAINED_GLASS, base-price: 46 }
+  red_stained_glass_pane: { category: misc, material: RED_STAINED_GLASS_PANE, base-price: 21 }
+  red_terracotta: { category: misc, material: RED_TERRACOTTA, base-price: 105 }
+  red_wool: { category: misc, material: RED_WOOL, base-price: 120 }
+  resin_bricks: { category: misc, material: RESIN_BRICKS, base-price: 89 }
+  resin_brick_slab: { category: misc, material: RESIN_BRICK_SLAB, base-price: 90 }
+  resin_brick_stairs: { category: misc, material: RESIN_BRICK_STAIRS, base-price: 85 }
+  rooted_dirt: { category: misc, material: ROOTED_DIRT, base-price: 12 }
+  sand: { category: misc, material: SAND, base-price: 45 }
+  sandstone: { category: misc, material: SANDSTONE, base-price: 73 }
+  sandstone_slab: { category: misc, material: SANDSTONE_SLAB, base-price: 40 }
+  sandstone_stairs: { category: misc, material: SANDSTONE_STAIRS, base-price: 65 }
+  sea_lantern: { category: misc, material: SEA_LANTERN, base-price: 235 }
+  shroomlight: { category: misc, material: SHROOMLIGHT, base-price: 48 }
+  slime_block: { category: misc, material: SLIME_BLOCK, base-price: 195 }
+  smooth_basalt: { category: misc, material: SMOOTH_BASALT, base-price: 30 }
+  smooth_quartz: { category: misc, material: SMOOTH_QUARTZ, base-price: 160 }
+  smooth_quartz_slab: { category: misc, material: SMOOTH_QUARTZ_SLAB, base-price: 99 }
+  smooth_quartz_stairs: { category: misc, material: SMOOTH_QUARTZ_STAIRS, base-price: 150 }
+  smooth_red_sandstone: { category: misc, material: SMOOTH_RED_SANDSTONE, base-price: 145 }
+  smooth_red_sandstone_slab: { category: misc, material: SMOOTH_RED_SANDSTONE_SLAB, base-price: 96 }
+  smooth_red_sandstone_stairs: { category: misc, material: SMOOTH_RED_SANDSTONE_STAIRS, base-price: 165 }
+  smooth_sandstone: { category: misc, material: SMOOTH_SANDSTONE, base-price: 69 }
+  smooth_sandstone_slab: { category: misc, material: SMOOTH_SANDSTONE_SLAB, base-price: 40 }
+  smooth_sandstone_stairs: { category: misc, material: SMOOTH_SANDSTONE_STAIRS, base-price: 80 }
+  smooth_stone: { category: misc, material: SMOOTH_STONE, base-price: 11 }
+  smooth_stone_slab: { category: misc, material: SMOOTH_STONE_SLAB, base-price: 12 }
+  snow_block: { category: misc, material: SNOW_BLOCK, base-price: 68 }
+  soul_sand: { category: misc, material: SOUL_SAND, base-price: 55 }
+  soul_soil: { category: misc, material: SOUL_SOIL, base-price: 62 }
+  sponge: { category: misc, material: SPONGE, base-price: 990 }
+  spruce_fence: { category: misc, material: SPRUCE_FENCE, base-price: 39 }
+  spruce_fence_gate: { category: misc, material: SPRUCE_FENCE_GATE, base-price: 38 }
+  spruce_leaves: { category: misc, material: SPRUCE_LEAVES, base-price: 26 }
+  spruce_log: { category: misc, material: SPRUCE_LOG, base-price: 24 }
+  spruce_planks: { category: misc, material: SPRUCE_PLANKS, base-price: 34 }
+  spruce_slab: { category: misc, material: SPRUCE_SLAB, base-price: 26 }
+  spruce_stairs: { category: misc, material: SPRUCE_STAIRS, base-price: 46 }
+  spruce_wood: { category: misc, material: SPRUCE_WOOD, base-price: 33 }
+  stone: { category: misc, material: STONE, base-price: 12 }
+  stone_bricks: { category: misc, material: STONE_BRICKS, base-price: 10 }
+  stone_brick_slab: { category: misc, material: STONE_BRICK_SLAB, base-price: 12 }
+  stone_brick_stairs: { category: misc, material: STONE_BRICK_STAIRS, base-price: 11 }
+  stone_slab: { category: misc, material: STONE_SLAB, base-price: 11 }
+  stone_stairs: { category: misc, material: STONE_STAIRS, base-price: 11 }
+  tinted_glass: { category: misc, material: TINTED_GLASS, base-price: 40 }
+  tube_coral_block: { category: misc, material: TUBE_CORAL_BLOCK, base-price: 91 }
+  tuff: { category: misc, material: TUFF, base-price: 20 }
+  tuff_bricks: { category: misc, material: TUFF_BRICKS, base-price: 21 }
+  tuff_brick_slab: { category: misc, material: TUFF_BRICK_SLAB, base-price: 11 }
+  tuff_brick_stairs: { category: misc, material: TUFF_BRICK_STAIRS, base-price: 19 }
+  tuff_slab: { category: misc, material: TUFF_SLAB, base-price: 12 }
+  tuff_stairs: { category: misc, material: TUFF_STAIRS, base-price: 19 }
+  verdant_froglight: { category: misc, material: VERDANT_FROGLIGHT, base-price: 43 }
+  warped_fence: { category: misc, material: WARPED_FENCE, base-price: 38 }
+  warped_fence_gate: { category: misc, material: WARPED_FENCE_GATE, base-price: 32 }
+  warped_hyphae: { category: misc, material: WARPED_HYPHAE, base-price: 35 }
+  warped_nylium: { category: misc, material: WARPED_NYLIUM, base-price: 44 }
+  warped_planks: { category: misc, material: WARPED_PLANKS, base-price: 26 }
+  warped_slab: { category: misc, material: WARPED_SLAB, base-price: 23 }
+  warped_stairs: { category: misc, material: WARPED_STAIRS, base-price: 33 }
+  warped_stem: { category: misc, material: WARPED_STEM, base-price: 27 }
+  waxed_copper_block: { category: misc, material: WAXED_COPPER_BLOCK, base-price: 44 }
+  waxed_cut_copper: { category: misc, material: WAXED_CUT_COPPER, base-price: 17 }
+  white_concrete: { category: misc, material: WHITE_CONCRETE, base-price: 50 }
+  white_concrete_powder: { category: misc, material: WHITE_CONCRETE_POWDER, base-price: 51 }
+  white_glazed_terracotta: { category: misc, material: WHITE_GLAZED_TERRACOTTA, base-price: 120 }
+  white_stained_glass: { category: misc, material: WHITE_STAINED_GLASS, base-price: 42 }
+  white_stained_glass_pane: { category: misc, material: WHITE_STAINED_GLASS_PANE, base-price: 21 }
+  white_terracotta: { category: misc, material: WHITE_TERRACOTTA, base-price: 105 }
+  white_wool: { category: misc, material: WHITE_WOOL, base-price: 135 }
+  yellow_concrete: { category: misc, material: YELLOW_CONCRETE, base-price: 52 }
+  yellow_concrete_powder: { category: misc, material: YELLOW_CONCRETE_POWDER, base-price: 52 }
+  yellow_glazed_terracotta: { category: misc, material: YELLOW_GLAZED_TERRACOTTA, base-price: 110 }
+  yellow_stained_glass: { category: misc, material: YELLOW_STAINED_GLASS, base-price: 44 }
+  yellow_stained_glass_pane: { category: misc, material: YELLOW_STAINED_GLASS_PANE, base-price: 24 }
+  yellow_terracotta: { category: misc, material: YELLOW_TERRACOTTA, base-price: 120 }
+  yellow_wool: { category: misc, material: YELLOW_WOOL, base-price: 140 }
+
+
+# ==========================================================
+# Potion / Tipped Arrow / Enchanted Book variants imported from EconomyShopGUI
+# ==========================================================
+  fire_resistance_pot: { category: magic, material: POTION, base-price: 130, variant-type: potion, variant-value: fire_resistance  }
+  harming_pot: { category: magic, material: POTION, base-price: 205, variant-type: potion, variant-value: harming  }
+  healing_pot: { category: magic, material: POTION, base-price: 125, variant-type: potion, variant-value: healing  }
+  invisibility_pot: { category: magic, material: POTION, base-price: 240, variant-type: potion, variant-value: invisibility  }
+  leaping_pot: { category: magic, material: POTION, base-price: 970, variant-type: potion, variant-value: leaping  }
+  night_vision_pot: { category: magic, material: POTION, base-price: 140, variant-type: potion, variant-value: night_vision  }
+  poison_pot: { category: magic, material: POTION, base-price: 105, variant-type: potion, variant-value: poison  }
+  regeneration_pot: { category: magic, material: POTION, base-price: 320, variant-type: potion, variant-value: regeneration  }
+  slow_falling_pot: { category: magic, material: POTION, base-price: 755, variant-type: potion, variant-value: slow_falling  }
+  slowness_pot: { category: magic, material: POTION, base-price: 140, variant-type: potion, variant-value: slowness  }
+  strength_pot: { category: magic, material: POTION, base-price: 82, variant-type: potion, variant-value: strength  }
+  swiftness_pot: { category: magic, material: POTION, base-price: 47, variant-type: potion, variant-value: swiftness  }
+  turtle_master_pot: { category: magic, material: POTION, base-price: 6600, variant-type: potion, variant-value: turtle_master  }
+  water_breathing_pot: { category: magic, material: POTION, base-price: 105, variant-type: potion, variant-value: water_breathing  }
+  weakness_pot: { category: magic, material: POTION, base-price: 110, variant-type: potion, variant-value: weakness  }
+  strong_harming_pot: { category: magic, material: POTION, base-price: 385, variant-type: potion, variant-value: strong_harming  }
+  strong_healing_pot: { category: magic, material: POTION, base-price: 300, variant-type: potion, variant-value: strong_healing  }
+  strong_leaping_pot: { category: magic, material: POTION, base-price: 1125, variant-type: potion, variant-value: strong_leaping  }
+  strong_poison_pot: { category: magic, material: POTION, base-price: 285, variant-type: potion, variant-value: strong_poison  }
+  strong_regeneration_pot: { category: magic, material: POTION, base-price: 500, variant-type: potion, variant-value: strong_regeneration  }
+  strong_strength_pot: { category: magic, material: POTION, base-price: 270, variant-type: potion, variant-value: strong_strength  }
+  strong_swiftness_pot: { category: magic, material: POTION, base-price: 265, variant-type: potion, variant-value: strong_swiftness  }
+  strong_turtle_master_pot: { category: magic, material: POTION, base-price: 7100, variant-type: potion, variant-value: strong_turtle_master  }
+  long_fire_resistance_pot: { category: magic, material: POTION, base-price: 160, variant-type: potion, variant-value: long_fire_resistance  }
+  long_invisibility_pot: { category: magic, material: POTION, base-price: 260, variant-type: potion, variant-value: long_invisibility  }
+  long_night_vision_pot: { category: magic, material: POTION, base-price: 190, variant-type: potion, variant-value: long_night_vision  }
+  long_poison_pot: { category: magic, material: POTION, base-price: 130, variant-type: potion, variant-value: long_poison  }
+  long_regeneration_pot: { category: magic, material: POTION, base-price: 335, variant-type: potion, variant-value: long_regeneration  }
+  long_slow_falling_pot: { category: magic, material: POTION, base-price: 735, variant-type: potion, variant-value: long_slow_falling  }
+  long_slowness_pot: { category: magic, material: POTION, base-price: 165, variant-type: potion, variant-value: long_slowness  }
+  long_strength_pot: { category: magic, material: POTION, base-price: 115, variant-type: potion, variant-value: long_strength  }
+  long_swiftness_pot: { category: magic, material: POTION, base-price: 88, variant-type: potion, variant-value: long_swiftness  }
+  long_turtle_master_pot: { category: magic, material: POTION, base-price: 6500, variant-type: potion, variant-value: long_turtle_master  }
+  long_water_breathing_pot: { category: magic, material: POTION, base-price: 145, variant-type: potion, variant-value: long_water_breathing  }
+  long_weakness_pot: { category: magic, material: POTION, base-price: 150, variant-type: potion, variant-value: long_weakness  }
+  fire_resistance_splash: { category: magic, material: SPLASH_POTION, base-price: 235, variant-type: potion, variant-value: fire_resistance  }
+  harming_splash: { category: magic, material: SPLASH_POTION, base-price: 275, variant-type: potion, variant-value: harming  }
+  healing_splash: { category: magic, material: SPLASH_POTION, base-price: 225, variant-type: potion, variant-value: healing  }
+  invisibility_splash: { category: magic, material: SPLASH_POTION, base-price: 320, variant-type: potion, variant-value: invisibility  }
+  leaping_splash: { category: magic, material: SPLASH_POTION, base-price: 900, variant-type: potion, variant-value: leaping  }
+  night_vision_splash: { category: magic, material: SPLASH_POTION, base-price: 240, variant-type: potion, variant-value: night_vision  }
+  poison_splash: { category: magic, material: SPLASH_POTION, base-price: 245, variant-type: potion, variant-value: poison  }
+  regeneration_splash: { category: magic, material: SPLASH_POTION, base-price: 435, variant-type: potion, variant-value: regeneration  }
+  slow_falling_splash: { category: magic, material: SPLASH_POTION, base-price: 830, variant-type: potion, variant-value: slow_falling  }
+  slowness_splash: { category: magic, material: SPLASH_POTION, base-price: 255, variant-type: potion, variant-value: slowness  }
+  strength_splash: { category: magic, material: SPLASH_POTION, base-price: 185, variant-type: potion, variant-value: strength  }
+  swiftness_splash: { category: magic, material: SPLASH_POTION, base-price: 170, variant-type: potion, variant-value: swiftness  }
+  turtle_master_splash: { category: magic, material: SPLASH_POTION, base-price: 6100, variant-type: potion, variant-value: turtle_master  }
+  water_breathing_splash: { category: magic, material: SPLASH_POTION, base-price: 235, variant-type: potion, variant-value: water_breathing  }
+  weakness_splash: { category: magic, material: SPLASH_POTION, base-price: 200, variant-type: potion, variant-value: weakness  }
+  strong_harming_splash: { category: magic, material: SPLASH_POTION, base-price: 445, variant-type: potion, variant-value: strong_harming  }
+  strong_healing_splash: { category: magic, material: SPLASH_POTION, base-price: 360, variant-type: potion, variant-value: strong_healing  }
+  strong_leaping_splash: { category: magic, material: SPLASH_POTION, base-price: 1075, variant-type: potion, variant-value: strong_leaping  }
+  strong_poison_splash: { category: magic, material: SPLASH_POTION, base-price: 400, variant-type: potion, variant-value: strong_poison  }
+  strong_regeneration_splash: { category: magic, material: SPLASH_POTION, base-price: 570, variant-type: potion, variant-value: strong_regeneration  }
+  strong_strength_splash: { category: magic, material: SPLASH_POTION, base-price: 345, variant-type: potion, variant-value: strong_strength  }
+  strong_swiftness_splash: { category: magic, material: SPLASH_POTION, base-price: 390, variant-type: potion, variant-value: strong_swiftness  }
+  strong_turtle_master_splash: { category: magic, material: SPLASH_POTION, base-price: 6800, variant-type: potion, variant-value: strong_turtle_master  }
+  long_fire_resistance_splash: { category: magic, material: SPLASH_POTION, base-price: 255, variant-type: potion, variant-value: long_fire_resistance  }
+  long_invisibility_splash: { category: magic, material: SPLASH_POTION, base-price: 335, variant-type: potion, variant-value: long_invisibility  }
+  long_night_vision_splash: { category: magic, material: SPLASH_POTION, base-price: 255, variant-type: potion, variant-value: long_night_vision  }
+  long_poison_splash: { category: magic, material: SPLASH_POTION, base-price: 250, variant-type: potion, variant-value: long_poison  }
+  long_regeneration_splash: { category: magic, material: SPLASH_POTION, base-price: 410, variant-type: potion, variant-value: long_regeneration  }
+  long_slow_falling_splash: { category: magic, material: SPLASH_POTION, base-price: 870, variant-type: potion, variant-value: long_slow_falling  }
+  long_slowness_splash: { category: magic, material: SPLASH_POTION, base-price: 285, variant-type: potion, variant-value: long_slowness  }
+  long_strength_splash: { category: magic, material: SPLASH_POTION, base-price: 235, variant-type: potion, variant-value: long_strength  }
+  long_swiftness_splash: { category: magic, material: SPLASH_POTION, base-price: 220, variant-type: potion, variant-value: long_swiftness  }
+  long_turtle_master_splash: { category: magic, material: SPLASH_POTION, base-price: 6600, variant-type: potion, variant-value: long_turtle_master  }
+  long_water_breathing_splash: { category: magic, material: SPLASH_POTION, base-price: 220, variant-type: potion, variant-value: long_water_breathing  }
+  long_weakness_splash: { category: magic, material: SPLASH_POTION, base-price: 240, variant-type: potion, variant-value: long_weakness  }
+  fire_resistance_ling: { category: magic, material: LINGERING_POTION, base-price: 775, variant-type: potion, variant-value: fire_resistance  }
+  harming_ling: { category: magic, material: LINGERING_POTION, base-price: 765, variant-type: potion, variant-value: harming  }
+  healing_ling: { category: magic, material: LINGERING_POTION, base-price: 740, variant-type: potion, variant-value: healing  }
+  invisibility_ling: { category: magic, material: LINGERING_POTION, base-price: 850, variant-type: potion, variant-value: invisibility  }
+  leaping_ling: { category: magic, material: LINGERING_POTION, base-price: 1350, variant-type: potion, variant-value: leaping  }
+  night_vision_ling: { category: magic, material: LINGERING_POTION, base-price: 825, variant-type: potion, variant-value: night_vision  }
+  poison_ling: { category: magic, material: LINGERING_POTION, base-price: 795, variant-type: potion, variant-value: poison  }
+  regeneration_ling: { category: magic, material: LINGERING_POTION, base-price: 945, variant-type: potion, variant-value: regeneration  }
+  slow_falling_ling: { category: magic, material: LINGERING_POTION, base-price: 1150, variant-type: potion, variant-value: slow_falling  }
+  slowness_ling: { category: magic, material: LINGERING_POTION, base-price: 680, variant-type: potion, variant-value: slowness  }
+  strength_ling: { category: magic, material: LINGERING_POTION, base-price: 685, variant-type: potion, variant-value: strength  }
+  swiftness_ling: { category: magic, material: LINGERING_POTION, base-price: 665, variant-type: potion, variant-value: swiftness  }
+  turtle_master_ling: { category: magic, material: LINGERING_POTION, base-price: 7900, variant-type: potion, variant-value: turtle_master  }
+  water_breathing_ling: { category: magic, material: LINGERING_POTION, base-price: 790, variant-type: potion, variant-value: water_breathing  }
+  weakness_ling: { category: magic, material: LINGERING_POTION, base-price: 735, variant-type: potion, variant-value: weakness  }
+  strong_harming_ling: { category: magic, material: LINGERING_POTION, base-price: 895, variant-type: potion, variant-value: strong_harming  }
+  strong_healing_ling: { category: magic, material: LINGERING_POTION, base-price: 900, variant-type: potion, variant-value: strong_healing  }
+  strong_leaping_ling: { category: magic, material: LINGERING_POTION, base-price: 1600, variant-type: potion, variant-value: strong_leaping  }
+  strong_poison_ling: { category: magic, material: LINGERING_POTION, base-price: 785, variant-type: potion, variant-value: strong_poison  }
+  strong_regeneration_ling: { category: magic, material: LINGERING_POTION, base-price: 1075, variant-type: potion, variant-value: strong_regeneration  }
+  strong_strength_ling: { category: magic, material: LINGERING_POTION, base-price: 905, variant-type: potion, variant-value: strong_strength  }
+  strong_swiftness_ling: { category: magic, material: LINGERING_POTION, base-price: 800, variant-type: potion, variant-value: strong_swiftness  }
+  strong_turtle_master_ling: { category: magic, material: LINGERING_POTION, base-price: 7500, variant-type: potion, variant-value: strong_turtle_master  }
+  long_fire_resistance_ling: { category: magic, material: LINGERING_POTION, base-price: 720, variant-type: potion, variant-value: long_fire_resistance  }
+  long_invisibility_ling: { category: magic, material: LINGERING_POTION, base-price: 750, variant-type: potion, variant-value: long_invisibility  }
+  long_night_vision_ling: { category: magic, material: LINGERING_POTION, base-price: 835, variant-type: potion, variant-value: long_night_vision  }
+  long_poison_ling: { category: magic, material: LINGERING_POTION, base-price: 785, variant-type: potion, variant-value: long_poison  }
+  long_regeneration_ling: { category: magic, material: LINGERING_POTION, base-price: 925, variant-type: potion, variant-value: long_regeneration  }
+  long_slow_falling_ling: { category: magic, material: LINGERING_POTION, base-price: 1325, variant-type: potion, variant-value: long_slow_falling  }
+  long_slowness_ling: { category: magic, material: LINGERING_POTION, base-price: 720, variant-type: potion, variant-value: long_slowness  }
+  long_strength_ling: { category: magic, material: LINGERING_POTION, base-price: 735, variant-type: potion, variant-value: long_strength  }
+  long_swiftness_ling: { category: magic, material: LINGERING_POTION, base-price: 735, variant-type: potion, variant-value: long_swiftness  }
+  long_turtle_master_ling: { category: magic, material: LINGERING_POTION, base-price: 7600, variant-type: potion, variant-value: long_turtle_master  }
+  long_water_breathing_ling: { category: magic, material: LINGERING_POTION, base-price: 685, variant-type: potion, variant-value: long_water_breathing  }
+  long_weakness_ling: { category: magic, material: LINGERING_POTION, base-price: 775, variant-type: potion, variant-value: long_weakness  }
+  fire_resistance_arrow: { category: magic, material: TIPPED_ARROW, base-price: 175, variant-type: potion, variant-value: fire_resistance  }
+  harming_arrow: { category: magic, material: TIPPED_ARROW, base-price: 190, variant-type: potion, variant-value: harming  }
+  healing_arrow: { category: magic, material: TIPPED_ARROW, base-price: 180, variant-type: potion, variant-value: healing  }
+  invisibility_arrow: { category: magic, material: TIPPED_ARROW, base-price: 205, variant-type: potion, variant-value: invisibility  }
+  leaping_arrow: { category: magic, material: TIPPED_ARROW, base-price: 370, variant-type: potion, variant-value: leaping  }
+  poison_arrow: { category: magic, material: TIPPED_ARROW, base-price: 200, variant-type: potion, variant-value: poison  }
+  regeneration_arrow: { category: magic, material: TIPPED_ARROW, base-price: 240, variant-type: potion, variant-value: regeneration  }
+  slow_falling_arrow: { category: magic, material: TIPPED_ARROW, base-price: 310, variant-type: potion, variant-value: slow_falling  }
+  slowness_arrow: { category: magic, material: TIPPED_ARROW, base-price: 195, variant-type: potion, variant-value: slowness  }
+  strength_arrow: { category: magic, material: TIPPED_ARROW, base-price: 195, variant-type: potion, variant-value: strength  }
+  swiftness_arrow: { category: magic, material: TIPPED_ARROW, base-price: 185, variant-type: potion, variant-value: swiftness  }
+  turtle_master_arrow: { category: magic, material: TIPPED_ARROW, base-price: 1575, variant-type: potion, variant-value: turtle_master  }
+  water_breathing_arrow: { category: magic, material: TIPPED_ARROW, base-price: 175, variant-type: potion, variant-value: water_breathing  }
+  weakness_arrow: { category: magic, material: TIPPED_ARROW, base-price: 180, variant-type: potion, variant-value: weakness  }
+  strong_harming_arrow: { category: magic, material: TIPPED_ARROW, base-price: 250, variant-type: potion, variant-value: strong_harming  }
+  strong_healing_arrow: { category: magic, material: TIPPED_ARROW, base-price: 240, variant-type: potion, variant-value: strong_healing  }
+  strong_leaping_arrow: { category: magic, material: TIPPED_ARROW, base-price: 375, variant-type: potion, variant-value: strong_leaping  }
+  strong_poison_arrow: { category: magic, material: TIPPED_ARROW, base-price: 220, variant-type: potion, variant-value: strong_poison  }
+  strong_regeneration_arrow: { category: magic, material: TIPPED_ARROW, base-price: 245, variant-type: potion, variant-value: strong_regeneration  }
+  strong_strength_arrow: { category: magic, material: TIPPED_ARROW, base-price: 210, variant-type: potion, variant-value: strong_strength  }
+  strong_swiftness_arrow: { category: magic, material: TIPPED_ARROW, base-price: 225, variant-type: potion, variant-value: strong_swiftness  }
+  strong_turtle_master_arrow: { category: magic, material: TIPPED_ARROW, base-price: 1650, variant-type: potion, variant-value: strong_turtle_master  }
+  long_fire_resistance_arrow: { category: magic, material: TIPPED_ARROW, base-price: 195, variant-type: potion, variant-value: long_fire_resistance  }
+  long_invisibility_arrow: { category: magic, material: TIPPED_ARROW, base-price: 200, variant-type: potion, variant-value: long_invisibility  }
+  long_night_vision_arrow: { category: magic, material: TIPPED_ARROW, base-price: 190, variant-type: potion, variant-value: long_night_vision  }
+  long_poison_arrow: { category: magic, material: TIPPED_ARROW, base-price: 180, variant-type: potion, variant-value: long_poison  }
+  long_regeneration_arrow: { category: magic, material: TIPPED_ARROW, base-price: 250, variant-type: potion, variant-value: long_regeneration  }
+  long_slow_falling_arrow: { category: magic, material: TIPPED_ARROW, base-price: 320, variant-type: potion, variant-value: long_slow_falling  }
+  long_slowness_arrow: { category: magic, material: TIPPED_ARROW, base-price: 205, variant-type: potion, variant-value: long_slowness  }
+  long_strength_arrow: { category: magic, material: TIPPED_ARROW, base-price: 205, variant-type: potion, variant-value: long_strength  }
+  long_swiftness_arrow: { category: magic, material: TIPPED_ARROW, base-price: 180, variant-type: potion, variant-value: long_swiftness  }
+  long_turtle_master_arrow: { category: magic, material: TIPPED_ARROW, base-price: 1875, variant-type: potion, variant-value: long_turtle_master  }
+  long_water_breathing_arrow: { category: magic, material: TIPPED_ARROW, base-price: 200, variant-type: potion, variant-value: long_water_breathing  }
+  long_weakness_arrow: { category: magic, material: TIPPED_ARROW, base-price: 200, variant-type: potion, variant-value: long_weakness  }
+  water_worker: { category: magic, material: ENCHANTED_BOOK, base-price: 1075, variant-type: enchantment, variant-value: WATER_WORKER:1  }
+  damage_arthropods: { category: magic, material: ENCHANTED_BOOK, base-price: 7000, variant-type: enchantment, variant-value: DAMAGE_ARTHROPODS:5  }
+  binding_curse: { category: magic, material: ENCHANTED_BOOK, base-price: 1250, variant-type: enchantment, variant-value: BINDING_CURSE:1  }
+  breach: { category: magic, material: ENCHANTED_BOOK, base-price: 5900, variant-type: enchantment, variant-value: BREACH:4  }
+  protection_explosions: { category: magic, material: ENCHANTED_BOOK, base-price: 5800, variant-type: enchantment, variant-value: PROTECTION_EXPLOSIONS:4  }
+  channeling: { category: magic, material: ENCHANTED_BOOK, base-price: 1150, variant-type: enchantment, variant-value: CHANNELING:1  }
+  density: { category: magic, material: ENCHANTED_BOOK, base-price: 9700, variant-type: enchantment, variant-value: DENSITY:5  }
+  depth_strider: { category: magic, material: ENCHANTED_BOOK, base-price: 2925, variant-type: enchantment, variant-value: DEPTH_STRIDER:3  }
+  dig_speed: { category: magic, material: ENCHANTED_BOOK, base-price: 3925, variant-type: enchantment, variant-value: DIG_SPEED:5  }
+  protection_fall: { category: magic, material: ENCHANTED_BOOK, base-price: 3750, variant-type: enchantment, variant-value: PROTECTION_FALL:4  }
+  fire_aspect: { category: magic, material: ENCHANTED_BOOK, base-price: 1950, variant-type: enchantment, variant-value: FIRE_ASPECT:2  }
+  protection_fire: { category: magic, material: ENCHANTED_BOOK, base-price: 3600, variant-type: enchantment, variant-value: PROTECTION_FIRE:4  }
+  arrow_fire: { category: magic, material: ENCHANTED_BOOK, base-price: 1000, variant-type: enchantment, variant-value: ARROW_FIRE:1  }
+  loot_bonus_blocks: { category: magic, material: ENCHANTED_BOOK, base-price: 3050, variant-type: enchantment, variant-value: LOOT_BONUS_BLOCKS:3  }
+  frost_walker: { category: magic, material: ENCHANTED_BOOK, base-price: 1800, variant-type: enchantment, variant-value: FROST_WALKER:2  }
+  impaling: { category: magic, material: ENCHANTED_BOOK, base-price: 8400, variant-type: enchantment, variant-value: IMPALING:5  }
+  arrow_infinite: { category: magic, material: ENCHANTED_BOOK, base-price: 1375, variant-type: enchantment, variant-value: ARROW_INFINITE:1  }
+  knockback: { category: magic, material: ENCHANTED_BOOK, base-price: 1350, variant-type: enchantment, variant-value: KNOCKBACK:2  }
+  loot_bonus_mobs: { category: magic, material: ENCHANTED_BOOK, base-price: 3075, variant-type: enchantment, variant-value: LOOT_BONUS_MOBS:3  }
+  loyalty: { category: magic, material: ENCHANTED_BOOK, base-price: 2425, variant-type: enchantment, variant-value: LOYALTY:3  }
+  luck: { category: magic, material: ENCHANTED_BOOK, base-price: 3250, variant-type: enchantment, variant-value: LUCK:3  }
+  lure: { category: magic, material: ENCHANTED_BOOK, base-price: 3075, variant-type: enchantment, variant-value: LURE:3  }
+  mending: { category: magic, material: ENCHANTED_BOOK, base-price: 1150, variant-type: enchantment, variant-value: MENDING:1  }
+  multishot: { category: magic, material: ENCHANTED_BOOK, base-price: 1050, variant-type: enchantment, variant-value: MULTISHOT:1  }
+  piercing: { category: magic, material: ENCHANTED_BOOK, base-price: 2525, variant-type: enchantment, variant-value: PIERCING:4  }
+  arrow_damage: { category: magic, material: ENCHANTED_BOOK, base-price: 3825, variant-type: enchantment, variant-value: ARROW_DAMAGE:5  }
+  protection_projectile: { category: magic, material: ENCHANTED_BOOK, base-price: 3525, variant-type: enchantment, variant-value: PROTECTION_PROJECTILE:4  }
+  protection_environmental: { category: magic, material: ENCHANTED_BOOK, base-price: 2400, variant-type: enchantment, variant-value: PROTECTION_ENVIRONMENTAL:4  }
+  arrow_knockback: { category: magic, material: ENCHANTED_BOOK, base-price: 1875, variant-type: enchantment, variant-value: ARROW_KNOCKBACK:2  }
+  quick_charge: { category: magic, material: ENCHANTED_BOOK, base-price: 2350, variant-type: enchantment, variant-value: QUICK_CHARGE:3  }
+  oxygen: { category: magic, material: ENCHANTED_BOOK, base-price: 3275, variant-type: enchantment, variant-value: OXYGEN:3  }
+  riptide: { category: magic, material: ENCHANTED_BOOK, base-price: 3125, variant-type: enchantment, variant-value: RIPTIDE:3  }
+  damage_all: { category: magic, material: ENCHANTED_BOOK, base-price: 3725, variant-type: enchantment, variant-value: DAMAGE_ALL:5  }
+  silk_touch: { category: magic, material: ENCHANTED_BOOK, base-price: 1250, variant-type: enchantment, variant-value: SILK_TOUCH:1  }
+  damage_undead: { category: magic, material: ENCHANTED_BOOK, base-price: 6000, variant-type: enchantment, variant-value: DAMAGE_UNDEAD:5  }
+  soul_speed: { category: magic, material: ENCHANTED_BOOK, base-price: 4425, variant-type: enchantment, variant-value: SOUL_SPEED:3  }
+  sweeping_edge: { category: magic, material: ENCHANTED_BOOK, base-price: 2900, variant-type: enchantment, variant-value: SWEEPING_EDGE:3  }
+  swift_sneak: { category: magic, material: ENCHANTED_BOOK, base-price: 1600, variant-type: enchantment, variant-value: SWIFT_SNEAK:3  }
+  thorns: { category: magic, material: ENCHANTED_BOOK, base-price: 3425, variant-type: enchantment, variant-value: THORNS:3  }
+  durability: { category: magic, material: ENCHANTED_BOOK, base-price: 2075, variant-type: enchantment, variant-value: DURABILITY:3  }
+  vanishing_curse: { category: magic, material: ENCHANTED_BOOK, base-price: 1375, variant-type: enchantment, variant-value: VANISHING_CURSE:1  }
+  wind_burst: { category: magic, material: ENCHANTED_BOOK, base-price: 25000, variant-type: enchantment, variant-value: WIND_BURST:3  }
+  lunge: { category: magic, material: ENCHANTED_BOOK, base-price: 25000, variant-type: enchantment, variant-value: LUNGE:3  }

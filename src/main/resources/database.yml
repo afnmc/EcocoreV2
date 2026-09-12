@@ -1,0 +1,21 @@
+# ==========================================================
+# EcoCore - Database Configuration
+# ==========================================================
+type: "SQLITE"
+file-name: "ecocore.db"
+
+auto-migrate: true
+
+pool:
+  maximum-pool-size: 8
+  minimum-idle: 2
+  connection-timeout-ms: 10000
+  idle-timeout-ms: 600000
+  max-lifetime-ms: 1800000
+  leak-detection-threshold-ms: 15000
+
+backup:
+  enabled: true
+  interval-minutes: 60
+  keep-count: 24
+  folder: "backups"

@@ -1,0 +1,211 @@
+# ==========================================================
+# EcoCore - Jobs Configuration
+# ==========================================================
+global:
+  max-level: 100
+  xp-curve-base: 100
+  xp-curve-multiplier: 1.08
+  prestige-enabled: true
+  prestige-max: 10
+  prestige-xp-multiplier-bonus: 0.05
+  daily-mission-count: 3
+  weekly-mission-count: 5
+  leaderboard-top-size: 10
+  leaderboard-refresh-seconds: 300
+
+jobs:
+  miner:
+    display-name: "&7Miner"
+    icon: "IRON_PICKAXE"
+    base-money-per-action: 2.5
+    base-xp-per-action: 4
+  woodcutter:
+    display-name: "&6Woodcutter"
+    icon: "IRON_AXE"
+    base-money-per-action: 2.0
+    base-xp-per-action: 3
+  farmer:
+    display-name: "&2Farmer"
+    icon: "IRON_HOE"
+    base-money-per-action: 1.5
+    base-xp-per-action: 3
+  hunter:
+    display-name: "&cHunter"
+    icon: "BOW"
+    base-money-per-action: 3.0
+    base-xp-per-action: 5
+  fisherman:
+    display-name: "&bFisherman"
+    icon: "FISHING_ROD"
+    base-money-per-action: 2.2
+    base-xp-per-action: 4
+  excavator:
+    display-name: "&eExcavator"
+    icon: "IRON_SHOVEL"
+    base-money-per-action: 1.8
+    base-xp-per-action: 3
+  builder:
+    display-name: "&fBuilder"
+    icon: "BRICKS"
+    base-money-per-action: 1.2
+    base-xp-per-action: 2
+  crafter:
+    display-name: "&dCrafter"
+    icon: "CRAFTING_TABLE"
+    base-money-per-action: 1.5
+    base-xp-per-action: 3
+  explorer:
+    display-name: "&aExplorer"
+    icon: "MAP"
+    base-money-per-action: 2.0
+    base-xp-per-action: 4
+  breeder:
+    display-name: "&6Breeder"
+    icon: "WHEAT_SEEDS"
+    base-money-per-action: 1.8
+    base-xp-per-action: 3
+  cook:
+    display-name: "&6Cook"
+    icon: "FURNACE"
+    base-money-per-action: 1.6
+    base-xp-per-action: 3
+  blacksmith:
+    display-name: "&7Blacksmith"
+    icon: "ANVIL"
+    base-money-per-action: 2.5
+    base-xp-per-action: 4
+  enchanter:
+    display-name: "&5Enchanter"
+    icon: "ENCHANTING_TABLE"
+    base-money-per-action: 3.5
+    base-xp-per-action: 6
+  alchemy:
+    display-name: "&dAlchemy"
+    icon: "BREWING_STAND"
+    base-money-per-action: 3.0
+    base-xp-per-action: 5
+  merchant:
+    display-name: "&eMerchant"
+    icon: "EMERALD"
+    base-money-per-action: 2.0
+    base-xp-per-action: 4
+  quest_hunter:
+    display-name: "&6Quest Hunter"
+    icon: "WRITTEN_BOOK"
+    base-money-per-action: 4.0
+    base-xp-per-action: 7
+
+perks:
+  bonus-types: [ "money", "drop", "xp", "speed", "fortune", "luck" ]
+  perk-unlock-levels: [ 5, 10, 20, 35, 50, 75, 100 ]
+
+skill-tree:
+  points-per-level: 1
+  max-branches: 3
+
+# ================================================================
+# Revisi 18: anti-abuse dasar buat progress misi.
+# ================================================================
+anti-abuse:
+  action-cooldown-seconds: 0.5
+  daily-action-cap-per-mission: 5000
+
+# ================================================================
+# Revisi 18: pool misi per job. Setiap job punya daftar template.
+# Saat assign misi, sistem pilih acak dari pool ini (weighted).
+# type   = salah satu MissionType (BREAK_BLOCK, PLACE_BLOCK,
+#          HARVEST_CROP, PLANT_CROP, CHOP_TREE, COLLECT_ITEM,
+#          CRAFT_ITEM, SMELT_ITEM, FISH_ITEM, KILL_MOB, BREED_ANIMAL,
+#          SHEAR_SHEEP, MILK_COW, COLLECT_EGG, MINE_ORE, MINE_STONE,
+#          TRADE, ENCHANT, BREW_POTION, DELIVER_ITEM,
+#          EARN_MONEY, SELL_ITEM, BUY_SHOP, SELL_SHOP,
+#          NIGHT_MARKET_ACTION)
+# target = material/entity spesifik (opsional, kosongkan buat misi
+#          umum yang gak spesifik target)
+# min-amount/max-amount = target acak di antara rentang ini
+# money-per-unit/xp-per-unit = reward per unit target
+# weight = bobot pemilihan acak (semakin besar semakin sering muncul)
+# daily/weekly = boolean, misi ini boleh muncul di periode mana
+# enabled = boolean, matikan template tanpa hapus
+# ================================================================
+mission-pools:
+  miner:
+    - { type: MINE_ORE, target: DIAMOND_ORE, min-amount: 5, max-amount: 15, money-per-unit: 8.0, xp-per-unit: 12.0, weight: 1.0, daily: true, weekly: true }
+    - { type: MINE_ORE, target: IRON_ORE, min-amount: 20, max-amount: 60, money-per-unit: 2.0, xp-per-unit: 4.0, weight: 3.0, daily: true, weekly: true }
+    - { type: MINE_ORE, target: GOLD_ORE, min-amount: 10, max-amount: 30, money-per-unit: 3.5, xp-per-unit: 6.0, weight: 2.0, daily: true, weekly: true }
+    - { type: MINE_ORE, target: EMERALD_ORE, min-amount: 3, max-amount: 10, money-per-unit: 12.0, xp-per-unit: 18.0, weight: 0.5, daily: false, weekly: true }
+    - { type: MINE_STONE, target: DEEPSLATE, min-amount: 50, max-amount: 150, money-per-unit: 0.5, xp-per-unit: 1.0, weight: 2.0, daily: true, weekly: true }
+    - { type: BREAK_BLOCK, target: "", min-amount: 100, max-amount: 300, money-per-unit: 0.3, xp-per-unit: 0.8, weight: 1.5, daily: true, weekly: true }
+  farmer:
+    - { type: HARVEST_CROP, target: WHEAT, min-amount: 30, max-amount: 100, money-per-unit: 1.0, xp-per-unit: 2.0, weight: 2.0, daily: true, weekly: true }
+    - { type: PLANT_CROP, target: CARROTS, min-amount: 20, max-amount: 80, money-per-unit: 1.0, xp-per-unit: 2.0, weight: 1.5, daily: true, weekly: true }
+    - { type: HARVEST_CROP, target: NETHER_WART, min-amount: 15, max-amount: 40, money-per-unit: 2.5, xp-per-unit: 5.0, weight: 1.0, daily: true, weekly: true }
+    - { type: PLANT_CROP, target: POTATOES, min-amount: 20, max-amount: 80, money-per-unit: 1.0, xp-per-unit: 2.0, weight: 1.5, daily: true, weekly: true }
+    - { type: HARVEST_CROP, target: PUMPKIN, min-amount: 10, max-amount: 40, money-per-unit: 1.5, xp-per-unit: 3.0, weight: 1.0, daily: true, weekly: true }
+  woodcutter:
+    - { type: CHOP_TREE, target: OAK_LOG, min-amount: 20, max-amount: 60, money-per-unit: 1.5, xp-per-unit: 3.0, weight: 2.0, daily: true, weekly: true }
+    - { type: CHOP_TREE, target: DARK_OAK_LOG, min-amount: 10, max-amount: 30, money-per-unit: 3.0, xp-per-unit: 6.0, weight: 1.0, daily: true, weekly: true }
+    - { type: CHOP_TREE, target: BIRCH_LOG, min-amount: 20, max-amount: 60, money-per-unit: 1.5, xp-per-unit: 3.0, weight: 1.5, daily: true, weekly: true }
+    - { type: CHOP_TREE, target: JUNGLE_LOG, min-amount: 15, max-amount: 45, money-per-unit: 2.0, xp-per-unit: 4.0, weight: 1.0, daily: true, weekly: true }
+  fisherman:
+    - { type: FISH_ITEM, target: "", min-amount: 15, max-amount: 50, money-per-unit: 3.0, xp-per-unit: 6.0, weight: 2.0, daily: true, weekly: true }
+    - { type: FISH_ITEM, target: PUFFERFISH, min-amount: 3, max-amount: 10, money-per-unit: 10.0, xp-per-unit: 15.0, weight: 0.5, daily: false, weekly: true }
+    - { type: FISH_ITEM, target: SALMON, min-amount: 10, max-amount: 30, money-per-unit: 4.0, xp-per-unit: 7.0, weight: 1.5, daily: true, weekly: true }
+    - { type: FISH_ITEM, target: COD, min-amount: 15, max-amount: 40, money-per-unit: 3.0, xp-per-unit: 5.0, weight: 1.5, daily: true, weekly: true }
+  merchant:
+    - { type: TRADE, target: "", min-amount: 10, max-amount: 30, money-per-unit: 5.0, xp-per-unit: 8.0, weight: 1.0, daily: true, weekly: true }
+    - { type: SELL_ITEM, target: "", min-amount: 50, max-amount: 200, money-per-unit: 0.5, xp-per-unit: 1.0, weight: 2.0, daily: true, weekly: true }
+    - { type: BUY_SHOP, target: "", min-amount: 20, max-amount: 80, money-per-unit: 0.8, xp-per-unit: 1.5, weight: 1.5, daily: true, weekly: true }
+    - { type: NIGHT_MARKET_ACTION, target: "", min-amount: 3, max-amount: 10, money-per-unit: 6.0, xp-per-unit: 10.0, weight: 0.5, daily: false, weekly: true }
+  hunter:
+    - { type: KILL_MOB, target: ZOMBIE, min-amount: 30, max-amount: 100, money-per-unit: 1.0, xp-per-unit: 2.0, weight: 2.0, daily: true, weekly: true }
+    - { type: KILL_MOB, target: ENDERMAN, min-amount: 5, max-amount: 20, money-per-unit: 8.0, xp-per-unit: 12.0, weight: 0.5, daily: false, weekly: true }
+    - { type: KILL_MOB, target: SPIDER, min-amount: 25, max-amount: 80, money-per-unit: 1.2, xp-per-unit: 2.5, weight: 1.5, daily: true, weekly: true }
+    - { type: KILL_MOB, target: SKELETON, min-amount: 25, max-amount: 80, money-per-unit: 1.5, xp-per-unit: 3.0, weight: 1.5, daily: true, weekly: true }
+  blacksmith:
+    - { type: SMELT_ITEM, target: IRON_INGOT, min-amount: 20, max-amount: 60, money-per-unit: 1.5, xp-per-unit: 3.0, weight: 1.5, daily: true, weekly: true }
+    - { type: SMELT_ITEM, target: GOLD_INGOT, min-amount: 10, max-amount: 30, money-per-unit: 2.5, xp-per-unit: 4.5, weight: 1.0, daily: true, weekly: true }
+    - { type: SMELT_ITEM, target: COPPER_INGOT, min-amount: 20, max-amount: 60, money-per-unit: 1.2, xp-per-unit: 2.5, weight: 1.0, daily: true, weekly: true }
+    - { type: ANVIL_USE, target: "", min-amount: 5, max-amount: 20, money-per-unit: 4.0, xp-per-unit: 7.0, weight: 1.0, daily: true, weekly: true }
+  alchemy:
+    - { type: BREW_POTION, target: "", min-amount: 10, max-amount: 30, money-per-unit: 4.0, xp-per-unit: 8.0, weight: 1.5, daily: true, weekly: true }
+    - { type: COLLECT_ITEM, target: NETHER_WART, min-amount: 15, max-amount: 40, money-per-unit: 1.5, xp-per-unit: 3.0, weight: 1.0, daily: true, weekly: true }
+    - { type: COLLECT_ITEM, target: GLOWSTONE_DUST, min-amount: 10, max-amount: 30, money-per-unit: 2.0, xp-per-unit: 3.5, weight: 1.0, daily: true, weekly: true }
+  enchanter:
+    - { type: ENCHANT, target: "", min-amount: 5, max-amount: 20, money-per-unit: 6.0, xp-per-unit: 10.0, weight: 1.5, daily: true, weekly: true }
+    - { type: COLLECT_ITEM, target: LAPIS_LAZULI, min-amount: 20, max-amount: 60, money-per-unit: 1.0, xp-per-unit: 2.0, weight: 1.0, daily: true, weekly: true }
+    - { type: TRADE, target: "", min-amount: 5, max-amount: 15, money-per-unit: 4.0, xp-per-unit: 7.0, weight: 0.5, daily: false, weekly: true }
+  breeder:
+    - { type: BREED_ANIMAL, target: "", min-amount: 10, max-amount: 30, money-per-unit: 2.0, xp-per-unit: 4.0, weight: 1.5, daily: true, weekly: true }
+    - { type: SHEAR_SHEEP, target: "", min-amount: 15, max-amount: 50, money-per-unit: 1.0, xp-per-unit: 2.0, weight: 1.0, daily: true, weekly: true }
+    - { type: MILK_COW, target: "", min-amount: 10, max-amount: 30, money-per-unit: 1.0, xp-per-unit: 2.0, weight: 1.0, daily: true, weekly: true }
+    - { type: COLLECT_EGG, target: "", min-amount: 10, max-amount: 40, money-per-unit: 0.8, xp-per-unit: 1.5, weight: 1.0, daily: true, weekly: true }
+  builder:
+    - { type: PLACE_BLOCK, target: "", min-amount: 100, max-amount: 400, money-per-unit: 0.3, xp-per-unit: 0.6, weight: 2.0, daily: true, weekly: true }
+    - { type: PLACE_BLOCK, target: "", min-amount: 500, max-amount: 1200, money-per-unit: 0.25, xp-per-unit: 0.5, weight: 0.5, daily: false, weekly: true }
+    - { type: BREAK_BLOCK, target: "", min-amount: 100, max-amount: 300, money-per-unit: 0.25, xp-per-unit: 0.5, weight: 1.0, daily: true, weekly: true }
+  excavator:
+    - { type: MINE_STONE, target: "", min-amount: 100, max-amount: 400, money-per-unit: 0.3, xp-per-unit: 0.6, weight: 2.0, daily: true, weekly: true }
+    - { type: MINE_STONE, target: SAND, min-amount: 80, max-amount: 250, money-per-unit: 0.3, xp-per-unit: 0.6, weight: 1.5, daily: true, weekly: true }
+    - { type: MINE_STONE, target: GRAVEL, min-amount: 60, max-amount: 200, money-per-unit: 0.3, xp-per-unit: 0.6, weight: 1.5, daily: true, weekly: true }
+  explorer:
+    - { type: DELIVER_ITEM, target: "", min-amount: 5, max-amount: 20, money-per-unit: 3.0, xp-per-unit: 6.0, weight: 1.0, daily: true, weekly: true }
+    - { type: COLLECT_ITEM, target: "", min-amount: 20, max-amount: 60, money-per-unit: 1.0, xp-per-unit: 2.5, weight: 1.5, daily: true, weekly: true }
+    - { type: TRADE, target: "", min-amount: 5, max-amount: 20, money-per-unit: 3.5, xp-per-unit: 6.0, weight: 1.0, daily: true, weekly: true }
+  quest_hunter:
+    - { type: EARN_MONEY, target: "", min-amount: 500, max-amount: 2000, money-per-unit: 0.05, xp-per-unit: 0.1, weight: 1.0, daily: true, weekly: true }
+    - { type: DELIVER_ITEM, target: "", min-amount: 5, max-amount: 15, money-per-unit: 4.0, xp-per-unit: 7.0, weight: 1.0, daily: true, weekly: true }
+    - { type: KILL_MOB, target: "", min-amount: 20, max-amount: 60, money-per-unit: 1.5, xp-per-unit: 3.0, weight: 1.0, daily: true, weekly: true }
+    - { type: SELL_ITEM, target: "", min-amount: 30, max-amount: 100, money-per-unit: 0.8, xp-per-unit: 1.5, weight: 1.0, daily: true, weekly: true }
+  cook:
+    # Cook missions are based on furnace/smoker/blast-furnace output.
+    # Example: RAW_BEEF -> COOKED_BEEF counts toward COOKED_BEEF.
+    - { type: COOK_ITEM, target: COOKED_BEEF, min-amount: 20, max-amount: 60, money-per-unit: 1.0, xp-per-unit: 2.0, weight: 1.5, daily: true, weekly: true }
+    - { type: COOK_ITEM, target: COOKED_CHICKEN, min-amount: 20, max-amount: 60, money-per-unit: 1.0, xp-per-unit: 2.0, weight: 1.5, daily: true, weekly: true }
+    - { type: COOK_ITEM, target: COOKED_PORKCHOP, min-amount: 20, max-amount: 60, money-per-unit: 1.0, xp-per-unit: 2.0, weight: 1.0, daily: true, weekly: true }
+    - { type: COOK_ITEM, target: BAKED_POTATO, min-amount: 20, max-amount: 60, money-per-unit: 1.0, xp-per-unit: 2.0, weight: 1.0, daily: true, weekly: true }
+    - { type: COOK_ITEM, target: COOKED_SALMON, min-amount: 10, max-amount: 40, money-per-unit: 1.2, xp-per-unit: 2.5, weight: 0.8, daily: true, weekly: true }
+  crafter:
+    - { type: CRAFT_ITEM, target: "", min-amount: 30, max-amount: 100, money-per-unit: 1.0, xp-per-unit: 2.0, weight: 1.5, daily: true, weekly: true }
+    - { type: CRAFT_ITEM, target: STICK, min-amount: 50, max-amount: 150, money-per-unit: 0.3, xp-per-unit: 0.6, weight: 1.0, daily: true, weekly: true }
+    - { type: CRAFT_ITEM, target: TORCH, min-amount: 40, max-amount: 120, money-per-unit: 0.3, xp-per-unit: 0.6, weight: 1.0, daily: true, weekly: true }
