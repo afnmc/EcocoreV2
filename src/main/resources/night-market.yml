@@ -1,0 +1,60 @@
+# ==========================================================
+# EcoCore - Night Market
+# Processed from the EconomyShopGUI item list.
+# Only endgame / exceptionally rare / high-value items appear here.
+# The market rotates; these items are NOT part of the normal /shop.
+# base-price = EcoCore-designed market price before rotation multiplier.
+# ==========================================================
+rotation:
+  interval-hours: 6
+  slots: 5
+  stock-per-item: 5
+  price-multiplier: 1.4
+
+pool:
+  black_shulker_box: { material: BLACK_SHULKER_BOX, base-price: 150000 }
+  blue_shulker_box: { material: BLUE_SHULKER_BOX, base-price: 150000 }
+  brown_shulker_box: { material: BROWN_SHULKER_BOX, base-price: 150000 }
+  conduit: { material: CONDUIT, base-price: 180000 }
+  cyan_shulker_box: { material: CYAN_SHULKER_BOX, base-price: 150000 }
+  dragon_breath: { material: DRAGON_BREATH, base-price: 45000 }
+  elytra: { material: ELYTRA, base-price: 900000 }
+  enchanted_golden_apple: { material: ENCHANTED_GOLDEN_APPLE, base-price: 250000 }
+  end_crystal: { material: END_CRYSTAL, base-price: 30000 }
+  gray_shulker_box: { material: GRAY_SHULKER_BOX, base-price: 150000 }
+  green_shulker_box: { material: GREEN_SHULKER_BOX, base-price: 150000 }
+  heart_of_the_sea: { material: HEART_OF_THE_SEA, base-price: 75000 }
+  light_blue_shulker_box: { material: LIGHT_BLUE_SHULKER_BOX, base-price: 150000 }
+  light_gray_shulker_box: { material: LIGHT_GRAY_SHULKER_BOX, base-price: 150000 }
+  lime_shulker_box: { material: LIME_SHULKER_BOX, base-price: 150000 }
+  magenta_shulker_box: { material: MAGENTA_SHULKER_BOX, base-price: 150000 }
+  music_disc_pigstep: { material: MUSIC_DISC_PIGSTEP, base-price: 125000 }
+  mace: { material: MACE, base-price: 100000 }
+  netherite_axe: { material: NETHERITE_AXE, base-price: 212400 }
+  netherite_block: { material: NETHERITE_BLOCK, base-price: 1.6e+06 }
+  netherite_boots: { material: NETHERITE_BOOTS, base-price: 201600 }
+  netherite_chestplate: { material: NETHERITE_CHESTPLATE, base-price: 243000 }
+  netherite_helmet: { material: NETHERITE_HELMET, base-price: 207000 }
+  netherite_hoe: { material: NETHERITE_HOE, base-price: 189000 }
+  netherite_horse_armor: { material: NETHERITE_HORSE_ARMOR, base-price: 306000 }
+  netherite_ingot: { material: NETHERITE_INGOT, base-price: 180000 }
+  netherite_leggings: { material: NETHERITE_LEGGINGS, base-price: 230400 }
+  netherite_nautilus_armor: { material: NETHERITE_NAUTILUS_ARMOR, base-price: 396000 }
+  netherite_pickaxe: { material: NETHERITE_PICKAXE, base-price: 212400 }
+  netherite_scrap: { material: NETHERITE_SCRAP, base-price: 45000 }
+  netherite_shovel: { material: NETHERITE_SHOVEL, base-price: 189000 }
+  netherite_spear: { material: NETHERITE_SPEAR, base-price: 189000 }
+  netherite_sword: { material: NETHERITE_SWORD, base-price: 207000 }
+  netherite_upgrade_smithing_template: { material: NETHERITE_UPGRADE_SMITHING_TEMPLATE, base-price: 150000 }
+  nether_star: { material: NETHER_STAR, base-price: 500000 }
+  orange_shulker_box: { material: ORANGE_SHULKER_BOX, base-price: 150000 }
+  pink_shulker_box: { material: PINK_SHULKER_BOX, base-price: 150000 }
+  purple_shulker_box: { material: PURPLE_SHULKER_BOX, base-price: 150000 }
+  recovery_compass: { material: RECOVERY_COMPASS, base-price: 95000 }
+  red_shulker_box: { material: RED_SHULKER_BOX, base-price: 150000 }
+  shulker_box: { material: SHULKER_BOX, base-price: 150000 }
+  shulker_shell: { material: SHULKER_SHELL, base-price: 120000 }
+  totem_of_undying: { material: TOTEM_OF_UNDYING, base-price: 350000 }
+  white_shulker_box: { material: WHITE_SHULKER_BOX, base-price: 150000 }
+  wither_skeleton_skull: { material: WITHER_SKELETON_SKULL, base-price: 85000 }
+  yellow_shulker_box: { material: YELLOW_SHULKER_BOX, base-price: 150000 }

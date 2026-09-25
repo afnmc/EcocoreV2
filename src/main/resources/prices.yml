@@ -1,0 +1,33 @@
+# ==========================================================
+# EcoCore - Price Bounds Configuration
+# (Actual live prices are computed by the AI engine at runtime
+#  and stored in the database, not read from this file. This
+#  file only defines bounds/elasticity used by the AI engine.)
+# ==========================================================
+global:
+  min-price-multiplier: 0.10
+  max-price-multiplier: 5.00
+  base-elasticity: 1.0
+
+category-overrides:
+  ores:
+    elasticity: 1.3
+    max-price-multiplier: 6.00
+  mob-drops:
+    elasticity: 0.8
+    max-price-multiplier: 4.00
+  farming:
+    elasticity: 0.6
+    max-price-multiplier: 3.00
+  redstone:
+    elasticity: 1.1
+    max-price-multiplier: 5.50
+
+rounding:
+  mode: "NEAREST"
+  step: 0.01
+
+buy-sell-spread:
+  default-spread-percent: 12.0
+  min-spread-percent: 5.0
+  max-spread-percent: 35.0

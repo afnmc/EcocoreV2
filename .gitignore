@@ -1,0 +1,19 @@
+target/
+*.jar
+*.class
+
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.classpath
+.project
+
+.DS_Store
+Thumbs.db
+
+# local test server
+run/
+server/

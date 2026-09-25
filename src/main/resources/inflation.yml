@@ -1,0 +1,39 @@
+# ==========================================================
+# EcoCore - Inflation Engine Configuration
+# ==========================================================
+economy-baseline:
+  initial-money-supply: 0.0
+  target-inflation-percent: 2.0
+  target-average-balance: 5000.0
+
+thresholds:
+  boom-growth-percent: 8.0
+  recession-decline-percent: -5.0
+  crisis-decline-percent: -15.0
+  recovery-growth-percent: 3.0
+
+weighting:
+  total-money-weight: 0.25
+  player-wealth-weight: 0.20
+  average-balance-weight: 0.15
+  trading-volume-weight: 0.20
+  money-flow-weight: 0.10
+  market-activity-weight: 0.10
+
+state-effects:
+  boom:
+    price-multiplier: 1.15
+    job-bonus-multiplier: 0.90
+  recession:
+    price-multiplier: 0.90
+    job-bonus-multiplier: 1.10
+  economic-crisis:
+    price-multiplier: 0.75
+    job-bonus-multiplier: 1.25
+  economic-growth:
+    price-multiplier: 1.05
+    job-bonus-multiplier: 1.00
+
+history:
+  snapshot-interval-seconds: 900
+  keep-days: 90
